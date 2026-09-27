@@ -235,7 +235,8 @@ The validator is ZENITH's own and implements the assertions of JSON Schema 2020-
 schema uses a keyword the validator does not check, the band says which one, and that
 SOLAR checks it. A tool that tests SOLAR must never refuse something SOLAR would accept,
 so an unknown keyword is never treated as a failure. Why the validator is not the
-`jsonschema` crate, with the measurement, is in `docs/OPEN_QUESTIONS.md`.
+`jsonschema` crate, with the measurement, is
+[ADR 0007](adr/0007-zenith-has-its-own-schema-validator.md).
 
 **The history** of the command line holds the lines that were run, without consecutive
 repeats, and `↑` and `↓` walk it when the completion menu is closed. It is kept in
@@ -738,5 +739,6 @@ it, and in CI a skip is a failure.
 ## 17. What this version does not do
 
 No AI features, no program other than `solar` started, no file written unless asked, no
-configuration file, no persistent history, no mouse. Each of these is either out of scope
-by instruction or an open question, and `docs/OPEN_QUESTIONS.md` says which.
+configuration file, no persistent history, and no mouse, for now, which is
+[ADR 0013](adr/0013-no-mouse-for-now.md). The others are either out of scope by
+instruction or an open question, and `docs/OPEN_QUESTIONS.md` says which.
