@@ -77,6 +77,10 @@ either is stated here in its own line.
   to the constants of `limits.rs`, so that the documents cannot say one size and the code
   keep another.
 
+- `docs/TESTING_BY_HAND.md`, the guide for testing SOLAR through ZENITH on a Mac, on
+  Linux and on Windows, for someone who has never used Rust: installing, building both
+  programs, what to try, and what to send back when something is not right.
+
 ### Changed
 
 - Development builds keep file and line for backtraces and no more, and the dependencies
