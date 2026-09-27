@@ -18,5 +18,18 @@ either is stated here in its own line.
   without asking in `docs/OPEN_QUESTIONS.md`.
 - The workspace: the toolchain SOLAR pins, the same lints, formatting, spelling and
   supply chain rules, and the NIPS-CERN Licence 1.1 copied byte for byte.
+- `zenith-client`, everything that talks to SOLAR and nothing that draws: finding `solar`
+  by `--solar`, `ZENITH_SOLAR` or the `PATH`; on Windows, starting it from a copy under
+  `%TEMP%\zenith\solar\<hash>\` so that SOLAR's build can always replace
+  `target\release\solar.exe`; the child process with one thread per pipe and a limit in
+  bytes on every line; matching responses to calls by `id`; reading every response
+  against sections 5, 6 and 7 of SOLAR's contract; the handshake that checks the protocol
+  and the manifest layout; the catalogue of the manifest, which detects `solar.cancel`.
+- A schema validator of ZENITH's own for JSON Schema 2020-12, held by property tests to
+  the verdicts of the `jsonschema` crate on 4 096 generated schemas and on every schema of
+  a real manifest, and a reader of schemas as descriptions for completion and forms.
+- `zenith-solar-double`, a stand-in for `solar serve --stdio` that the tests use to
+  produce the failures a real SOLAR cannot: exiting at once, another protocol, garbage,
+  silence, a line too long to keep, and a `solar.cancel` ahead of SOLAR's own.
 
 [Unreleased]: https://github.com/nipscernlab/zenith/commits/main

@@ -16,6 +16,8 @@ DeserializeOwned = "DeserializeOwned"
 serialize = "serialize"
 deserialize = "deserialize"
 skip_serializing_if = "skip_serializing_if"
+# The RustCrypto digest API finalises with a method spelt the American way.
+finalize = "finalize"
 SERIALIZATION_FAILED = "SERIALIZATION_FAILED"
 # ratatui and crossterm name their types the American way.
 Color = "Color"
@@ -34,6 +36,8 @@ centered = "centered"
 color = "color"
 # The crate that draws the interface, named after a dish on purpose.
 ratatui = "ratatui"
+# A JSON literal cut short, in a test of text that is not JSON.
+tru = "tru"
 # The demonstration of a misspelt parameter, which is the point of the demonstration.
 mesage = "mesage"
 

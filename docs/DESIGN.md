@@ -359,9 +359,13 @@ unless a copy with that name is already there, and starts the copy. The reason i
 practical: SOLAR's build replaces `target\release\solar.exe`, and Windows cannot replace
 an executable while it is running, so running it in place would break SOLAR's build every
 time ZENITH was open. The copy is written under a temporary name and renamed into place,
-so two ZENITH processes starting at once never see half a file. Copies of other hashes are
-removed on the way, and a copy that is running cannot be removed, which is what keeps a
-second ZENITH safe. `system.info` reports the copy as its `executable`, which is true.
+so two ZENITH processes starting at once never see half a file, and read back and hashed
+again, so that a copy made while SOLAR's build was rewriting the file is thrown away
+rather than kept under a name that lies about it. Copies of other hashes of the same
+program are removed on the way, and a copy that is running cannot be removed, which is
+what keeps a second ZENITH safe. Each program has its own directory, so the copies of
+ZENITH's test double never touch SOLAR's. `system.info` reports the copy as its
+`executable`, which is true.
 
 On macOS and Linux a running binary can be replaced, so SOLAR is started where it is.
 
@@ -410,7 +414,12 @@ sent with `/raw` is shown as one card per element, matched by position.
   when a request was too broken to have an id, which ZENITH never sends except through
   `/raw`.
 - A response that matches no request is shown in the transcript as `unexpected`, with
-  its whole envelope, because it is a bug in one of the two programs.
+  its whole envelope, because it is a bug in one of the two programs. A line that is not
+  JSON at all answers nothing, for the same reason: guessing which call it belongs to
+  would hide the bug.
+- A line sent with `/raw` whose `id` is the id of a call still waiting is refused before
+  it is sent, because neither program could tell the two answers apart. ZENITH never gives
+  its own calls an id that a line sent by hand is waiting on.
 - One response line may be up to 16 MiB, the same limit SOLAR puts on a request line. A
   longer one is discarded up to its newline, and the call it answered is marked
   `response too large`, with the size that was reached.
