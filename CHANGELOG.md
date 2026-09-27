@@ -37,5 +37,10 @@ either is stated here in its own line.
   WGL4 by default and 7-bit ASCII with `--ascii`; the SOLAR mark from SOLAR's
   `docs/brand`, byte for byte; ring buffers with a limit in entries and in bytes; times in
   UTC.
+- The keys, in one table that both dispatches and draws the help, every action on a plain
+  or `Ctrl` key. A character typed with `AltGr` is text, which is how `/` and `?` are typed
+  on a Brazilian ABNT2 keyboard. The line editor with a bounded history, the thirteen slash
+  commands and their parser, and completion of commands, API names, parameter names and
+  values from the manifest.
 
 [Unreleased]: https://github.com/nipscernlab/zenith/commits/main

@@ -544,6 +544,12 @@ expands a line, `c` clears.
 `Home`, `End`, `PgUp` and `PgDn` are kept by macOS Terminal for its own scrollback unless
 Shift is held, which is why every one of them has a letter or a `Ctrl` key beside it.
 
+**A character typed with `AltGr` is text.** Windows reports it as the character with `Ctrl`
+and `Alt` held, and on a Brazilian ABNT2 keyboard that is how `/` and `?` are typed; on
+German and French keyboards, `{`, `}`, `[`, `]` and `@`. ZENITH therefore has no binding
+with `Ctrl` and `Alt` together, and treats such a key as the character it types. This was
+found by typing into ZENITH in Windows Terminal on the machine it was written on.
+
 ## 12. The files ZENITH writes
 
 ZENITH writes a file only when asked, with `/export`, `/report` or `x`, into the current

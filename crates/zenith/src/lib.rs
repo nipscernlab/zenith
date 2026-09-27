@@ -6,7 +6,11 @@
 
 pub mod brand;
 pub mod clock;
+pub mod commands;
+pub mod completion;
+pub mod editor;
 pub mod glyphs;
+pub mod keys;
 pub mod limits;
 pub mod ring;
 pub mod theme;
