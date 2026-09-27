@@ -261,6 +261,25 @@ They are constants in `crates/zenith/src/limits.rs`, each with this reason besid
 
 ## Measuring and testing
 
+### The coverage floor is 88 % of lines
+
+On 27 September 2026 the tests ran 88.46 % of the lines of `zenith-client` and `zenith`,
+measured on Windows with SOLAR 0.2.0 present, leaving out the test double, `main.rs` and
+`xtask`. CI measures the same on Linux, where the code for Windows is not compiled and the
+code for Unix is. The floor only rises: whoever raises the coverage may raise it, and
+nobody lowers it.
+
+### Mutation testing reports, and does not gate
+
+`cargo mutants` runs weekly in CI, and never on a laptop, for the reason `AGENTS.md`
+gives. Its survivors go to the job's artefact and the job succeeds either way: the first
+run has no baseline to compare with, and a gate that fails on survivors nobody has
+looked at yet would be switched off rather than read.
+
+**What would change it.** A first run looked at survivor by survivor: once each one is
+killed by a test or recorded as a mutation that changes nothing, the job can fail on a
+new one.
+
 ### Development builds keep line tables only
 
 Full debug information made `target/debug` 3.6 GB on the machine ZENITH was written on,

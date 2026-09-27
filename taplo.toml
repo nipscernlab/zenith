@@ -1,7 +1,7 @@
 # TOML formatting, checked by `taplo fmt --check` in CI.
 
 include = ["**/*.toml"]
-exclude = ["target/**"]
+exclude = ["target/**", "solar-checkout/**"]
 
 [formatting]
 align_entries = false

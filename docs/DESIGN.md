@@ -723,6 +723,7 @@ What is measured, how, and where the numbers are:
 | The real SOLAR | The handshake, every command, every failure path that can be produced, cancellation and batches when the SOLAR under test has them, and a walk through every API of the manifest that runs every example through the path a person uses and checks each result against the example | `crates/zenith/tests/against_solar.rs` |
 | The README | The session its pictures show, recorded against a real SOLAR and replayed through the drawing code at 100 × 30; the pictures are drawn from those snapshots | `crates/zenith/tests/screens.rs`, `cargo xtask screenshots --check` |
 | The whole program | `zenith` started in a pseudo-terminal, keys typed into it, the screen read back | `cargo xtask perf`, `cargo xtask soak` |
+| Mutations | Whether the tests notice when a line of the code is changed: `cargo mutants`, weekly, and only in CI | `.github/workflows/scheduled.yml` |
 
 The tests that need SOLAR find it the way ZENITH does, `ZENITH_SOLAR` first, and say
 plainly that they were skipped when it is not there. CI always has it, because CI builds

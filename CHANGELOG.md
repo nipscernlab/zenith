@@ -83,6 +83,12 @@ either is stated here in its own line.
 - The README, with pictures drawn from snapshots of a session recorded against SOLAR 0.2.0
   and replayed through ZENITH's own drawing code, by `cargo xtask screenshots`, which with
   `--check` fails when a picture is not its snapshot.
+- CI on Linux, Windows and macOS, against SOLAR built from its main branch, and
+  `cargo xtask ci`, which runs the same steps in the same order with the same flags:
+  formatting, TOML formatting, spelling, lints, tests, doctests, documentation, a check
+  that every commit changing code adds to this file, the README's pictures, the supply
+  chain, and the coverage against a floor of 88 % of lines. Weekly, the next compiler, the
+  declared minimum, and mutation testing, which runs only in CI.
 
 ### Changed
 

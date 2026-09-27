@@ -7,3 +7,8 @@
 .vscode/
 # Written by `x` in the History tab or by /export, in whatever directory ZENITH ran from.
 zenith-history-*.ndjson
+# SOLAR, checked out by CI beside the workspace to build and test against.
+/solar-checkout
+zenith-report-*.ndjson
+# What cargo-mutants writes, in CI only.
+/mutants.out*

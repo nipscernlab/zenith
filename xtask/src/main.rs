@@ -2,6 +2,9 @@
 //!
 //! | Task | What it does |
 //! | ---- | ------------ |
+//! | `ci [--fast]` | What CI runs, in the same order, with the same flags |
+//! | `changelog [base]` | Every commit since `base` that changes code adds to `CHANGELOG.md` |
+//! | `coverage [--report]` | The coverage of the shipped crates, against its floor |
 //! | `screenshots [--check]` | The screenshots of the README, drawn from the snapshots |
 //!
 //! Nothing here is a dependency of the `zenith` binary.
@@ -15,6 +18,9 @@
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
+mod changelog;
+mod ci;
+mod coverage;
 mod screenshots;
 
 fn main() -> ExitCode {
@@ -23,6 +29,12 @@ fn main() -> ExitCode {
     let rest: Vec<&str> = arguments.iter().skip(1).map(String::as_str).collect();
     let root = root();
     let outcome = match task {
+        "ci" => ci::run(&root, rest.contains(&"--fast")),
+        "changelog" => match rest.first() {
+            Some(base) if !base.starts_with('-') => changelog::run(&root, base),
+            _ => changelog::run(&root, changelog::DEFAULT_BASE),
+        },
+        "coverage" => coverage::run(&root, rest.contains(&"--report")),
         "screenshots" => screenshots::run(&root, rest.contains(&"--check")),
         "help" | "--help" | "-h" => {
             println!("{}", HELP.trim());
@@ -43,6 +55,9 @@ fn main() -> ExitCode {
 }
 
 const HELP: &str = "
+cargo xtask ci [--fast]          what CI runs, in the same order, with the same flags
+cargo xtask changelog [base]     every commit since base that changes code adds to CHANGELOG.md
+cargo xtask coverage [--report]  the coverage of the shipped crates, against its floor
 cargo xtask screenshots [--check] the screenshots of the README, drawn from the snapshots
 ";
 

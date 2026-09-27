@@ -1,0 +1,185 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+# A push that lands while the previous one is still running cancels it: only the tip of a
+# branch is worth knowing about.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    env:
+      # In CI a test against SOLAR that finds no SOLAR fails instead of skipping.
+      ZENITH_REQUIRE_SOLAR: "1"
+
+    steps:
+      # The whole history, so that the changelog check can read every commit of the push.
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          fetch-depth: 0
+
+      # ZENITH is tested against the real SOLAR, built from its main branch, on every
+      # system. It is a client of SOLAR and only a client: it builds SOLAR's binary and
+      # starts it, and links nothing of it.
+      - name: Check out SOLAR
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          repository: nipscernlab/solar
+          path: solar-checkout
+
+      # rustup reads rust-toolchain.toml, which pins the same compiler SOLAR pins.
+      - name: Install the pinned toolchain
+        run: rustup show active-toolchain
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2 (v2.8.1)
+        with:
+          workspaces: |
+            . -> target
+            solar-checkout -> target
+
+      - name: Build SOLAR
+        working-directory: solar-checkout
+        run: cargo build --release --locked -p solar-cli
+
+      - name: Point the tests at SOLAR (unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          echo "ZENITH_SOLAR=$PWD/solar-checkout/target/release/solar" >> "$GITHUB_ENV"
+          echo "ZENITH_SOLAR_CHECKOUT=$PWD/solar-checkout" >> "$GITHUB_ENV"
+
+      - name: Point the tests at SOLAR (windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Add-Content -Path $env:GITHUB_ENV -Value "ZENITH_SOLAR=$env:GITHUB_WORKSPACE\solar-checkout\target\release\solar.exe"
+          Add-Content -Path $env:GITHUB_ENV -Value "ZENITH_SOLAR_CHECKOUT=$env:GITHUB_WORKSPACE\solar-checkout"
+
+      - name: Report the toolchain and SOLAR
+        shell: bash
+        run: |
+          rustc --version
+          cargo --version
+          "$ZENITH_SOLAR" version
+
+      # Prebuilt binaries for the checkers cargo would otherwise compile from source.
+      - name: Install the checkers and the test runner
+        uses: taiki-e/install-action@4cef1412cce204788f482e778a0b9187f9626a29 # v2.87.21
+        with:
+          tool: typos-cli,taplo-cli,cargo-nextest,cargo-deny
+
+      - name: Formatting
+        run: cargo fmt --all -- --check
+
+      - name: TOML formatting
+        run: taplo fmt --check
+
+      - name: Spelling
+        run: typos
+
+      - name: Lints
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+
+      - name: Tests
+        run: cargo nextest run --workspace --locked --profile ci
+
+      # nextest does not run doctests; nothing else does either, so they are their own step.
+      - name: Doctests
+        run: cargo test --doc --workspace --locked
+
+      - name: Documentation
+        env:
+          RUSTDOCFLAGS: -D warnings
+        run: cargo doc --workspace --no-deps --locked
+
+      # Code and documentation move together: every commit of this push or pull request
+      # that changes code adds to CHANGELOG.md.
+      - name: Every code change has its changelog entry
+        shell: bash
+        run: |
+          base="${{ github.event.before }}"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags origin "${{ github.base_ref }}"
+            base="origin/${{ github.base_ref }}"
+          fi
+          if [ -z "$base" ] || echo "$base" | grep -qE '^0+$'; then
+            base="$(git rev-list --max-parents=0 HEAD)"
+          fi
+          cargo run --package xtask --locked --quiet -- changelog "$base"
+
+      - name: The screenshots are the snapshots
+        run: cargo run --package xtask --locked --quiet -- screenshots --check
+
+      # Advisories, licences, sources and duplicates. One system is enough for a check
+      # about the dependency tree, which is the same everywhere.
+      - name: Supply chain
+        if: runner.os == 'Linux'
+        run: cargo deny check
+
+      - name: Release build
+        run: cargo build --release --locked -p zenith
+
+      - name: The release binary says what it is
+        shell: bash
+        run: ./target/release/zenith --version
+
+  coverage:
+    name: coverage
+    runs-on: ubuntu-latest
+    env:
+      ZENITH_REQUIRE_SOLAR: "1"
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - name: Check out SOLAR
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          repository: nipscernlab/solar
+          path: solar-checkout
+      - name: Install the pinned toolchain
+        run: rustup show active-toolchain
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2 (v2.8.1)
+        with:
+          workspaces: |
+            . -> target
+            solar-checkout -> target
+      - name: Build SOLAR
+        working-directory: solar-checkout
+        run: cargo build --release --locked -p solar-cli
+      - name: Point the tests at SOLAR
+        run: echo "ZENITH_SOLAR=$PWD/solar-checkout/target/release/solar" >> "$GITHUB_ENV"
+      - name: Install the coverage tool and the test runner
+        uses: taiki-e/install-action@4cef1412cce204788f482e778a0b9187f9626a29 # v2.87.21
+        with:
+          tool: cargo-llvm-cov,cargo-nextest
+
+      # The floor lives in xtask/src/coverage.rs, with the date it was measured. It only
+      # ever goes up.
+      - name: Coverage
+        run: cargo run --package xtask --locked --quiet -- coverage --report
+
+      - name: Keep the report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: coverage
+          path: target/coverage/
+          if-no-files-found: warn

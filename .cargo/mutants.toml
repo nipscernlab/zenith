@@ -1,0 +1,14 @@
+# Mutation testing: coverage says which lines ran, this says whether anything checked what
+# they did. It runs only in CI, weekly, in .github/workflows/scheduled.yml. Never run it on a
+# laptop: cargo-mutants copies the whole project for each job, and on the machine this was
+# written on that filled the disk once already.
+
+# Only the crates that ship are mutated. The test double and main.rs, which only the
+# pseudo-terminal harness reaches, are left out, as is xtask, the harness itself.
+examine_globs = ["crates/zenith-client/src/**/*.rs", "crates/zenith/src/**/*.rs"]
+exclude_globs = ["crates/zenith/src/main.rs", "crates/zenith-client/src/bin/**", "xtask/**"]
+
+# nextest, so a mutant that makes a test hang is killed by the same timeout the suite uses.
+test_tool = "nextest"
+timeout_multiplier = 3.0
+minimum_test_timeout = 60

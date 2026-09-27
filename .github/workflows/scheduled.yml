@@ -1,0 +1,95 @@
+name: scheduled
+
+# The early warnings: what breaks on a compiler this repository has not pinned yet, and
+# whether the declared minimum still builds. Neither belongs in the loop of every push.
+
+on:
+  schedule:
+    # Mondays at 06:00 UTC, before the working day in Brazil and in Geneva.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  latest-stable:
+    name: latest stable rust
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - name: Install the latest stable, ignoring the pin
+        run: |
+          rustup toolchain install stable --component rustfmt,clippy
+          echo "RUSTUP_TOOLCHAIN=stable" >> "$GITHUB_ENV"
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2 (v2.8.1)
+      - name: Report the toolchain
+        run: rustc --version
+      - name: Lints on the next compiler
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - name: Tests on the next compiler
+        run: cargo test --workspace --locked
+
+  minimum-supported:
+    name: minimum supported rust
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - name: Install the rust-version of Cargo.toml
+        run: |
+          minimum="$(grep -m1 '^rust-version' Cargo.toml | sed 's/.*"\(.*\)".*/\1/')"
+          echo "the declared minimum is ${minimum}"
+          rustup toolchain install "${minimum}"
+          echo "RUSTUP_TOOLCHAIN=${minimum}" >> "$GITHUB_ENV"
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2 (v2.8.1)
+      - name: Report the toolchain
+        run: rustc --version
+      - name: The minimum builds and tests
+        run: cargo test --workspace --locked
+
+  mutants:
+    name: mutation testing
+    runs-on: ubuntu-latest
+    # Every line of the two shipped crates is mutated and the suite run for each, which is
+    # long. It runs here and nowhere else: cargo-mutants copies the project for every job,
+    # which a laptop's disk does not have room for.
+    timeout-minutes: 180
+    env:
+      ZENITH_REQUIRE_SOLAR: "1"
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - name: Check out SOLAR
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          repository: nipscernlab/solar
+          path: solar-checkout
+      - name: Install the pinned toolchain
+        run: rustup show active-toolchain
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2 (v2.8.1)
+        with:
+          workspaces: |
+            . -> target
+            solar-checkout -> target
+      - name: Build SOLAR
+        working-directory: solar-checkout
+        run: cargo build --release --locked -p solar-cli
+      - name: Point the tests at SOLAR
+        run: echo "ZENITH_SOLAR=$PWD/solar-checkout/target/release/solar" >> "$GITHUB_ENV"
+      - name: Install the mutation tool and the test runner
+        uses: taiki-e/install-action@4cef1412cce204788f482e778a0b9187f9626a29 # v2.87.21
+        with:
+          tool: cargo-mutants,cargo-nextest
+
+      # There is no ceiling yet: the first run is the measurement it will be set from, and
+      # a check that fails before anyone has seen the number would only teach people to
+      # ignore it. The survivors are in the artefact, by file and line.
+      - name: Mutate the shipped crates
+        run: cargo mutants --workspace --no-shuffle || echo "survivors are in the artefact"
+
+      - name: Keep the report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: mutants
+          path: mutants.out/
+          if-no-files-found: warn
