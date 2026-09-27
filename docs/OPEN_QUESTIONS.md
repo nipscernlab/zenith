@@ -212,6 +212,13 @@ be written as it crossed. The header names the writer `ZENITH <version>`, as
 0.1.0, `zenith-history`, is gone: the report keeps ZENITH's own format, which holds more
 than a recording can.
 
+A SOLAR older than the format, 0.2.0 at `3aa92fd` for one, writes its recordings without a
+header, and its replay refuses ZENITH's first line: it was seen on 27 September 2026 to
+say that line 1 is not an entry and exit 2. Without the header it replays, but it reports
+every answer as different, because it compares `meta` and its times too. ZENITH writes the
+header whatever SOLAR it talks to, as `docs/RECORDING.md` asks of a writer that is not
+SOLAR, and its tests and walkthrough ask an older SOLAR's replay nothing.
+
 **Revisit when** one file per connection, for every connection of a session, is wanted.
 
 ### A request longer than SOLAR declares is not sent, unless it is sent by hand

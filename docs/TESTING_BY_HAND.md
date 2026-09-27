@@ -136,7 +136,7 @@ Type each line and press `Enter`. The right column is what should happen.
 | Make the window smaller than 80 × 24 | One sentence saying how large ZENITH needs the window to be. Make it larger and the screen comes back |
 | `Ctrl+C`, then `Ctrl+C` again | The first says `Press Ctrl+C again to quit`; the second quits, and the terminal works normally afterwards |
 | Start ZENITH again, and press `↑` | The last line you ran before quitting is back on the command line: ZENITH keeps what you type there between sessions, in the file section 7 names |
-| `/export` | `Wrote the recording of this connection`, and the file it names, in SOLAR's recording format. In another terminal, `solar replay` on that file sends its requests again and ends `0 answers differ` |
+| `/export` | `Wrote the recording of this connection`, and the file it names, in SOLAR's recording format. In another terminal, `solar replay` on that file sends its requests again and ends `0 answers differ`; a SOLAR older than the format refuses the file's first line |
 | `/forget` | `Forgot the` number of lines `of the command line history, here and in` that file; `↑` then brings nothing back |
 
 **Mac only.** In macOS Terminal, Option does not act as Alt, and nothing in ZENITH needs

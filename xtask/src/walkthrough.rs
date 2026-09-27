@@ -319,7 +319,7 @@ const STEPS: &[Step] = &[
             let _ = std::fs::remove_file(&file);
             walk.line(&format!("/export {}", file.display()))?;
             walk.see("Wrote the recording of this connection")?;
-            let said = replay(&walk.solar, &file)?;
+            let said = replay(&walk.solar, &file, &walk.data)?;
             walk.said(&said);
             Ok(())
         },
@@ -565,14 +565,26 @@ pub(crate) fn run(root: &Path) -> Result<(), String> {
 }
 
 /// Runs `solar replay` on a recording, from the copy ZENITH itself runs on Windows, and
-/// returns what it said last when it found every answer the same.
-fn replay(solar: &str, file: &Path) -> Result<String, String> {
+/// returns what it said last when it found every answer the same. A SOLAR older than the
+/// recording format, whose own recordings have no header, refuses the header ZENITH
+/// writes, so it is not asked, and the note says so.
+fn replay(solar: &str, file: &Path, scratch: &str) -> Result<String, String> {
     let found = Found {
         path: PathBuf::from(solar),
         origin: Origin::Flag,
     };
     let prepared =
         prepare(found, &Placement::for_this_system()).map_err(|error| error.to_string())?;
+    if !records_with_a_header(
+        &prepared.runs,
+        &Path::new(scratch).join("own-recording.ndjson"),
+    )? {
+        return Ok(
+            "this SOLAR records without a header, so its replay predates the format and was \
+             not asked"
+                .to_owned(),
+        );
+    }
     let output = std::process::Command::new(&prepared.runs)
         .arg("replay")
         .arg(file)
@@ -590,6 +602,35 @@ fn replay(solar: &str, file: &Path) -> Result<String, String> {
         ));
     }
     Ok(said.lines().last().unwrap_or_default().trim().to_owned())
+}
+
+/// Whether `solar` writes recordings with the header of SOLAR's recording format: it is
+/// asked to record one ping, and the first line of what it wrote is read.
+fn records_with_a_header(solar: &Path, file: &Path) -> Result<bool, String> {
+    use std::io::Write as _;
+    let _ = std::fs::remove_file(file);
+    let mut child = std::process::Command::new(solar)
+        .args(["serve", "--stdio", "--record"])
+        .arg(file)
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .spawn()
+        .map_err(|error| format!("solar serve could not be started: {error}"))?;
+    if let Some(mut input) = child.stdin.take() {
+        writeln!(input, r#"{{"jsonrpc":"2.0","id":1,"method":"solar.ping"}}"#)
+            .map_err(|error| format!("solar serve did not read its input: {error}"))?;
+    }
+    child
+        .wait()
+        .map_err(|error| format!("solar serve did not end: {error}"))?;
+    let first = std::fs::read_to_string(file)
+        .unwrap_or_default()
+        .lines()
+        .next()
+        .map(str::to_owned)
+        .unwrap_or_default();
+    Ok(first.contains("\"solar_recording\""))
 }
 
 /// The `zenith` of the current code, built now. The walkthrough checks behaviour, not

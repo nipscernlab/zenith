@@ -67,12 +67,15 @@ either is stated here in its own line.
   background beside ZENITH's, a black border on the right. At true colour and at 256
   colours ZENITH sets the terminal's background to its own while it runs, with OSC 11, and
   puts the terminal's own back when it exits, with OSC 111.
-
 - The property test that holds ZENITH's schema validator to the `jsonschema` crate failed
   on a schema ZENITH judges rightly: `jsonschema` 0.58.1 ignores what `then` and `else`
   evaluate when `if` is `true` or `false`, which the Python `jsonschema` 4.26.0 does not.
   The test now hands the crate each boolean `if` as the object schema it stands for, and
   keeps the case that found it.
+- The test of `/export` and the walkthrough's row for it no longer fail against a SOLAR
+  older than the recording format, such as 0.2.0, whose replay refuses the header ZENITH
+  writes: a SOLAR whose own recordings have no header is not asked to replay, and the
+  note says so.
 
 - No mark was ever seen on a fast machine: the opening lasts as long as the connection,
   32 ms on the architect's, as the design requires. Every connection now starts the
