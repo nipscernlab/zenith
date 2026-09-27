@@ -4,3 +4,6 @@
 LICENSE -text
 # The snapshots hold terminal screens, where a trailing space is part of the picture.
 *.snap text eol=lf
+# The terminal drawings of the SOLAR mark are copied byte for byte from SOLAR, trailing
+# spaces included, and must never be normalised.
+crates/zenith/assets/brand/banner*.txt -text

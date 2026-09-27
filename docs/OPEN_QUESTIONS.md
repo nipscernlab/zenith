@@ -204,6 +204,21 @@ every one of them is computed by a test. Errors in the dark themes are a mix of 
 and gold, because copper alone on night is 4.07:1, below the 4.5:1 that normal text
 needs; they are told from the accent by the word `error` and the badge, never by colour.
 
+### The light theme is red in sixteen colours
+
+The brand gives a sixteen-colour value for gold, `ESC[33m`, and none for copper. Yellow
+on a light background is unreadable in most sixteen-colour palettes, and the copper of the
+light theme has no sixteen-colour counterpart, so the light theme's accent and the mark
+are red, `ESC[31m`, at that depth. At every other depth they are the brand's copper.
+
+**Revisit when** the brand gives copper a sixteen-colour value.
+
+### The flag is `--color`, spelt the American way
+
+Every command line tool spells it so, `git`, `cargo` and `ls` among them, and so does
+`NO_COLOR`. The prose around it is British; the flag is an identifier a person already
+knows, and `typos.toml` says so.
+
 ### `--color` beats `NO_COLOR`, and `NO_COLOR` beats `ZENITH_COLOR`
 
 no-color.org asks that `NO_COLOR` be overridden only by a per-invocation argument. A

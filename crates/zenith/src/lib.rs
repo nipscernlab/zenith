@@ -4,6 +4,13 @@
 //! decision it makes lives in this library, so that the tests can drive the same code
 //! with ratatui's test backend and a real SOLAR. `docs/DESIGN.md` is the specification.
 
+pub mod brand;
+pub mod clock;
+pub mod glyphs;
+pub mod limits;
+pub mod ring;
+pub mod theme;
+
 /// The version of this build, from `Cargo.toml`.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 

@@ -31,5 +31,11 @@ either is stated here in its own line.
 - `zenith-solar-double`, a stand-in for `solar serve --stdio` that the tests use to
   produce the failures a real SOLAR cannot: exiting at once, another protocol, garbage,
   silence, a line too long to keep, and a `solar.cancel` ahead of SOLAR's own.
+- The look of ZENITH: the five colours of SOLAR's brand and the roles drawn from them in
+  three themes, night, light and high-contrast, at four depths from true colour to none,
+  with the contrast of every role computed with the formula of WCAG 2.2; the characters,
+  WGL4 by default and 7-bit ASCII with `--ascii`; the SOLAR mark from SOLAR's
+  `docs/brand`, byte for byte; ring buffers with a limit in entries and in bytes; times in
+  UTC.
 
 [Unreleased]: https://github.com/nipscernlab/zenith/commits/main

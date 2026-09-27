@@ -622,16 +622,17 @@ A theme gives each role a colour. The code draws roles, never colours.
 | Role | Night | Light | High contrast |
 | ---- | ----- | ----- | ------------- |
 | background | night | mist | night |
-| text | mist | ink | mist |
-| muted | mist 62% over night | ink 68% over mist | mist |
-| faint, for borders and stars | mist 30% over night | ink 30% over mist | mist |
-| accent | gold | copper 75% over ink | gold |
-| error | copper 50% over gold | copper 75% over ink | gold |
-| selection | mist 12% over night | ink 10% over mist | reverse video |
+| text | mist, 17.30:1 | ink, 15.95:1 | mist, 17.30:1 |
+| muted | mist 62% over night, 6.95:1 | ink 72% over mist, 6.76:1 | mist |
+| faint, for borders and stars | mist 38% over night, 3.26:1 | ink 50% over mist, 3.31:1 | mist |
+| accent | gold, 12.10:1 | copper 75% over ink, 6.07:1 | gold, 12.10:1 |
+| error | copper 50% over gold, 7.28:1 | copper 75% over ink, 6.07:1 | gold |
+| selection | mist 14% over night | ink 12% over mist | reverse video |
 
-The contrast of every text role against its background is computed by a test with the
-formula of WCAG 2.2, and must be at least 4.5:1 in the night and light themes and at
-least 7:1 in the high-contrast one. Gold is never drawn on a light background, which the
+The ratios are against the background, computed by a test with the formula of WCAG 2.2.
+Every text role must reach 4.5:1 in the night and light themes, on the background and on
+a selected row, and 7:1 in the high-contrast one; borders and stars, which are components
+rather than text, must reach 3:1. Gold is never drawn on a light background, which the
 brand forbids at 1.43:1.
 
 In the high-contrast theme nothing is muted: all text is mist or gold on night, a
@@ -647,7 +648,7 @@ principle 4 requires anyway.
 | ----- | ---------------- | ------------- |
 | True colour | `COLORTERM` is `truecolor` or `24bit`, or `WT_SESSION` is set (Windows Terminal), or `TERM_PROGRAM` is `iTerm.app` | The hex values |
 | 256 colours | `TERM` contains `256color`, or the classic Windows console | The nearest entry of the xterm cube, except gold, which is `215` as the brand says |
-| 16 colours | anything else | A table per theme; gold is yellow, `ESC[33m`, as the brand says |
+| 16 colours | anything else | A table per theme; gold is yellow, `ESC[33m`, as the brand says, and the light theme's accent is red, because yellow on a light background is unreadable in most palettes |
 | None | `NO_COLOR` is set and not empty (no-color.org) | No colour at all: the terminal's own foreground and background, and emphasis by bold, underline and reverse only |
 
 `--color <depth>` or `ZENITH_COLOR` overrides the guess: `truecolor`, `256`, `16` or
@@ -657,9 +658,11 @@ no-color.org gives to a user who asks for colour on purpose.
 ### 14.4 Characters
 
 By default ZENITH draws only characters that the fonts of the classic Windows console
-have: the box drawing, the block elements and a few shapes from code page 437, such as
-`─ │ ┌ ┐ └ ┘ █ ▀ ▄ · ∙ ● ○ › …`. Rounded corners, check marks and emoji are left out on
-purpose, because a missing glyph is a box of garbage in somebody's terminal.
+have: the box drawing, the block elements and a few shapes of WGL4, the set Consolas,
+Lucida Console and Cascadia Mono all cover, such as `─ │ ┌ ┐ └ ┘ █ ▀ ▄ · ∙ ● ○ › …`.
+Rounded corners, check marks and emoji are left out on purpose, because a missing glyph
+is a box of garbage in somebody's terminal. The old raster fonts of the console have less
+than WGL4, and `--ascii` is for them.
 
 `--ascii` or `ZENITH_ASCII` draws in 7-bit ASCII only: `+ - |` for the boxes, `*` and `.`
 for the stars, `banner-ascii.txt` for the mark. As in SOLAR, it is a switch and not a
