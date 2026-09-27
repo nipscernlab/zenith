@@ -231,7 +231,8 @@ pub struct Palette {
     pub error: Rgb,
     /// The background of a selected row.
     pub selection: Rgb,
-    /// The SOLAR mark: gold on dark, copper on light, as the brand requires.
+    /// Both marks, ZENITH's and SOLAR's: gold on dark, copper on light, as the brands
+    /// require.
     pub mark: Rgb,
 }
 
@@ -444,8 +445,8 @@ impl Theme {
         self.error().add_modifier(Modifier::REVERSED)
     }
 
-    /// The SOLAR mark: gold on dark, copper on light, the terminal's foreground without
-    /// colour, never anything else.
+    /// A mark, ZENITH's or SOLAR's: gold on dark, copper on light, the terminal's
+    /// foreground without colour, never anything else.
     #[must_use]
     pub fn mark(&self) -> Style {
         self.with(self.palette.mark, self.sixteen().mark)

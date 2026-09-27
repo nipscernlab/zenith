@@ -18,7 +18,7 @@ Everything the brief asks for, as `docs/DESIGN.md` describes it.
 | Checking | Parameters checked against the API's schema before they are sent, with the wrong part of the line underlined, by a validator of ZENITH's own that property tests hold to the verdicts of the `jsonschema` crate. Every response checked against sections 5, 6 and 7 of SOLAR's contract, and a breach shown with its section. |
 | Cancelling | `Ctrl+C` sends `solar.cancel` for the call in flight when the manifest offers it, and pressed again quits. |
 | The keys | One table that dispatches the keys and draws the help overlay. Every action has a plain key or a `Ctrl` key, for macOS Terminal, where Option is not Alt; a character typed with `AltGr` is text. |
-| The look | The five colours of SOLAR's brand in three themes, night, light and high-contrast, each at four depths down to none, with `NO_COLOR` obeyed; the contrast of every colour computed against WCAG 2.2; WGL4 characters, or 7-bit ASCII with `--ascii`; the SOLAR mark from SOLAR's brand, byte for byte. Works at 80 × 24 and above, follows resizing, and gives the terminal back on exit, on a signal and after a panic. |
+| The look | The five colours of SOLAR's brand in three themes, night, light and high-contrast, each at four depths down to none, with `NO_COLOR` obeyed; the contrast of every colour computed against WCAG 2.2; WGL4 characters, or 7-bit ASCII with `--ascii`; ZENITH's own mark in the opening, from `docs/brand`, and SOLAR's on the card of `/version`, from SOLAR's brand, byte for byte. Works at 80 × 24 and above, follows resizing, and gives the terminal back on exit, on a signal and after a panic. |
 | Memory | Every collection that grows with use is a ring buffer with a limit in entries and in bytes, and says how much it dropped. `/export` and `/report` are written as they go. |
 | Bug reports | `/report` writes one file with the versions of ZENITH and SOLAR, the system as `system.info` reports it, the recent log and the calls of the session. |
 | The command line history | Kept between sessions in the per-user data directory of each system, written atomically after every line, in a documented format; `/forget` empties it and `--no-history` turns it off. |
@@ -27,10 +27,10 @@ Everything the brief asks for, as `docs/DESIGN.md` describes it.
 
 | What | How many | Where |
 | ---- | -------- | ----- |
-| Tests | 297, all passing; 27 of them start a real program, the installed SOLAR or a double of it for the failures SOLAR cannot produce | `cargo nextest run --workspace` |
-| Snapshots | 112: every screen at 80 × 24 and 160 × 48 in each theme, without colour and in ASCII, and the README's seven | `crates/zenith/tests/snapshots/` |
-| Line coverage | 88.90 % of the lines of `zenith-client` and `zenith` on Windows, 88.71 % on Linux in CI; the floor is 88 % | `cargo xtask coverage` |
-| The guide's table | 20 of 20 rows, typed into the real binary in a pseudo-terminal, on Windows 11 and in AlmaLinux 9 on this machine, and in CI on Linux, Windows and macOS | `cargo xtask walkthrough` |
+| Tests | 324, all passing, against SOLAR 0.3.0 on this machine; 27 of them start a real program, the installed SOLAR or a double of it for the failures SOLAR cannot produce | `cargo nextest run --workspace` |
+| Snapshots | 128: every screen at 80 × 24 and 160 × 48 in each theme, without colour and in ASCII; the opening in each theme at 256 colours, 16 and none, and the Session tab at 256 and 16; the screen of a terminal too small; and the README's seven | `crates/zenith/tests/snapshots/` |
+| Line coverage | 89.12 % of the lines of `zenith-client` and `zenith` on Windows, with the tests against SOLAR 0.3.0; the floor is 88 % | `cargo xtask coverage` |
+| The guide's table | 22 of 22 rows, typed into the real binary in a pseudo-terminal, on Windows 11 on this machine against SOLAR 0.3.0, and in CI on Linux, Windows and macOS | `cargo xtask walkthrough` |
 
 **CI** builds SOLAR from the head of its main branch on every run, and ran three times on
 27 September 2026. The first run, on the push at 16:06, built `2497b3f`, SOLAR 0.1.0 from
@@ -125,6 +125,8 @@ what would change it. The ones with the most consequence:
 - **Where the command line history is kept**, `nipscern-zenith/command-history.ndjson`
   in the system's per-user data directory, the command `/forget` and the flag
   `--no-history`, and that two ZENITHs at once each write their own, the last one winning.
+- **ZENITH's mark**, drawn without a designer: the dome of an observatory with its slit
+  open at the zenith, in the opening, with SOLAR's mark moved to the card of `/version`.
 - **The theme is not remembered**: no configuration file.
 - **The limits on memory**, and the soak's rule for growth.
 - **Mutation testing that reports and does not gate yet**, and development builds with
@@ -153,7 +155,6 @@ works around none of them.
   code owners.
 - **The first mutation run**, on the first Monday: each survivor killed by a test or
   recorded as a mutation that changes nothing, after which the job can fail on new ones.
-- **A mark for ZENITH**, when the brand has one. ZENITH draws only SOLAR's.
 - **The slow first start**, with the steps it now records.
 
 ## Versions

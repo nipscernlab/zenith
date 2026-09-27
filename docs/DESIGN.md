@@ -97,22 +97,19 @@ screen the moment the terminal is large enough. Nothing is lost while it is smal
 
 ## 3. The opening
 
-While SOLAR starts and answers the handshake, ZENITH draws a starfield with the SOLAR
-mark in the middle, exactly as `docs/brand/README.md` of SOLAR lays it out: the symbol of
-`banner.txt`, 16 × 8 cells, and the text starting three columns after it, with the name on
-the row whose slot opens to the right.
+While SOLAR starts and answers the handshake, ZENITH draws a starfield with its own mark
+in the middle, laid out as [`docs/brand/README.md`](brand/README.md) says: the dome of
+`banner.txt`, 16 × 4 cells, and beside it, starting three columns after it, the name level
+with the top of the dome, then what ZENITH is, the laboratory and the version. The line
+below is the state of the connection.
 
 ```text
-   ▄▄██████▄▄
- ▄████████████▄
-▄████              SOLAR
-████████████████   The central API of the Constellation
-████████████████   NIPS-CERN
-           ████▀   connecting
- ▀████████████▀
-   ▀▀██████▀▀
+   ▄▄██  ██▄▄      ZENITH
+ ▄█████  █████▄    The terminal of Constellation
+▄██████████████▄   NIPS-CERN
+████████████████   0.2.0
 
-            ZENITH 0.1.0, the terminal of Constellation
+               Connecting to SOLAR
 ```
 
 - **It lasts exactly as long as the connection.** The moment the handshake finishes,
@@ -121,16 +118,20 @@ the row whose slot opens to the right.
   connection itself.
 - **Any key skips it.** The connection carries on, and the status bar shows it.
 - **The stars twinkle** at twelve frames a second, and only during the opening. No star is
-  drawn within two cells of the mark, which is the clear space the brand rules ask for.
-- **The mark is never stretched, mirrored or recoloured outside the palette.** It is gold
+  drawn within two cells of the mark and its words, which is the clear space the brand
+  rules ask for, nor of the line below.
+- **The mark is never stretched, turned or recoloured outside the palette.** It is gold
   on the night background, copper on the light one, and the terminal's own foreground
   when there is no colour. With `--ascii` it is `banner-ascii.txt`.
-- **ZENITH has no mark of its own yet.** Its name is written in text, and a mark is an
-  open question.
+- **The line below says where the connection is:** `Connecting to SOLAR` while it is
+  made, and `Not connected to SOLAR`, in the error colour, when it failed.
 
-The two drawings are copied byte for byte from SOLAR's `docs/brand` into
-`crates/zenith/assets/brand/`, and a test compares them with SOLAR's when SOLAR's checkout
-is available, which it is in CI.
+ZENITH's mark stands for ZENITH and SOLAR's for SOLAR, and neither is drawn in the other's
+place. SOLAR's mark is where ZENITH shows SOLAR itself, on the card of `/version`
+(section 4). Its two drawings are copied byte for byte from SOLAR's `docs/brand` into
+`crates/zenith/assets/solar/`, and a test compares them with SOLAR's when SOLAR's checkout
+is available, which it is in CI. ZENITH's own are read from `docs/brand` of this
+repository, and the tests of `crates/zenith/src/brand.rs` hold them to its rules.
 
 If the connection fails, the opening stops animating and shows what happened in its
 place (section 9). The stars stay, still.
@@ -176,8 +177,9 @@ response to it, goes into the transcript, laid out for a person.
   that breaks the contract must not look like one that keeps it.
 - **Five commands have layouts of their own**, because they are ZENITH's commands and not
   just calls: `/list` is a table of the APIs, `/describe` is the entry of one API laid out
-  like the APIs tab, `/ping` is one line, `/version` is the three versions and the build,
-  and `/help` is the table of commands. If the data does not have the shape the layout
+  like the APIs tab, `/ping` is one line, `/version` is SOLAR's mark with the version of
+  the SOLAR that answered beside it, as SOLAR's brand lays it out, then the three versions
+  and the build, and `/help` is the table of commands. If the data does not have the shape the layout
   expects, the card falls back to the generic layout rather than failing.
 - **A call in flight** is a line `… solar.ping, waiting 0.3 s` whose timer moves while
   the call is out. When SOLAR's own budget for that API, `timeout_ms`, has passed with no
@@ -483,7 +485,7 @@ says a session ends, and waits up to half a second for SOLAR to exit before kill
 | `/describe <api>` | One API, laid out | `solar.describe` with `{"api": ...}` |
 | `/call <api> [json]` | Any call; absent JSON means `{}` | `<api>` with the JSON, validated first |
 | `/ping [message]` | One line: the round trip and SOLAR's own time | `solar.ping` |
-| `/version` | The three versions and the build | `solar.version` |
+| `/version` | SOLAR's mark, the three versions and the build | `solar.version` |
 | `/theme [name]` | `night`, `light` or `high-contrast`; with no name, the next one | none |
 | `/help [command]` | The commands, or one of them | none |
 | `/quit` | Leaves ZENITH | none |
@@ -671,6 +673,8 @@ The claim is measured, not asserted: section 15.
 
 Every colour ZENITH draws is one of the five colours of SOLAR's `docs/brand/README.md`, or
 a mix of two of them, written as the mix. Nothing outside the palette is introduced.
+ZENITH's own mark, in [`docs/brand`](brand/README.md), is drawn in the same five colours,
+in the same roles.
 
 | Name | Hex | From the brand |
 | ---- | --- | -------------- |
@@ -730,8 +734,9 @@ is a box of garbage in somebody's terminal. The old raster fonts of the console 
 than WGL4, and `--ascii` is for them.
 
 `--ascii` or `ZENITH_ASCII` draws in 7-bit ASCII only: `+ - |` for the boxes, `*` and `.`
-for the stars, `banner-ascii.txt` for the mark. As in SOLAR, it is a switch and not a
-guess, because no terminal can be asked reliably whether it has a glyph.
+for the stars, and the `banner-ascii.txt` of each brand for the two marks. As in SOLAR, it
+is a switch and not a guess, because no terminal can be asked reliably whether it has a
+glyph.
 
 ### 14.5 Choosing a theme
 

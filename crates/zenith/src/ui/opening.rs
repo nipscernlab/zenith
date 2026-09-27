@@ -1,9 +1,10 @@
-//! The opening: a starfield with the SOLAR mark, while the connection is made.
+//! The opening: a starfield with ZENITH's mark, while the connection is made.
 //!
-//! The mark is laid out as SOLAR's `docs/brand/README.md`, section 3, says: the symbol of
-//! 16 × 8 cells, the text three columns after it, the name on the row whose slot opens to
-//! the right. No star is drawn within two cells of the mark, which is the clear space the
-//! brand asks for.
+//! The mark is laid out as `docs/brand/README.md`, section 3, says: the symbol of 16 × 4
+//! cells, and beside it, three columns after it, the name on the row level with the top of
+//! the dome, what ZENITH is, the laboratory and the version on the rows below. The state of
+//! the connection is the line under it. No star is drawn within two cells of the mark,
+//! which is the clear space the brand asks for.
 
 use ratatui::Frame;
 use ratatui::layout::Rect;
@@ -12,7 +13,7 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Paragraph};
 
 use super::chrome::scatter;
-use super::text;
+use super::{lockup, text};
 use crate::app::App;
 use crate::app::link::Phase;
 use crate::brand;
@@ -20,9 +21,11 @@ use crate::brand;
 /// One star in how many cells.
 const DENSITY: u64 = 29;
 
-/// The words beside the mark, from the brand's example; the fourth is the state of the
-/// connection, where the brand puts the version.
-const BESIDE: [&str; 3] = ["SOLAR", "The central API of the Constellation", "NIPS-CERN"];
+/// What ZENITH is, on the row under its name.
+const WHAT: &str = "The terminal of Constellation";
+
+/// The laboratory, on the row under that.
+const WHO: &str = "NIPS-CERN";
 
 /// Draws the opening over the whole screen.
 #[allow(
@@ -34,19 +37,18 @@ pub fn draw(frame: &mut Frame<'_>, area: Rect, app: &App) {
     let failure = (app.link.phase == Phase::Down)
         .then_some(app.link.failure.as_ref())
         .flatten();
-    let state = match app.link.phase {
-        Phase::Down => ("not connected", theme.error()),
-        Phase::Connected => ("connected", theme.accent()),
-        Phase::Starting | Phase::Handshaking => ("connecting", theme.muted()),
+    let (footer, footer_style) = match app.link.phase {
+        Phase::Down => ("Not connected to SOLAR", theme.error()),
+        Phase::Connected => ("Connected to SOLAR", theme.accent()),
+        Phase::Starting | Phase::Handshaking => ("Connecting to SOLAR", theme.muted()),
     };
-    let text_width = BESIDE
-        .iter()
-        .map(|line| text::width(line))
-        .chain(std::iter::once(text::width(state.0)))
-        .max()
-        .unwrap_or(0);
-    let mark_width = u16::try_from(brand::WIDTH + brand::GAP + text_width).unwrap_or(area.width);
-    let footer = format!("ZENITH {}, the terminal of Constellation", crate::VERSION);
+    let beside = [
+        ("ZENITH".to_owned(), theme.strong()),
+        (WHAT.to_owned(), theme.text()),
+        (WHO.to_owned(), theme.muted()),
+        (crate::VERSION.to_owned(), theme.muted()),
+    ];
+    let mark_width = u16::try_from(lockup::width(&brand::ZENITH, &beside)).unwrap_or(area.width);
 
     // The failure card, when there is one, is laid out first, to know how tall it is.
     let card_width = area.width.saturating_sub(8).min(76);
@@ -85,7 +87,7 @@ pub fn draw(frame: &mut Frame<'_>, area: Rect, app: &App) {
     } else {
         u16::try_from(card_lines.len()).unwrap_or(0) + 2
     };
-    let mark_height = u16::try_from(brand::HEIGHT).unwrap_or(8);
+    let mark_height = u16::try_from(brand::ZENITH.height).unwrap_or(4);
     let total = mark_height + 2 + 1 + if card_height > 0 { 2 + card_height } else { 0 };
     let top = area.y + area.height.saturating_sub(total) / 2;
     let left = area.x + area.width.saturating_sub(mark_width) / 2;
@@ -101,7 +103,7 @@ pub fn draw(frame: &mut Frame<'_>, area: Rect, app: &App) {
     // The stars, outside the clear space around everything that carries words.
     let keep_out = [
         grow(mark, 2),
-        grow(footer_area_text(footer_area, &footer), 2),
+        grow(footer_area_text(footer_area, footer), 2),
         grow(card, 1),
     ];
     let frame_number = app.opening.map_or(0, |opening| opening.frame);
@@ -130,31 +132,17 @@ pub fn draw(frame: &mut Frame<'_>, area: Rect, app: &App) {
     }
 
     // The mark, then the words beside it.
-    let rows = brand::rows(app.glyphs.charset);
-    for (offset, row) in rows.iter().enumerate() {
+    let lines = lockup::lines(&brand::ZENITH, app.glyphs.charset, 0, &beside, theme);
+    for (offset, line) in lines.into_iter().enumerate() {
         let y = top + u16::try_from(offset).unwrap_or(0);
         if y >= area.y + area.height {
             break;
         }
-        let beside = offset
-            .checked_sub(brand::NAME_ROW)
-            .and_then(|index| match index {
-                0 => Some((BESIDE[0], theme.strong())),
-                1 => Some((BESIDE[1], theme.text())),
-                2 => Some((BESIDE[2], theme.muted())),
-                3 => Some(state),
-                _ => None,
-            });
-        let mut spans = vec![Span::styled(row.clone(), theme.mark())];
-        if let Some((words, style)) = beside {
-            spans.push(Span::styled(" ".repeat(brand::GAP), theme.base()));
-            spans.push(Span::styled(words.to_owned(), style));
-        }
         let line_area = Rect::new(left, y, mark_width.min(area.width), 1);
-        frame.render_widget(Paragraph::new(Line::from(spans)), line_area);
+        frame.render_widget(Paragraph::new(line), line_area);
     }
     frame.render_widget(
-        Paragraph::new(Line::from(Span::styled(footer, theme.muted())))
+        Paragraph::new(Line::from(Span::styled(footer, footer_style)))
             .alignment(ratatui::layout::Alignment::Center),
         footer_area,
     );

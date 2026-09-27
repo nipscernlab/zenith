@@ -24,6 +24,7 @@ SOLAR is tested by hand through it
 | [`docs/adr/`](docs/adr/) | What the architect has settled. |
 | [`docs/OPEN_QUESTIONS.md`](docs/OPEN_QUESTIONS.md) | What was decided without asking, and what ZENITH needed from SOLAR and did not find. |
 | [`docs/TESTING_BY_HAND.md`](docs/TESTING_BY_HAND.md) | How a person who has never used Rust builds both programs and tests SOLAR through ZENITH. |
+| [`docs/brand/README.md`](docs/brand/README.md) | ZENITH's mark: its geometry, colours and terminal forms, and where each of the two marks is drawn. |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Setting up, the tools, the rules about dependencies, opening a pull request. |
 
 SOLAR's contract is `docs/CONTRACT.md` in [nipscernlab/solar](https://github.com/nipscernlab/solar).

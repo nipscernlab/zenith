@@ -1,6 +1,6 @@
 ---
 source: crates/zenith/tests/screens.rs
-expression: "screen(&draw(&script.app, width, height))"
+expression: "screen(&draw(&script.app, 80, 24))"
 ---
                                    *   *                            ·
                                          •             ∙
@@ -26,9 +26,9 @@ expression: "screen(&draw(&script.app, width, height))"
                        •                                           •
        *            •          •
                                  *        *·   ∙
---- every cell not listed is #F5F1E8 on #0B0C14
- 8: 16-31  #FFC23D on #0B0C14
- 8: 35-40  #FFC23D on #0B0C14 bold
- 9: 16-31  #FFC23D on #0B0C14
-10: 16-31  #FFC23D on #0B0C14
-11: 16-31  #FFC23D on #0B0C14
+--- every cell not listed is @255 on @233
+ 8: 16-31  @215 on @233
+ 8: 35-40  @215 on @233 bold
+ 9: 16-31  @215 on @233
+10: 16-31  @215 on @233
+11: 16-31  @215 on @233

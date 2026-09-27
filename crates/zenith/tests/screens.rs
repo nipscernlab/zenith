@@ -109,6 +109,21 @@ fn session_after_calls(options: Options) -> Script {
     script
 }
 
+fn session_version(options: Options) -> Script {
+    let mut script = Script::connected(options);
+    script.later(Duration::from_secs(2));
+    script.run("/version");
+    script.answer(
+        "solar.version",
+        &json!({"solar_version": "0.1.0", "protocol": "solar/1",
+                "manifest_schema_version": "2.0.0",
+                "build": {"git_commit_short": "c9c566b22e2b", "profile": "release",
+                          "rustc_version": "rustc 1.97.1", "target": "x86_64-pc-windows-msvc"}}),
+        480,
+    );
+    script
+}
+
 fn session_commands_menu(options: Options) -> Script {
     let mut script = session_just_connected(options);
     script.type_text("/");
@@ -223,11 +238,12 @@ fn envelope_viewer(options: Options) -> Script {
     script
 }
 
-const SCENES: [(&str, Scene); 14] = [
+const SCENES: [(&str, Scene); 15] = [
     ("opening_connecting", opening_connecting),
     ("opening_not_on_path", opening_not_on_path),
     ("session_just_connected", session_just_connected),
     ("session_after_calls", session_after_calls),
+    ("session_version", session_version),
     ("session_commands_menu", session_commands_menu),
     ("session_parameters_menu", session_parameters_menu),
     ("session_validation_error", session_validation_error),
@@ -282,6 +298,51 @@ fn the_fallback_depths_draw_in_their_own_colours() {
             );
             insta::assert_snapshot!(snapshot, screen(&draw(&script.app, 80, 24)));
         }
+    }
+}
+
+/// The opening carries ZENITH's mark, and the mark is drawn in every theme at every depth
+/// a terminal may have, down to none.
+#[test]
+fn the_opening_in_every_theme_at_every_depth() {
+    for depth in [Depth::Indexed, Depth::Sixteen, Depth::None] {
+        for theme in ThemeName::ALL {
+            let script = opening_connecting(options(theme, depth, Charset::Unicode));
+            let snapshot = format!(
+                "opening_connecting__80x24__{}__{}",
+                theme.name(),
+                depth.name()
+            );
+            insta::assert_snapshot!(snapshot, screen(&draw(&script.app, 80, 24)));
+        }
+    }
+}
+
+/// ZENITH's mark stands for ZENITH and SOLAR's for SOLAR: the opening draws ZENITH's and
+/// not SOLAR's, and the card of `/version`, where ZENITH shows SOLAR itself, draws SOLAR's
+/// and not ZENITH's.
+#[test]
+fn each_mark_is_drawn_where_it_stands_for_its_own() {
+    use zenith::brand::{SOLAR, ZENITH};
+    for charset in [Charset::Unicode, Charset::Ascii] {
+        let rows = |mark: &zenith::brand::Mark| -> Vec<String> {
+            mark.rows(charset)
+                .iter()
+                .map(|row| row.trim().to_owned())
+                .collect()
+        };
+        let has = |text: &str, mark: &zenith::brand::Mark| {
+            rows(mark).iter().all(|row| text.contains(row.as_str()))
+        };
+        let opening = opening_connecting(options(ThemeName::Night, Depth::None, charset));
+        let text = characters(&draw(&opening.app, 160, 48));
+        assert!(has(&text, &ZENITH), "{text}");
+        assert!(!has(&text, &SOLAR), "{text}");
+        let version = session_version(options(ThemeName::Night, Depth::None, charset));
+        let text = characters(&draw(&version.app, 160, 48));
+        assert!(has(&text, &SOLAR), "{text}");
+        assert!(!has(&text, &ZENITH), "{text}");
+        assert!(text.contains("The central API of the Constellation"));
     }
 }
 

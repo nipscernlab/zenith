@@ -2,42 +2,38 @@
 source: crates/zenith/tests/screens.rs
 expression: "screen(&draw(&script.app, width, height))"
 ---
+                                   *   *                            ·
 
-               ▄▄██████▄▄
-       ∙     ▄████████████▄
-         *  ▄████              SOLAR
- •   ∙·     ████████████████   The central API of the Constellation
-  ·         ████████████████   NIPS-CERN
-                       ████▀   not connected                            ∙    *
-             ▀████████████▀
-∙              ▀▀██████▀▀                                               •
-
-
-                   ZENITH 0.1.0, the terminal of Constellation
+       ∙
+         **        ▄▄██  ██▄▄      ZENITH
+ •   ∙·          ▄█████  █████▄    The terminal of Constellation
+  ·             ▄██████████████▄   NIPS-CERN
+                ████████████████   0.1.0                                ∙    *
+                                                                   ·
+∙                                                                       •
+                             Not connected to SOLAR
 
     ┌──────────────────────────────────────────────────────────────────────┐
     │ ZENITH could not find solar on the PATH, which has 23 directories.   │
     │ Put the folder that holds solar on the PATH, SOLAR's target/release  │
-*   │ when it was built from source, or give the path with --solar <path>  │
+    │ when it was built from source, or give the path with --solar <path>  │
     │ or the variable ZENITH_SOLAR.                                        │
-    │                                                                      │
+*   │                                                                      │
     │ r try again   Enter go to the tabs   q quit                          │
     └──────────────────────────────────────────────────────────────────────┘
 
+
+                       •                                           •
        *            •          •
                                  *        *·   ∙
 --- every cell not listed is #F5F1E8 on #0B0C14
- 1: 12-27  #FFC23D on #0B0C14
- 2: 12-27  #FFC23D on #0B0C14
- 3: 12-27  #FFC23D on #0B0C14
- 3: 31-35  #FFC23D on #0B0C14 bold
- 4: 12-27  #FFC23D on #0B0C14
- 5: 12-27  #FFC23D on #0B0C14
- 6: 12-27  #FFC23D on #0B0C14
- 6: 31-43  #FFC23D on #0B0C14 bold
- 7: 12-27  #FFC23D on #0B0C14
- 8: 12-27  #FFC23D on #0B0C14
-14:  6-71  #FFC23D on #0B0C14 bold
-19:  6-6   #FFC23D on #0B0C14 bold
-19: 20-24  #FFC23D on #0B0C14 bold
-19: 43-43  #FFC23D on #0B0C14 bold
+ 3: 16-31  #FFC23D on #0B0C14
+ 3: 35-40  #FFC23D on #0B0C14 bold
+ 4: 16-31  #FFC23D on #0B0C14
+ 5: 16-31  #FFC23D on #0B0C14
+ 6: 16-31  #FFC23D on #0B0C14
+ 9: 29-50  #FFC23D on #0B0C14 bold
+12:  6-71  #FFC23D on #0B0C14 bold
+17:  6-6   #FFC23D on #0B0C14 bold
+17: 20-24  #FFC23D on #0B0C14 bold
+17: 43-43  #FFC23D on #0B0C14 bold

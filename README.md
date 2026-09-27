@@ -1,4 +1,8 @@
-# ZENITH
+<!-- The mark and its rules live in docs/brand. -->
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/brand/svg/lockup-dark.svg">
+  <img alt="ZENITH" src="docs/brand/svg/lockup-light.svg" height="72">
+</picture>
 
 **The terminal of Constellation, from NIPS-CERN.** A full-screen application in which a
 person talks to SOLAR, the API at the centre of Constellation, with tabs, commands and
@@ -36,7 +40,7 @@ Then start ZENITH, telling it where SOLAR is, or putting SOLAR's `target/release
 ./target/release/zenith --solar ../solar/target/release/solar
 ```
 
-The opening, a starfield with the SOLAR mark, lasts as long as the connection takes,
+The opening, a starfield with ZENITH's mark, lasts as long as the connection takes,
 about twenty milliseconds on the machine it was written on, and any key skips it. Type `/` for the commands and `?` for
 every key.
 

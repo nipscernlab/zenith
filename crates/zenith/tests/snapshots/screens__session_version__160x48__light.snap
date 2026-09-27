@@ -1,0 +1,102 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, width, height))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·                        ••      ·        ∙  ·                                        ? keys
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   · Connected to SOLAR 0.1.0 in 1.84 ms: protocol solar/1, manifest 2.0.0, 5 APIs.
+     This SOLAR has no solar.cancel. Type / for the commands, or ? for every key.
+ › /version
+    ok   solar.version 1.0.0 · 0.48 ms · 0.17 ms in SOLAR · #3
+
+      ▄▄██████▄▄
+    ▄████████████▄
+   ▄████              SOLAR
+   ████████████████   The central API of the Constellation
+   ████████████████   NIPS-CERN
+              ████▀   0.1.0
+    ▀████████████▀
+      ▀▀██████▀▀
+
+   solar_version            0.1.0
+   protocol                 solar/1
+   manifest_schema_version  2.0.0
+   build
+     git_commit_short  c9c566b22e2b
+     profile           release
+     rustc_version     rustc 1.97.1
+     target            x86_64-pc-windows-msvc
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ › Type / for the commands, or ? for every key.                                                                                                               │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 0.48 ms ─── in orbit 2s ────────────────────────────────────────────────────────────────────────────────────────────
+--- every cell not listed is #17161C on #F5F1E8
+ 0:  0-7   #8C4907 on #F5F1E8 bold
+ 0: 10-18  #8C4907 on #F5F1E8 bold underlined
+ 0: 21-26  #555355 on #F5F1E8
+ 0: 29-33  #555355 on #F5F1E8
+ 0: 36-44  #555355 on #F5F1E8
+ 0: 45-152 #868482 on #F5F1E8
+ 0:153-153 #8C4907 on #F5F1E8 bold
+ 0:154-159 #555355 on #F5F1E8
+22:  3-3   #8C4907 on #F5F1E8
+24:  0-10  #8C4907 on #F5F1E8
+25:  3-6   #8C4907 on #F5F1E8 bold reversed
+25:  9-21  #8C4907 on #F5F1E8
+25: 22-27  #555355 on #F5F1E8
+25: 38-61  #555355 on #F5F1E8
+27:  3-18  #B35A00 on #F5F1E8
+28:  3-18  #B35A00 on #F5F1E8
+29:  3-18  #B35A00 on #F5F1E8
+29: 22-26  #8C4907 on #F5F1E8 bold
+30:  3-18  #B35A00 on #F5F1E8
+31:  3-18  #B35A00 on #F5F1E8
+31: 22-30  #555355 on #F5F1E8
+32:  3-18  #B35A00 on #F5F1E8
+32: 22-26  #555355 on #F5F1E8
+33:  3-18  #B35A00 on #F5F1E8
+34:  3-18  #B35A00 on #F5F1E8
+36:  3-25  #8C4907 on #F5F1E8
+37:  3-25  #8C4907 on #F5F1E8
+38:  3-25  #8C4907 on #F5F1E8
+39:  3-7   #8C4907 on #F5F1E8
+40:  5-20  #8C4907 on #F5F1E8
+41:  5-20  #8C4907 on #F5F1E8
+42:  5-20  #8C4907 on #F5F1E8
+43:  5-20  #8C4907 on #F5F1E8
+44:  0-159 #868482 on #F5F1E8
+45:  0-0   #868482 on #F5F1E8
+45:  1-3   #8C4907 on #F5F1E8
+45:  4-47  #555355 on #F5F1E8
+45:159-159 #868482 on #F5F1E8
+46:  0-159 #868482 on #F5F1E8
+47:  0-2   #868482 on #F5F1E8
+47:  3-3   #8C4907 on #F5F1E8
+47:  4-6   #868482 on #F5F1E8
+47:  7-17  #8C4907 on #F5F1E8 bold
+47: 18-20  #555355 on #F5F1E8
+47: 28-32  #868482 on #F5F1E8
+47: 33-42  #555355 on #F5F1E8
+47: 50-54  #868482 on #F5F1E8
+47: 55-63  #555355 on #F5F1E8
+47: 66-159 #868482 on #F5F1E8
