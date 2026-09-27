@@ -4,6 +4,7 @@
 //! decision it makes lives in this library, so that the tests can drive the same code
 //! with ratatui's test backend and a real SOLAR. `docs/DESIGN.md` is the specification.
 
+pub mod app;
 pub mod brand;
 pub mod clock;
 pub mod commands;

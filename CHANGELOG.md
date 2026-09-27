@@ -42,5 +42,11 @@ either is stated here in its own line.
   on a Brazilian ABNT2 keyboard. The line editor with a bounded history, the thirteen slash
   commands and their parser, and completion of commands, API names, parameter names and
   values from the manifest.
+- The application, a state machine with no terminal and no clock of its own: the
+  handshake and its version checks, every failure path with what happened and what to do,
+  calls matched by id, parameters checked before they are sent with the part of the line to
+  underline, examples judged against what they declare, the parameter form, `Ctrl+C` that
+  cancels when SOLAR offers `solar.cancel`, the Log filtered by level, the History, and
+  `/export` and `/report` written as they go.
 
 [Unreleased]: https://github.com/nipscernlab/zenith/commits/main

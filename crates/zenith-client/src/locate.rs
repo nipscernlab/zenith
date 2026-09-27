@@ -111,8 +111,7 @@ impl fmt::Display for LocateError {
             ),
             Self::NotOnPath { directories } => write!(
                 formatter,
-                "ZENITH could not find {} on the PATH, which has {directories} {}.",
-                program_name(),
+                "ZENITH could not find solar on the PATH, which has {directories} {}.",
                 if *directories == 1 {
                     "directory"
                 } else {

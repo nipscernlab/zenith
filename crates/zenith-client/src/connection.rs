@@ -32,7 +32,7 @@ pub const STDERR_LINE_LIMIT: usize = 64 * 1024;
 pub const OUTGOING_LIMIT: usize = 256;
 
 /// How a connection is started.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Settings {
     /// The value of `SOLAR_LOG` SOLAR is started with.
     pub log_level: String,
