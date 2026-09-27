@@ -63,42 +63,12 @@ specifies the recording, with a version. The exporter is one function.
 
 ## Naming
 
-### The name `zenith` is shared with a system monitor
-
-A system monitor written in Rust, `bvaisvil/zenith`, installs a binary called `zenith`
-too. The brief keeps the name.
-
-**How a person who has both tells them apart:**
-
-- `zenith --version` prints `ZENITH 0.1.0, the terminal of Constellation, NIPS-CERN`.
-  The monitor prints its own name in lower case with its own version.
-- `zenith --help` starts with the same line and names SOLAR.
-- Which one runs is decided by the order of the `PATH`. `where zenith` in Windows,
-  `which -a zenith` in macOS and Linux, lists every `zenith` in that order.
-- A person who needs both can put `target/release` of this repository first on the
-  `PATH`, or call the other by its full path.
-
-**Revisit when** the name has to be published somewhere names are unique, such as
-crates.io, where `zenith` is taken.
-
 ### ZENITH has no mark of its own
 
 The brief says a mark will come later. ZENITH writes its name in text, and draws only the
 SOLAR mark, in the opening, exactly as SOLAR's brand rules say.
 
 ## The interface
-
-### `Tab` switches tabs when the command line is empty
-
-Every terminal delivers `Tab` and `Shift+Tab`, and none of the other candidates does:
-`Alt` is not Alt in macOS Terminal, GNOME Terminal takes `Alt+1` and `F1`, and `Ctrl`
-with a digit is not delivered by most terminals at all. On the Session tab `Tab` also
-completes, so it switches tabs only when the line is empty, where there is nothing to
-complete.
-
-**The cost.** A person who presses `Tab` on an empty line expecting completion lands on
-the APIs tab. The help overlay and the first line of `/help` say how the two meanings
-split.
 
 ### `Enter` never accepts a completion
 
@@ -113,13 +83,6 @@ A line that starts with an API name gets `Commands start with a slash. Did you m
 solar.ping?` rather than being run as a call. Running it would be a guess about what the
 person meant, and the guess would be wrong the first time an API is named like a word.
 
-### Five commands beyond the eight the brief names
-
-`/raw`, `/reconnect`, `/clear`, `/export` and `/report`. `/report` was added to the brief
-later; the other four exist because testing SOLAR by hand needs them: `/raw` is the only
-way to send SOLAR something malformed and see its answer, and `/reconnect` picks up a new
-build of SOLAR without leaving ZENITH.
-
 ### Nothing is written to disk unless asked
 
 The command line history and the chosen theme are lost when ZENITH exits. Writing them
@@ -128,11 +91,6 @@ the brief asks for neither.
 
 **Revisit when** testers ask for it; the natural places are the platform configuration
 directories, `%APPDATA%`, `~/Library/Application Support` and `$XDG_CONFIG_HOME`.
-
-### No mouse
-
-Capturing the mouse takes text selection away from the terminal, and a person testing
-SOLAR copies JSON out of the screen all the time. Every action has a key.
 
 ### The time connected shows seconds only in the first minute
 
@@ -147,35 +105,15 @@ never quit on the first press.
 
 ## Validation
 
-### ZENITH has its own schema validator
-
-The brief asks for parameters to be validated against the schema before they are sent.
-The `jsonschema` crate is the most complete validator in Rust, and adding it took the
-release binary of an early build of ZENITH from 775 168 bytes to 4 598 272, six times the
-size, measured on 27 September 2026 with the release profile of this repository. Most of
-that is regular expressions and format checkers that SOLAR's schemas do not use.
-
-**Chosen.** A validator of ZENITH's own for the assertions of JSON Schema 2020-12, with
-`$ref` resolved into the manifest's `$defs`. It is tested against `jsonschema`, which is a
-development dependency and never ships: every schema of the manifest, with generated
-values, must get the same verdict from both.
-
 ### A keyword ZENITH does not check never fails a call
+
+The validator is ZENITH's own, [ADR 0007](adr/0007-zenith-has-its-own-schema-validator.md).
 
 When a schema uses a keyword the validator does not implement, such as `pattern`,
 ZENITH says that it did not check it and that SOLAR will, and sends the call. A tool that
 tests SOLAR must never refuse what SOLAR would accept.
 
 ## The connection
-
-### The handshake waits fifteen seconds
-
-SOLAR answers the handshake in a few milliseconds on this machine, and fifteen seconds is
-far more than it needs. It is that long because on Windows the first run of `solar.exe`
-can take far longer than the next: the first of ten starts spent 475 ms reading SOLAR's
-binary and starting it, against about 5 ms for the others, which looks like the
-antivirus scanning the file, and a build seen for the first time may take longer still.
-A ZENITH that gave up during such a start would report a failure that is not one.
 
 ### A response with `id: null` belongs to the oldest request waiting
 
@@ -270,16 +208,11 @@ fifth is room for the allocator, which does not hand pages back at once.
 
 ## Measuring and testing
 
-### The coverage floor is 88 % of lines
+### A coverage run seeds the property tests
 
-On 27 September 2026 the tests ran 88.46 % of the lines of `zenith-client` and `zenith`,
-measured on Windows with SOLAR 0.2.0 present, leaving out the test double, `main.rs` and
-`xtask`. CI measures the same on Linux, where the code for Windows is not compiled and the
-code for Unix is. The floor only rises: whoever raises the coverage may raise it, and
-nobody lowers it.
-
-A coverage run draws the random cases of the property tests from one fixed seed. With a
-new seed each run, the figure moved with chance, because those cases were the only tests
+The floor itself is [ADR 0011](adr/0011-the-coverage-floor-is-88-percent.md). A coverage
+run draws the random cases of the property tests from one fixed seed. With a new seed
+each run, the figure moved with chance, because those cases were the only tests
 that reached some of the interaction code: CI measured 88.15 % and then 87.87 % with the
 same tests. The code they had reached by chance now has tests of its own.
 

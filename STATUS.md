@@ -113,22 +113,19 @@ What the figures say:
 
 ## Decided without asking
 
-`docs/OPEN_QUESTIONS.md` has each decision with what it rules out and what would change
-it. The ones with the most consequence:
+On 27 September 2026 the architect confirmed seven of those decisions, which are now
+records in `docs/adr/`, 0007 to 0013: ZENITH's own schema validator, `Tab` switching tabs
+on an empty command line, the five commands beyond the brief, the fifteen-second
+handshake, the coverage floor at 88 %, the name `zenith`, and no mouse, for now.
 
-- **A schema validator of ZENITH's own.** `jsonschema` would have taken the release binary
-  from 775 168 bytes to 4 598 272. Property tests hold ZENITH's validator to its verdicts.
-- **`Tab` switches tabs on an empty command line**, and completes otherwise; no action
-  depends on Alt or a function key.
-- **Five commands beyond the eight of the brief**, `/raw`, `/reconnect`, `/clear`,
-  `/export` and `/report`, because testing SOLAR by hand needs them.
+`docs/OPEN_QUESTIONS.md` has each decision that is still open, with what it rules out and
+what would change it. The ones with the most consequence:
+
 - **Nothing is written to disk unless asked**: no configuration file, no persistent
   history.
-- **The handshake waits fifteen seconds**, because on Windows the first run of a
-  `solar.exe` can take far longer than the next, as the slow first start above shows.
 - **The limits on memory**, and the soak's rule for growth.
-- **The coverage floor at 88 %**, mutation testing that reports and does not gate yet, and
-  development builds with line tables only, for the disk.
+- **Mutation testing that reports and does not gate yet**, and development builds with
+  line tables only, for the disk.
 
 ## What ZENITH needed from SOLAR and did not find
 

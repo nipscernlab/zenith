@@ -18,7 +18,7 @@ use crate::limits;
 /// How long the handshake may take. Long, because on Windows the first run of `solar.exe`
 /// can take far longer than the next: on the machine ZENITH was written on, the first of
 /// ten starts spent 475 ms reading and starting it, against about 5 ms for the others.
-/// `docs/OPEN_QUESTIONS.md` records the choice.
+/// ADR 0010 records the choice.
 pub const HANDSHAKE_TIMEOUT: Duration = Duration::from_secs(15);
 
 /// How often ZENITH asks whether SOLAR has exited, once SOLAR has closed its output.

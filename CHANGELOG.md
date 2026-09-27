@@ -9,6 +9,12 @@ either is stated here in its own line.
 
 ## [Unreleased]
 
+### Changed
+
+- The seven decisions the architect confirmed on 27 September 2026 are records in
+  `docs/adr/`, 0007 to 0013, and every record is in the MADR 4.0.0 format;
+  `docs/OPEN_QUESTIONS.md` keeps only what is still open.
+
 ## [0.1.0] - 2026-09-27
 
 The first version, for SOLAR's protocol `solar/1` and manifests of layout 2, tested
