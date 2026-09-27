@@ -136,6 +136,17 @@ gh run download <run id> --pattern 'mutants-shard-*' --dir mutants-shards
 cargo xtask mutants mutants-shards --shards 20
 ```
 
+To run some shards again, for example one whose runner went down, name them; the summary
+of such a run fails, because a part of the mutants is not a measurement of all of them:
+
+```bash
+gh workflow run scheduled.yml -f shards='[14]'
+```
+
+Every process of the mutation job may take six GiB of address space. A mutant that takes
+away one of ZENITH's limits on memory then fails its test, where without the limit it took
+all of the runner's memory and the runner with it.
+
 **Never run `cargo mutants` locally.** It rebuilds the project for every mutant, and on
 the machine ZENITH was written on a copy of the project per job filled the disk once
 already.

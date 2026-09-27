@@ -35,7 +35,10 @@ either is stated here in its own line.
   `solar replay`.
 - The weekly mutation run in twenty shards, each well inside the time a CI job may take,
   testing every mutant against the whole workspace, and `cargo xtask mutants`, which adds
-  the shards up into one report with the score and every survivor by file.
+  the shards up into one report with the score and every survivor by file. A run started
+  by hand can name the shards to run again, and every process of the job may take six GiB
+  of address space, so that a mutant that takes away a limit on memory fails its test
+  rather than bringing the runner down.
 
 ### Changed
 
