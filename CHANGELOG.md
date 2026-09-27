@@ -95,6 +95,9 @@ either is stated here in its own line.
   of each tab. `cargo xtask walkthrough` types every row of the table in
   `docs/TESTING_BY_HAND.md` into ZENITH and waits for what the row says, in CI on all
   three systems, and a test holds the rows and the steps together.
+- `AGENTS.md`, the one entry point for a person or a coding agent, which `CLAUDE.md`
+  imports; `CONTRIBUTING.md`; and `docs/ADDING_A_FEATURE.md`, the one path for adding a
+  command, a key, a view or a tab.
 
 ### Changed
 
