@@ -29,6 +29,22 @@ pub const EXIT_CHECKS: u32 = 40;
 /// How many of SOLAR's last lines of standard error a failure quotes.
 pub const LAST_WORDS: usize = 6;
 
+/// How long an exit waits for the rest of SOLAR's standard error before it is reported,
+/// when something other than SOLAR keeps that pipe open.
+pub const LAST_WORDS_GRACE: Duration = Duration::from_millis(500);
+
+/// An exit seen before SOLAR's standard error was read to its end, waiting for the rest of
+/// it: the last words are what says why SOLAR ended.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ExitSeen {
+    /// How it ended, in words.
+    pub how: String,
+    /// When it was seen.
+    pub at: Instant,
+    /// Until when the rest of standard error is waited for.
+    pub until: Instant,
+}
+
 /// Where the connection is.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Phase {
@@ -251,6 +267,10 @@ pub struct Link {
     pub failure: Option<Failure>,
     /// Whether SOLAR has closed its output.
     pub output_closed: bool,
+    /// Whether SOLAR's standard error has been read to its end.
+    pub stderr_closed: bool,
+    /// An exit that waits for the rest of standard error.
+    pub exit_seen: Option<ExitSeen>,
     /// When to ask next whether SOLAR has exited.
     pub next_exit_check: Option<Instant>,
     /// How many times it has been asked.
@@ -286,6 +306,8 @@ impl Link {
             last_round_trip: None,
             failure: None,
             output_closed: false,
+            stderr_closed: false,
+            exit_seen: None,
             next_exit_check: None,
             exit_checks: 0,
             handshake_deadline: None,

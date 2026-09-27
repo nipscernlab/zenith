@@ -140,6 +140,10 @@ fn session_disconnected(options: Options) -> Script {
             at: script.now,
         },
     });
+    script.feed(Incoming::Connection {
+        generation: 1,
+        event: ConnectionEvent::StderrClosed,
+    });
     script.feed(Incoming::Exited {
         generation: 1,
         how: "exited with code 101".to_owned(),

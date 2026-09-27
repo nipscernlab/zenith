@@ -114,5 +114,8 @@ either is stated here in its own line.
   of the line, and a longer name has a line of its own.
 - The documentation builds with warnings denied, as CI builds it: a link to the `pointer`
   module of `zenith-client` could also have meant the primitive type of that name.
+- When SOLAR exits, its last lines of standard error are in the card that says so: the
+  exit could be reported before the thread reading standard error had delivered them. It
+  is now reported once that pipe is read to its end, or half a second after the exit.
 
 [Unreleased]: https://github.com/nipscernlab/zenith/commits/main

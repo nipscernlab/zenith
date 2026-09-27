@@ -39,7 +39,7 @@ use crate::theme::{Depth, Theme, ThemeName};
 
 use apis::{ApisTab, ExampleResult, Form};
 use history::{CallRecord, History, Origin, Outcome, Summary};
-use link::{Failure, Link, Phase};
+use link::{ExitSeen, Failure, Link, Phase};
 use log::{LogEntry, LogTab};
 use session::{Band, Entry, Layout, Session, Tone};
 
@@ -430,6 +430,7 @@ impl App {
         }
         deadlines.extend(self.next_waiting_tick);
         deadlines.extend(self.link.next_exit_check);
+        deadlines.extend(self.link.exit_seen.as_ref().map(|seen| seen.until));
         if let Some(connected) = self.link.connected_at
             && self.link.connected()
         {
@@ -559,7 +560,12 @@ impl App {
                     .entries
                     .push(LogEntry::read(&text, cut, self.link.generation, wall));
             }
-            ConnectionEvent::StderrClosed => {}
+            ConnectionEvent::StderrClosed => {
+                self.link.stderr_closed = true;
+                if let Some(seen) = self.link.exit_seen.take() {
+                    self.report_exit(seen.how, seen.at);
+                }
+            }
             ConnectionEvent::OutputClosed { error, .. } => {
                 self.link.output_closed = true;
                 self.link.next_exit_check = Some(self.now);
@@ -580,11 +586,26 @@ impl App {
             return;
         }
         self.link.next_exit_check = None;
+        // The thread that reads SOLAR's standard error may not have delivered its last
+        // lines yet, and they are what says why SOLAR ended. The exit is reported once that
+        // pipe is read to its end, or after a moment if something else holds it open.
+        if !self.link.stderr_closed {
+            self.link.exit_seen = Some(ExitSeen {
+                how,
+                at: self.now,
+                until: self.now + link::LAST_WORDS_GRACE,
+            });
+            return;
+        }
+        self.report_exit(how, self.now);
+    }
+
+    fn report_exit(&mut self, how: String, at: Instant) {
         let after = match self.link.phase {
             Phase::Connected => self
                 .link
                 .connected_at
-                .map(|connected| self.now.saturating_duration_since(connected)),
+                .map(|connected| at.saturating_duration_since(connected)),
             _ => None,
         };
         let waiting = self.link.tracker.waiting().len();
@@ -616,6 +637,13 @@ impl App {
     }
 
     fn on_tick(&mut self) {
+        if let Some(seen) = self.link.exit_seen.take() {
+            if self.now >= seen.until {
+                self.report_exit(seen.how, seen.at);
+            } else {
+                self.link.exit_seen = Some(seen);
+            }
+        }
         if let Some(opening) = &mut self.opening
             && self.now >= opening.next_frame
         {

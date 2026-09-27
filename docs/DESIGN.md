@@ -455,6 +455,11 @@ At startup the sentence replaces the connecting line of the opening, and `r` rec
 the failure is a card in the transcript and the status bar turns to disconnected; the
 History and the Log keep everything.
 
+**An exit is reported once SOLAR's standard error has been read to its end**, because its
+last lines are what says why SOLAR ended, and the thread that reads them can be a moment
+behind the exit. When something else keeps that pipe open, the exit is reported half a
+second after it was seen, with the lines that had arrived.
+
 **`Ctrl+R` or `/reconnect` restarts SOLAR at any time**, finding the binary again and
 copying it again if it changed. That is how a new build of SOLAR is picked up without
 leaving ZENITH.

@@ -488,6 +488,10 @@ fn solar_dying_after_connecting_closes_what_was_waiting_and_ctrl_r_starts_again(
             .effects
             .contains(&Effect::CheckExit { generation: 1 })
     );
+    harness.feed(Incoming::Connection {
+        generation: 1,
+        event: ConnectionEvent::StderrClosed,
+    });
     harness.feed(Incoming::Exited {
         generation: 1,
         how: "exited with code 101".to_owned(),
@@ -512,6 +516,69 @@ fn solar_dying_after_connecting_closes_what_was_waiting_and_ctrl_r_starts_again(
         harness.effects.last(),
         Some(Effect::Start { generation: 2, .. })
     ));
+}
+
+/// SOLAR's output closes and its exit is seen, and its standard error is not read to its
+/// end yet.
+fn exit_before_the_last_words(harness: &mut Harness) {
+    harness.feed(Incoming::Connection {
+        generation: 1,
+        event: ConnectionEvent::OutputClosed {
+            error: None,
+            at: harness.now,
+        },
+    });
+    harness.feed(Incoming::Exited {
+        generation: 1,
+        how: "exited with code 3".to_owned(),
+    });
+}
+
+#[test]
+fn an_exit_seen_before_the_last_words_waits_for_them() {
+    // Found flaky on Linux in CI: the exit was reported before the thread that reads
+    // standard error had delivered the line that said why SOLAR ended.
+    let mut harness = Harness::connected();
+    exit_before_the_last_words(&mut harness);
+    assert!(harness.app.link.failure.is_none());
+    assert!(
+        harness
+            .app
+            .next_deadline()
+            .is_some_and(|deadline| deadline <= harness.now + link::LAST_WORDS_GRACE)
+    );
+    for event in [
+        ConnectionEvent::Stderr {
+            text: "solar: exiting with 3".to_owned(),
+            cut: 0,
+            at: harness.now,
+        },
+        ConnectionEvent::StderrClosed,
+    ] {
+        harness.feed(Incoming::Connection {
+            generation: 1,
+            event,
+        });
+    }
+    let failure = harness.app.link.failure.clone().unwrap();
+    assert!(failure.what().starts_with("SOLAR exited with code 3"));
+    assert!(
+        failure
+            .last_words()
+            .iter()
+            .any(|line| line.contains("exiting with 3"))
+    );
+    assert_eq!(harness.app.link.phase, Phase::Down);
+}
+
+#[test]
+fn an_exit_is_reported_after_a_moment_when_standard_error_stays_open() {
+    let mut harness = Harness::connected();
+    exit_before_the_last_words(&mut harness);
+    harness.later(link::LAST_WORDS_GRACE);
+    harness.feed(Incoming::Tick);
+    let failure = harness.app.link.failure.clone().unwrap();
+    assert!(failure.what().starts_with("SOLAR exited with code 3"));
 }
 
 #[test]
