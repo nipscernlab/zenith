@@ -14,6 +14,8 @@ pub mod glyphs;
 pub mod keys;
 pub mod limits;
 pub mod ring;
+pub mod runtime;
+pub mod terminal;
 pub mod theme;
 pub mod ui;
 

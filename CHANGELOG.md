@@ -52,5 +52,8 @@ either is stated here in its own line.
   status bar drawn as SOLAR's orbit, the four tabs, the completion menu, the help and the
   envelope viewer. 105 snapshots of every screen at 80 × 24 and 160 × 48 in each theme,
   and without colour in ASCII. Every control character from SOLAR is drawn as an escape.
+- The `zenith` binary: the loop that waits on one channel and wakes only for a deadline,
+  the terminal given back on a panic or a signal, SOLAR found, copied and started on a
+  thread of its own, and `--solar`, `--theme`, `--color`, `--ascii` and `--solar-log`.
 
 [Unreleased]: https://github.com/nipscernlab/zenith/commits/main
