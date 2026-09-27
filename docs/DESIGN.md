@@ -239,8 +239,13 @@ so an unknown keyword is never treated as a failure. Why the validator is not th
 [ADR 0007](adr/0007-zenith-has-its-own-schema-validator.md).
 
 **The history** of the command line holds the lines that were run, without consecutive
-repeats, and `↑` and `↓` walk it when the completion menu is closed. It is kept in
-memory only: nothing is written to disk in this version.
+repeats, and `↑` and `↓` walk it when the completion menu is closed. It survives between
+sessions ([ADR 0014](adr/0014-the-command-line-history-survives-between-sessions.md)): a
+session starts with the lines of the last one, and after every line it runs, the whole
+history is written to its file, section 12, on a thread of its own so that the line never
+waits for the disk. `/forget` empties it, here and in the file. `--no-history`, or
+`ZENITH_NO_HISTORY`, keeps it for the session only: nothing is read from the file or
+written to it.
 
 A line that does not start with `/` is not run. When its first word is an API name, the
 band says `Commands start with a slash. Did you mean /call solar.ping?`; otherwise it
@@ -485,6 +490,7 @@ says a session ends, and waits up to half a second for SOLAR to exit before kill
 | `/raw <line>` | Sends the line exactly as typed, unchecked: a broken envelope, a batch, a notification | the line |
 | `/reconnect` | Restarts SOLAR, as `Ctrl+R` | the handshake |
 | `/clear` | Empties the transcript | none |
+| `/forget` | Empties the command line history, here and in its file | none |
 | `/export [path]` | Writes the History to a file (section 12) | none |
 | `/report [path]` | Writes a bug report to a file (section 12) | `system.info` |
 
@@ -566,8 +572,47 @@ found by typing into ZENITH in Windows Terminal on the machine it was written on
 
 ## 12. The files ZENITH writes
 
-ZENITH writes a file only when asked, with `/export`, `/report` or `x`, into the current
-directory unless a path is given, under a name with the time in UTC:
+ZENITH writes one file without being asked, the command line history, and every other
+only when asked.
+
+### 12.1 The command line history
+
+The lines run on the command line, and nothing else: never a response, never a setting.
+
+| System | The file |
+| ------ | -------- |
+| Windows | `%APPDATA%\nipscern-zenith\command-history.ndjson` |
+| macOS | `~/Library/Application Support/nipscern-zenith/command-history.ndjson` |
+| Linux and the other Unix systems | `$XDG_DATA_HOME/nipscern-zenith/command-history.ndjson`, and `~/.local/share/nipscern-zenith/command-history.ndjson` when `XDG_DATA_HOME` is not set or not an absolute path |
+
+`ZENITH_DATA_DIR`, when it is set, is the directory the file goes in instead, on every
+system. When none of those variables is set, the history is kept for the session only,
+and ZENITH says so when it starts.
+
+The file is NDJSON. The first line names the format and its version,
+`{"format":"zenith-command-history","version":1}`; every line after it is one line of the
+history as a JSON string, the oldest first. It holds at most what the command line history
+holds, 500 lines and 256 KiB, section 13.
+
+It is written whole after every line that changes the history, to a temporary file in the
+same directory, `command-history.ndjson.<process id>.tmp`, which is flushed to the disk and
+then renamed over it. A crash therefore leaves either the old file or the new one, and at
+worst a temporary file beside it that nothing reads. On Linux and macOS it is readable by
+its owner only.
+
+Reading it never loses anything. A line that is not a JSON string is left out, and ZENITH
+says how many were. A file whose first line names another format, or a newer version, is
+neither read nor written, so that whatever wrote it keeps its lines; the session keeps a
+history of its own for as long as it runs, and ZENITH says so. A file that cannot be read
+is treated the same way.
+
+When two ZENITHs run at once, each writes its own history whole, so the file holds the
+lines of whichever wrote last.
+
+### 12.2 The History and the report
+
+The History and the report are written only when asked, with `/export`, `/report` or
+`x`, into the current directory unless a path is given, under a name with the time in UTC:
 `zenith-history-2026-09-27T15-47-00Z.ndjson`, `zenith-report-2026-09-27T15-47-00Z.ndjson`.
 It never overwrites a file that exists.
 
@@ -738,7 +783,7 @@ it, and in CI a skip is a failure.
 
 ## 17. What this version does not do
 
-No AI features, no program other than `solar` started, no file written unless asked, no
-configuration file, no persistent history, and no mouse, for now, which is
+No AI features, no program other than `solar` started, no file written unless asked but
+the command line history, no configuration file, and no mouse, for now, which is
 [ADR 0013](adr/0013-no-mouse-for-now.md). The others are either out of scope by
 instruction or an open question, and `docs/OPEN_QUESTIONS.md` says which.

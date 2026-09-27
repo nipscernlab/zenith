@@ -19,7 +19,7 @@ use serde_json::{Value, json};
 use zenith_client::connection::{Connection, Event as Happened, Settings, Sink};
 use zenith_client::locate::{Found, Origin, Placement, prepare};
 
-use crate::pty::{Session, percentile, release_binary, solar};
+use crate::pty::{Session, percentile, release_binary, scratch_data_dir, solar};
 
 /// The calls each level of the price of `trace` is measured over, after [`WARM_UP`].
 const CALLS: usize = 2_000;
@@ -35,6 +35,8 @@ struct Setup {
     zenith: PathBuf,
     solar: PathBuf,
     out: PathBuf,
+    /// Where ZENITH keeps its command line history during the measurements.
+    data: PathBuf,
 }
 
 impl Setup {
@@ -44,10 +46,14 @@ impl Setup {
         let timings = self.out.join(name);
         let timings_text = timings.display().to_string();
         let solar = self.solar.display().to_string();
+        let data = self.data.display().to_string();
         let session = Session::start(
             &self.zenith,
             &["--solar", solar.as_str()],
-            &[("ZENITH_TRACE_TIMINGS", timings_text.as_str())],
+            &[
+                ("ZENITH_TRACE_TIMINGS", timings_text.as_str()),
+                ("ZENITH_DATA_DIR", data.as_str()),
+            ],
             100,
             30,
         )?;
@@ -74,6 +80,7 @@ pub(crate) fn run(root: &Path, rest: &[&str]) -> Result<(), String> {
         zenith: release_binary(root)?,
         solar: solar()?,
         out: root.join("target").join("perf"),
+        data: scratch_data_dir("perf")?,
     };
     std::fs::create_dir_all(&setup.out).map_err(|error| error.to_string())?;
 

@@ -7,6 +7,7 @@
 pub mod app;
 pub mod brand;
 pub mod clock;
+pub mod command_history;
 pub mod commands;
 pub mod completion;
 pub mod editor;

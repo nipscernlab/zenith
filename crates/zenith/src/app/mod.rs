@@ -137,6 +137,21 @@ pub struct Options {
     pub opening: bool,
     /// Variables added to SOLAR's environment; the tests use it for the double.
     pub environment: Vec<(String, String)>,
+    /// The command line history of earlier sessions, and where this one keeps it.
+    pub history: KeptHistory,
+}
+
+/// The command line history of earlier sessions, as it was read at the start, and the file
+/// this session keeps it in.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct KeptHistory {
+    /// The file; `None` when the history is kept for this session only.
+    pub file: Option<PathBuf>,
+    /// The lines read from it, oldest first.
+    pub lines: Vec<String>,
+    /// What to tell the person about it at the start: lines that were left out, or why it
+    /// is kept for this session only.
+    pub note: Option<String>,
 }
 
 impl Default for Options {
@@ -149,6 +164,7 @@ impl Default for Options {
             solar_log: "trace".to_owned(),
             opening: true,
             environment: Vec::new(),
+            history: KeptHistory::default(),
         }
     }
 }
@@ -182,6 +198,8 @@ pub enum Written {
     History,
     /// A report, by `/report`.
     Report,
+    /// The command line history, after each line and by `/forget`.
+    CommandHistory,
 }
 
 /// Something that happened.
@@ -282,6 +300,13 @@ pub enum Effect {
     },
     /// Draw the whole screen again.
     Repaint,
+    /// Write the command line history, whole, to its file.
+    SaveHistory {
+        /// The file.
+        file: PathBuf,
+        /// Every line, oldest first.
+        lines: Vec<String>,
+    },
     /// Leave.
     Quit,
 }
@@ -333,6 +358,9 @@ pub struct App {
     pending: HashMap<u64, Pending>,
     effects: Vec<Effect>,
     next_waiting_tick: Option<Instant>,
+    /// Whether writing the command line history has failed in this session, which is said
+    /// once.
+    history_write_failed: bool,
 }
 
 impl App {
@@ -366,8 +394,15 @@ impl App {
             pending: HashMap::new(),
             effects: Vec::new(),
             next_waiting_tick: None,
+            history_write_failed: false,
             options,
         };
+        for line in &app.options.history.lines.clone() {
+            app.session.editor.remember(line);
+        }
+        if let Some(note) = app.options.history.note.clone() {
+            app.push_notice(Tone::Info, vec![note]);
+        }
         app.start_connection();
         let effects = std::mem::take(&mut app.effects);
         (app, effects)
@@ -1055,6 +1090,22 @@ impl App {
         let noun = match what {
             Written::History => "the History",
             Written::Report => "the report",
+            Written::CommandHistory => {
+                // Written after every line: only a failure is worth a word, and only the
+                // first one of the session.
+                if let Err(error) = result
+                    && !self.history_write_failed
+                {
+                    self.history_write_failed = true;
+                    let text = format!(
+                        "Could not keep the command line history: {error} It is kept for this \
+                        session, and ZENITH tries again after the next line."
+                    );
+                    self.flash = Some((Tone::Error, text.clone()));
+                    self.push_notice(Tone::Error, vec![text]);
+                }
+                return;
+            }
         };
         let (tone, text) = match result {
             Ok((path, calls)) => (
@@ -1502,16 +1553,45 @@ impl App {
                     underline: error.span,
                 });
             }
-            Ok(Some(command)) => match self.run(command, &line) {
-                Ok(()) => {
-                    self.session.editor.take();
-                    self.session.band = None;
-                    self.session.scroll = 0;
-                    self.session.unseen = 0;
-                    self.refresh_completion();
+            Ok(Some(command)) => {
+                let forgets = command == Command::Forget;
+                match self.run(command, &line) {
+                    Ok(()) => self.line_ran(forgets),
+                    Err(band) => self.session.band = Some(band),
                 }
-                Err(band) => self.session.band = Some(band),
-            },
+            }
+        }
+    }
+
+    /// The line on the command line ran: it goes into the history, which is written to its
+    /// file when it changed, unless the line was `/forget`, which leaves the history empty.
+    fn line_ran(&mut self, forgets: bool) {
+        let before = self.session.editor.history().next_number();
+        self.session.editor.take();
+        if forgets {
+            self.session.editor.forget_history();
+        }
+        if forgets || self.session.editor.history().next_number() != before {
+            self.save_history();
+        }
+        self.session.band = None;
+        self.session.scroll = 0;
+        self.session.unseen = 0;
+        self.refresh_completion();
+    }
+
+    /// Asks for the command line history to be written, whole, when this session keeps it
+    /// in a file.
+    fn save_history(&mut self) {
+        if let Some(file) = self.options.history.file.clone() {
+            let lines = self
+                .session
+                .editor
+                .history()
+                .iter()
+                .map(|(_, line)| line.clone())
+                .collect();
+            self.effects.push(Effect::SaveHistory { file, lines });
         }
     }
 
@@ -1590,6 +1670,24 @@ impl App {
                 self.session.transcript.clear();
                 self.session.scroll = 0;
                 self.session.unseen = 0;
+                Ok(())
+            }
+            Command::Forget => {
+                // The line itself is emptied after it runs, with the rest, in `line_ran`.
+                let held = self.session.editor.history().len();
+                let lines = if held == 1 { "line" } else { "lines" };
+                let text = match &self.options.history.file {
+                    Some(file) => format!(
+                        "Forgot the {held} {lines} of the command line history, here and in {}.",
+                        file.display()
+                    ),
+                    None => format!(
+                        "Forgot the {held} {lines} of the command line history. This session keeps \
+                        none of it on disk."
+                    ),
+                };
+                self.session.push(echo);
+                self.push_notice(Tone::Info, vec![text]);
                 Ok(())
             }
             Command::Export { path } => {

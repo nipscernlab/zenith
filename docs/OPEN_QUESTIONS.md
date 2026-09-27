@@ -83,14 +83,35 @@ A line that starts with an API name gets `Commands start with a slash. Did you m
 solar.ping?` rather than being run as a call. Running it would be a guess about what the
 person meant, and the guess would be wrong the first time an API is named like a word.
 
-### Nothing is written to disk unless asked
+### The theme is not remembered between sessions
 
-The command line history and the chosen theme are lost when ZENITH exits. Writing them
-would mean choosing a configuration directory on three systems and a format for it, and
-the brief asks for neither.
+The command line history is, by the architect's decision, ADR 0014. The theme chosen with
+`/theme` is lost when ZENITH exits, and `--theme` or `ZENITH_THEME` choose it at the start.
+Remembering it would make a configuration file, which nothing else needs yet.
 
-**Revisit when** testers ask for it; the natural places are the platform configuration
-directories, `%APPDATA%`, `~/Library/Application Support` and `$XDG_CONFIG_HOME`.
+### Where the command line history is kept, and what it is called
+
+ADR 0014 asks for the per-user data directory of each system and a documented format;
+the rest was decided without asking:
+
+- **The directory** is `nipscern-zenith` inside the system's own: a name that says whose it
+  is, since a system monitor also installs a program called `zenith`.
+- **The file** is `command-history.ndjson`, of the format `zenith-command-history`, version
+  1, specified in `docs/DESIGN.md`, section 12.1.
+- **`ZENITH_DATA_DIR`** puts it elsewhere, which is how the walkthrough and the
+  measurements keep what they type out of the history of whoever runs them.
+- **`--no-history`**, and **`ZENITH_NO_HISTORY`** for whoever always wants it, turn it off
+  at the start, like the other flags that have a variable.
+- **`/forget`** clears it. `/clear` already empties the transcript, and the word the History
+  tab uses, history, was taken.
+- **Two ZENITHs at once** each write their own history whole, so the file holds the lines of
+  whichever wrote last. Merging them would need a lock or a format that appends, for a case
+  that testing by hand rarely meets.
+- **A file ZENITH cannot read**, of another format, a newer version or refused by the
+  system, is left as it is, and the session keeps its history in memory only.
+
+**Revisit when** the theme, or anything else, needs to be remembered: the same directory
+would hold a configuration file.
 
 ### The time connected shows seconds only in the first minute
 

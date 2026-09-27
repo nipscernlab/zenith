@@ -9,6 +9,15 @@ either is stated here in its own line.
 
 ## [Unreleased]
 
+### Added
+
+- The command line history survives between sessions, as the architect decided, ADR 0014:
+  in `command-history.ndjson` under the per-user data directory of each system, or of
+  `ZENITH_DATA_DIR`, bounded like the history in memory, written whole after every line on
+  a thread of its own, through a temporary file renamed over it, and in a documented,
+  versioned format. `/forget` empties it, and `--no-history` or `ZENITH_NO_HISTORY` keep it
+  for the session only. A file ZENITH cannot read is left as it is.
+
 ### Changed
 
 - The seven decisions the architect confirmed on 27 September 2026 are records in

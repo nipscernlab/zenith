@@ -133,6 +133,8 @@ Type each line and press `Enter`. The right column is what should happen.
 | `?` on an empty line | Every key, by where it works. `Esc` closes it |
 | Make the window smaller than 80 × 24 | One sentence saying how large ZENITH needs the window to be. Make it larger and the screen comes back |
 | `Ctrl+C`, then `Ctrl+C` again | The first says `Press Ctrl+C again to quit`; the second quits, and the terminal works normally afterwards |
+| Start ZENITH again, and press `↑` | The last line you ran before quitting is back on the command line: ZENITH keeps what you type there between sessions, in the file section 7 names |
+| `/forget` | `Forgot the` number of lines `of the command line history, here and in` that file; `↑` then brings nothing back |
 
 **Mac only.** In macOS Terminal, Option does not act as Alt, and nothing in ZENITH needs
 it. `Home`, `End`, `PgUp` and `PgDn` scroll Terminal itself; `g`, `G`, `Ctrl+B` and
@@ -178,3 +180,19 @@ building SOLAR again never fails because ZENITH is open; `Ctrl+R` picks up the n
 
 Another program called `zenith`, a system monitor, exists. If `zenith --version` does not
 start with `ZENITH`, it is the other one, earlier on the `PATH`.
+
+## 7. What ZENITH keeps between sessions
+
+ZENITH keeps the lines you run on the command line, and nothing else: never a response,
+never a setting. They are in one file, which it writes again after every line:
+
+| System | The file |
+| ------ | -------- |
+| Windows | `%APPDATA%\nipscern-zenith\command-history.ndjson` |
+| Mac | `~/Library/Application Support/nipscern-zenith/command-history.ndjson` |
+| Linux | `~/.local/share/nipscern-zenith/command-history.ndjson`, or under `$XDG_DATA_HOME` when it is set |
+
+`/forget` empties it. To keep nothing on disk for one session, start ZENITH with
+`--no-history`, or set `ZENITH_NO_HISTORY=1`; to keep it somewhere else, set
+`ZENITH_DATA_DIR` to a directory. If you send a report about the history, say which of
+these you used.
