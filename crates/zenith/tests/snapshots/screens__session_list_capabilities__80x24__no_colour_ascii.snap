@@ -1,0 +1,72 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: screen(&buffer)
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                .     .     ? keys
+                                the process
+
+   capabilities, as the manifest declares them
+     batch
+       accepted      true
+       max_elements  64
+       ordered       true
+     cancellation
+       accepted  true
+       method    solar.cancel
+     limits
+       default_max_output_bytes  8388608
+       max_abandoned_workers     64
+       max_queued_bytes          67108864
+       max_queued_requests       256
+       max_request_bytes         16777216
+       remembered_request_ids    1024
+     notifications
+       accepted  false
++------------------------------------------------------------------------------+
+| > Type / for the commands, or ? for every key.                               |
++------------------------------------------------------------------------------+
+ --*-- SOLAR 0.1.0 - solar/1 --- last call 0.90 ms --- in orbit 2s ------------
+--- every cell not listed is - on -
+ 0:  0-7   - on - bold
+ 0: 10-18  - on - bold underlined
+ 0: 45-72  - on - dim
+ 0: 73-73  - on - bold
+ 4:  5-9   - on - bold
+ 5:  7-18  - on - bold
+ 5: 21-24  - on - bold
+ 6:  7-18  - on - bold
+ 6: 21-22  - on - bold
+ 7:  7-18  - on - bold
+ 7: 21-24  - on - bold
+ 8:  5-16  - on - bold
+ 9:  7-14  - on - bold
+ 9: 17-20  - on - bold
+10:  7-14  - on - bold
+11:  5-10  - on - bold
+12:  7-30  - on - bold
+12: 33-39  - on - bold
+13:  7-30  - on - bold
+13: 33-34  - on - bold
+14:  7-30  - on - bold
+14: 33-40  - on - bold
+15:  7-30  - on - bold
+15: 33-35  - on - bold
+16:  7-30  - on - bold
+16: 33-40  - on - bold
+17:  7-30  - on - bold
+17: 33-36  - on - bold
+18:  5-17  - on - bold
+19:  7-14  - on - bold
+19: 17-21  - on - bold
+20:  0-79  - on - dim
+21:  0-0   - on - dim
+21:  1-3   - on - bold
+21: 79-79  - on - dim
+22:  0-79  - on - dim
+23:  0-2   - on - dim
+23:  3-3   - on - bold
+23:  4-6   - on - dim
+23:  7-17  - on - bold
+23: 28-32  - on - dim
+23: 50-54  - on - dim
+23: 66-79  - on - dim

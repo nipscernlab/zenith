@@ -13,6 +13,10 @@ use super::*;
 const MANIFEST: &str =
     include_str!("../../../zenith-client/tests/fixtures/solar-0.1.0-manifest.json");
 
+/// The manifest of a SOLAR that declares its capabilities and has `solar.set_log_level`.
+const MANIFEST_0_3_0: &str =
+    include_str!("../../../zenith-client/tests/fixtures/solar-0.3.0-manifest.json");
+
 /// 27 September 2026, 15:47:00 UTC.
 const SECONDS_SINCE_THE_EPOCH: u64 = 1_790_524_020;
 
@@ -89,6 +93,20 @@ impl Harness {
         );
         let manifest: Value = serde_json::from_str(MANIFEST).unwrap();
         harness.answer(2, &success(2, "solar.manifest", &manifest));
+        assert_eq!(harness.app.link.phase, Phase::Connected);
+        harness.effects.clear();
+        harness
+    }
+
+    /// A ZENITH connected to a SOLAR whose manifest is `manifest`.
+    fn connected_to(manifest: &Value) -> Self {
+        let mut harness = Self::new();
+        harness.start();
+        harness.answer(
+            1,
+            &success(1, "solar.version", &version_data("solar/1", "2.1.0")),
+        );
+        harness.answer(2, &success(2, "solar.manifest", manifest));
         assert_eq!(harness.app.link.phase, Phase::Connected);
         harness.effects.clear();
         harness
@@ -518,7 +536,10 @@ fn ctrl_c_on_a_call_in_flight_sends_solar_cancel_when_the_manifest_has_it() {
         "params_schema": {"type": "object", "properties": {"id": {}}, "required": ["id"]}
     }));
     harness.answer(2, &success(2, "solar.manifest", &manifest));
-    assert!(harness.app.link.capabilities.cancel);
+    assert_eq!(
+        harness.app.link.capabilities.cancel.as_deref(),
+        Some("solar.cancel")
+    );
     harness.effects.clear();
     harness.run("/call system.info");
     let slow = harness.written()[0]["id"].as_u64().unwrap();
@@ -1250,5 +1271,249 @@ fn a_history_that_cannot_be_written_is_said_once() {
             .count(),
         1,
         "a write that works says nothing"
+    );
+}
+
+fn manifest_0_3_0() -> Value {
+    serde_json::from_str(MANIFEST_0_3_0).unwrap()
+}
+
+#[test]
+fn a_solar_that_declares_its_capabilities_is_said_to_on_connecting() {
+    let harness = Harness::connected_to(&manifest_0_3_0());
+    let notices = harness.notices();
+    assert!(
+        notices[0].contains(
+            "Ctrl+C cancels a call in flight. It answers batches of up to 64 requests. The \
+             Log tab sets its log level. Type / for the commands"
+        ),
+        "{notices:?}"
+    );
+    let mut refusing = manifest_0_3_0();
+    refusing["capabilities"]["batch"] = json!({"accepted": false});
+    refusing["capabilities"]["cancellation"] = json!({"accepted": false, "method": null});
+    let harness = Harness::connected_to(&refusing);
+    assert!(
+        harness.notices()[0].contains("Its manifest says it cancels nothing. It refuses batches."),
+        "{:?}",
+        harness.notices()
+    );
+    // A SOLAR that declares nothing is described as before.
+    let harness = Harness::connected();
+    assert!(
+        harness.notices()[0].contains("This SOLAR has no solar.cancel. Type / for the commands"),
+        "{:?}",
+        harness.notices()
+    );
+}
+
+#[test]
+fn ctrl_c_asks_the_api_the_manifest_declares_for_cancelling() {
+    let mut manifest = manifest_0_3_0();
+    manifest["capabilities"]["cancellation"] = json!({"accepted": true, "method": "solar.stop"});
+    let mut harness = Harness::connected_to(&manifest);
+    harness.run("/call system.info");
+    let slow = harness.written()[0]["id"].as_u64().unwrap();
+    harness.effects.clear();
+    harness.key(KeyCode::Char('c'), KeyModifiers::CONTROL);
+    let written = harness.written();
+    assert_eq!(written.len(), 1);
+    assert_eq!(written[0]["method"], json!("solar.stop"));
+    assert_eq!(written[0]["params"], json!({"id": slow}));
+    // A manifest that says nothing is cancelled: nothing is sent, and the flash says why.
+    manifest["capabilities"]["cancellation"] = json!({"accepted": false, "method": null});
+    let mut harness = Harness::connected_to(&manifest);
+    harness.run("/call system.info");
+    harness.effects.clear();
+    harness.key(KeyCode::Char('c'), KeyModifiers::CONTROL);
+    assert!(harness.written().is_empty());
+    let (_, flash) = harness.app.flash.clone().unwrap();
+    assert!(
+        flash.starts_with("This SOLAR's manifest says it cancels nothing, so call"),
+        "{flash}"
+    );
+}
+
+#[test]
+fn a_request_longer_than_solar_reads_is_not_sent_but_a_raw_line_is() {
+    let mut manifest = manifest_0_3_0();
+    manifest["capabilities"]["limits"]["max_request_bytes"] = json!(100);
+    let mut harness = Harness::connected_to(&manifest);
+    let long = "x".repeat(120);
+    harness.run(&format!(r#"/call solar.ping {{"message": "{long}"}}"#));
+    assert!(harness.written().is_empty(), "{:?}", harness.written());
+    let said = harness
+        .band()
+        .map(|band| band.lines.join(" "))
+        .or_else(|| harness.app.flash.clone().map(|(_, text)| text));
+    let said = said.unwrap_or_default();
+    assert!(
+        said.contains("reads lines of at most 100, so nothing was sent"),
+        "{said}"
+    );
+    // A short one goes, and /raw is never held back for its length. The refused line
+    // stays on the command line to be mended, so it is cleared first.
+    harness.key(KeyCode::Char('u'), KeyModifiers::CONTROL);
+    harness.run(r#"/call solar.ping {"message": "short"}"#);
+    assert_eq!(harness.written().len(), 1);
+    harness.effects.clear();
+    harness.run(&format!(
+        r#"/raw {{"jsonrpc":"2.0","id":"r","method":"solar.ping","params":{{"message":"{long}"}}}}"#
+    ));
+    assert_eq!(harness.written().len(), 1);
+}
+
+#[test]
+fn the_level_keys_of_the_log_tab_set_solars_own_level_when_it_can() {
+    let mut harness = Harness::connected_to(&manifest_0_3_0());
+    assert!(harness.app.log.can_set);
+    assert_eq!(
+        harness.app.log.solar_said().as_deref(),
+        Some("SOLAR logs at trace")
+    );
+    go_to_tab(&mut harness, Tab::Log);
+    harness.key(KeyCode::Char('w'), KeyModifiers::NONE);
+    let written = harness.written();
+    assert_eq!(written.len(), 1);
+    assert_eq!(written[0]["method"], json!("solar.set_log_level"));
+    assert_eq!(written[0]["params"], json!({"level": "warn"}));
+    assert_eq!(harness.app.log.minimum, LevelKey::Warn);
+    assert_eq!(
+        harness.app.log.solar_said().as_deref(),
+        Some("asking SOLAR for warn")
+    );
+    let id = written[0]["id"].as_u64().unwrap();
+    harness.answer(
+        id,
+        &success(
+            id,
+            "solar.set_log_level",
+            &json!({"previous": "trace", "current": "warn", "changed": true}),
+        ),
+    );
+    assert_eq!(harness.app.log.solar_level, "warn");
+    assert_eq!(
+        harness.app.log.solar_said().as_deref(),
+        Some("SOLAR logs at warn")
+    );
+    // The call is in the History, and not in the transcript.
+    assert!(
+        harness
+            .app
+            .history
+            .calls
+            .iter()
+            .any(|(_, record)| record.origin == Origin::LogLevel)
+    );
+    // A refusal keeps the level SOLAR had, and says why.
+    harness.effects.clear();
+    harness.key(KeyCode::Right, KeyModifiers::NONE);
+    let id = harness.written()[0]["id"].as_u64().unwrap();
+    assert_eq!(harness.written()[0]["params"], json!({"level": "info"}));
+    harness.answer(
+        id,
+        &failure(
+            id,
+            "solar.set_log_level",
+            "INVALID_ARGUMENT",
+            -32602,
+            "INVALID_VALUE",
+            "The level is not one of the six.",
+        ),
+    );
+    assert_eq!(harness.app.log.solar_level, "warn");
+    assert_eq!(
+        harness.app.log.solar_said().as_deref(),
+        Some("SOLAR kept its level: The level is not one of the six.")
+    );
+    // A restart starts SOLAR at the level it logs at now.
+    harness.effects.clear();
+    harness.key(KeyCode::Char('r'), KeyModifiers::CONTROL);
+    let start = harness.effects.iter().find_map(|effect| match effect {
+        Effect::Start { settings, .. } => Some(settings.log_level.clone()),
+        _ => None,
+    });
+    assert_eq!(start.as_deref(), Some("warn"));
+}
+
+#[test]
+fn the_level_keys_only_filter_for_a_solar_that_cannot_set_its_level() {
+    let mut harness = Harness::connected();
+    assert!(!harness.app.log.can_set);
+    go_to_tab(&mut harness, Tab::Log);
+    harness.key(KeyCode::Char('d'), KeyModifiers::NONE);
+    assert!(harness.written().is_empty());
+    assert_eq!(harness.app.log.minimum, LevelKey::Debug);
+    assert_eq!(harness.app.log.solar_said(), None);
+}
+
+#[test]
+fn a_level_asked_for_when_the_connection_ends_is_forgotten() {
+    let mut harness = Harness::connected_to(&manifest_0_3_0());
+    go_to_tab(&mut harness, Tab::Log);
+    harness.key(KeyCode::Char('e'), KeyModifiers::NONE);
+    assert_eq!(harness.app.log.setting, Some(LevelKey::Error));
+    let generation = harness.app.link.generation;
+    harness.feed(Incoming::Connection {
+        generation,
+        event: ConnectionEvent::OutputClosed {
+            error: None,
+            at: harness.now,
+        },
+    });
+    harness.feed(Incoming::Connection {
+        generation,
+        event: ConnectionEvent::StderrClosed,
+    });
+    harness.feed(Incoming::Exited {
+        generation,
+        how: "exited with code 101".to_owned(),
+    });
+    assert_eq!(harness.app.link.phase, Phase::Down);
+    assert_eq!(harness.app.log.setting, None);
+}
+
+#[test]
+fn a_written_recording_says_where_it_is_and_what_it_left_out() {
+    let mut harness = Harness::connected();
+    harness.feed(Incoming::Wrote {
+        what: Written::Recording(Recorded {
+            calls: 4,
+            ..Recorded::default()
+        }),
+        result: Ok((PathBuf::from("rec.ndjson"), 4)),
+    });
+    let notice = harness.notices().last().cloned().unwrap();
+    assert_eq!(
+        notice,
+        "Wrote the recording of this connection, 4 calls, to rec.ndjson, in SOLAR's \
+         recording format 1.0.0; solar replay sends its requests again."
+    );
+    harness.feed(Incoming::Wrote {
+        what: Written::Recording(Recorded {
+            calls: 1,
+            earlier: 3,
+            too_long: 1,
+            dropped: 2,
+        }),
+        result: Ok((PathBuf::from("rec.ndjson"), 1)),
+    });
+    let notice = harness.notices().last().cloned().unwrap();
+    assert!(
+        notice.ends_with(
+            "1 call, to rec.ndjson, in SOLAR's recording format 1.0.0; solar replay sends its \
+             requests again. It leaves out 3 calls of earlier connections, each a session of \
+             its own, and 1 call whose answer was too long to keep. The History had already \
+             dropped 2 calls."
+        ),
+        "{notice}"
+    );
+    harness.feed(Incoming::Wrote {
+        what: Written::Recording(Recorded::default()),
+        result: Err("rec.ndjson: it exists".to_owned()),
+    });
+    assert_eq!(
+        harness.app.flash.clone().map(|(_, text)| text).as_deref(),
+        Some("Could not write the recording: rec.ndjson: it exists")
     );
 }

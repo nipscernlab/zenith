@@ -126,7 +126,7 @@ Type each line and press `Enter`. The right column is what should happen.
 | `Ctrl+O` | The whole envelope of the last call, exactly as it crossed the pipe. `Esc` closes it |
 | `Tab` | The APIs tab. `↓` and `↑` move through the APIs; `1` runs the first example of the one selected, `2` the second, and each says `matches the example` |
 | `Enter` on an API | A form with a field for each parameter. `Esc` closes it |
-| `Tab` again | The Log tab. `t` shows everything SOLAR wrote, `i` less |
+| `Tab` again | The Log tab. `t` shows everything SOLAR writes, `i` less. A SOLAR that has `solar.set_log_level` also logs at the level chosen, and the header says `SOLAR logs at info` |
 | `Tab` again | The History tab: every call with its timing. `Enter` shows one whole |
 | `/raw [{"jsonrpc":"2.0","id":"a","method":"solar.ping"}]` | A batch. A SOLAR that has batches answers with one card per element; one that has not answers `UNIMPLEMENTED` |
 | `/call solar.cancel {"id": 1}` | Only on a SOLAR that has `solar.cancel`: an answer saying what happened to call 1, `already_finished` |
@@ -136,6 +136,7 @@ Type each line and press `Enter`. The right column is what should happen.
 | Make the window smaller than 80 × 24 | One sentence saying how large ZENITH needs the window to be. Make it larger and the screen comes back |
 | `Ctrl+C`, then `Ctrl+C` again | The first says `Press Ctrl+C again to quit`; the second quits, and the terminal works normally afterwards |
 | Start ZENITH again, and press `↑` | The last line you ran before quitting is back on the command line: ZENITH keeps what you type there between sessions, in the file section 7 names |
+| `/export` | `Wrote the recording of this connection`, and the file it names, in SOLAR's recording format. In another terminal, `solar replay` on that file sends its requests again and ends `0 answers differ` |
 | `/forget` | `Forgot the` number of lines `of the command line history, here and in` that file; `↑` then brings nothing back |
 
 **Mac only.** In macOS Terminal, Option does not act as Alt, and nothing in ZENITH needs

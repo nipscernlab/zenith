@@ -116,7 +116,7 @@ pub const COMMANDS: &[Spec] = &[
     Spec {
         name: "export",
         usage: "/export [path]",
-        summary: "write the History to a file",
+        summary: "write this connection as a recording for solar replay",
         argument: Argument::OptionalRest,
     },
     Spec {

@@ -371,7 +371,10 @@ fn a_response_too_long_to_keep_is_dropped_and_still_matched_by_its_id() {
 fn a_cancellation_is_answered_before_the_call_it_cancels() {
     let mut session = Session::start(double(), &[("ZENITH_DOUBLE", "cancel")]);
     let catalogue = session.handshake();
-    assert!(catalogue.capabilities().cancel);
+    assert_eq!(
+        catalogue.capabilities().cancel.as_deref(),
+        Some("solar.cancel")
+    );
     let slow = session.call("double.slow", &json!({"ms": 2000}));
     std::thread::sleep(Duration::from_millis(100));
     let cancel = session.call("solar.cancel", &json!({"id": slow}));

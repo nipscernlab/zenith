@@ -65,6 +65,13 @@ pub enum Refused {
         /// The id.
         id: String,
     },
+    /// The request line is longer than SOLAR reads, as its manifest declares.
+    TooLong {
+        /// The length of the line, in bytes, without its newline.
+        bytes: usize,
+        /// The most SOLAR reads.
+        limit: usize,
+    },
 }
 
 impl std::fmt::Display for Refused {
@@ -79,6 +86,11 @@ impl std::fmt::Display for Refused {
                 "A call with the id {id} is already waiting, and neither SOLAR nor ZENITH \
                  could tell the two answers apart."
             ),
+            Self::TooLong { bytes, limit } => write!(
+                formatter,
+                "The request is {bytes} bytes, and SOLAR's manifest says it reads lines of at \
+                 most {limit}, so nothing was sent."
+            ),
         }
     }
 }
@@ -91,6 +103,7 @@ pub struct Tracker {
     next: u64,
     waiting: VecDeque<Waiting>,
     limit: usize,
+    longest: Option<usize>,
 }
 
 impl Tracker {
@@ -101,7 +114,15 @@ impl Tracker {
             next: 1,
             waiting: VecDeque::new(),
             limit,
+            longest: None,
         }
+    }
+
+    /// Refuses, from now on, a call ZENITH builds whose line is longer than `longest`
+    /// bytes, or refuses none with `None`. A line sent by hand is never refused for its
+    /// length: SOLAR's own answer to it is the point of sending it.
+    pub fn refuse_lines_longer_than(&mut self, longest: Option<usize>) {
+        self.longest = longest;
     }
 
     /// Numbers a call ZENITH builds, records it as waiting, and returns its number and
@@ -109,7 +130,9 @@ impl Tracker {
     ///
     /// # Errors
     ///
-    /// [`Refused::Full`] when the limit of waiting calls is reached.
+    /// [`Refused::Full`] when the limit of waiting calls is reached, and
+    /// [`Refused::TooLong`] when the line is longer than the one set with
+    /// [`Tracker::refuse_lines_longer_than`]. A refused call takes no number.
     pub fn call(
         &mut self,
         method: &str,
@@ -117,14 +140,25 @@ impl Tracker {
         sent: Instant,
     ) -> Result<(u64, String), Refused> {
         self.check_room()?;
+        let next = self.next;
         let id = self.next_free_number();
+        let line = request_line(id, method, params);
+        if let Some(limit) = self.longest
+            && line.len() > limit
+        {
+            self.next = next;
+            return Err(Refused::TooLong {
+                bytes: line.len(),
+                limit,
+            });
+        }
         self.waiting.push_back(Waiting {
             call: id,
             method: Some(method.to_owned()),
             expected: Expected::Id(Id::Number(id.into())),
             sent,
         });
-        Ok((id, request_line(id, method, params)))
+        Ok((id, line))
     }
 
     /// Records a line sent by hand, exactly as typed, and returns its number.
@@ -374,6 +408,51 @@ mod tests {
             .call("solar.ping", &json!({}), Instant::now())
             .unwrap();
         assert_ne!(id, 1);
+    }
+
+    #[test]
+    fn a_call_longer_than_solar_reads_is_refused_and_takes_no_number() {
+        let mut tracker = Tracker::new(8);
+        let now = Instant::now();
+        let (first, line) = tracker.call("solar.ping", &json!({}), now).unwrap();
+        let limit = line.len() + 16;
+        tracker.refuse_lines_longer_than(Some(limit));
+        let refused = tracker
+            .call(
+                "solar.ping",
+                &json!({"message": "far too long, surely"}),
+                now,
+            )
+            .unwrap_err();
+        let Refused::TooLong { bytes, limit: said } = refused.clone() else {
+            panic!("{refused:?}");
+        };
+        assert_eq!(said, limit);
+        assert!(bytes > limit);
+        assert!(refused.to_string().contains(&format!("at most {limit}")));
+        assert_eq!(tracker.waiting().len(), 1);
+        // A line exactly as long as the limit is sent, and it takes the next number.
+        let (second, exact) = tracker
+            .call("solar.ping", &json!({"message": "abcd"}), now)
+            .unwrap();
+        assert_eq!(exact.len(), limit);
+        assert_eq!(second, first + 1);
+        // A line sent by hand is never refused for its length.
+        let long = format!(
+            r#"{{"jsonrpc":"2.0","id":"h","method":"{}"}}"#,
+            "x".repeat(64)
+        );
+        assert!(tracker.raw(&long, now).is_ok());
+        tracker.refuse_lines_longer_than(None);
+        assert!(
+            tracker
+                .call(
+                    "solar.ping",
+                    &json!({"message": "far too long, surely"}),
+                    now
+                )
+                .is_ok()
+        );
     }
 
     #[test]

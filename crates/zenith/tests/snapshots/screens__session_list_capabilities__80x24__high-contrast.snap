@@ -1,0 +1,62 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, width, height))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·     ? keys
+                                the process
+
+   capabilities, as the manifest declares them
+     batch
+       accepted      true
+       max_elements  64
+       ordered       true
+     cancellation
+       accepted  true
+       method    solar.cancel
+     limits
+       default_max_output_bytes  8388608
+       max_abandoned_workers     64
+       max_queued_bytes          67108864
+       max_queued_requests       256
+       max_request_bytes         16777216
+       remembered_request_ids    1024
+     notifications
+       accepted  false
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ › Type / for the commands, or ? for every key.                               │
+└──────────────────────────────────────────────────────────────────────────────┘
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 0.90 ms ─── in orbit 2s ────────────
+--- every cell not listed is #F5F1E8 on #0B0C14
+ 0:  0-7   #FFC23D on #0B0C14 bold
+ 0: 10-18  #FFC23D on #0B0C14 bold underlined
+ 0: 73-73  #FFC23D on #0B0C14 bold
+ 4:  5-9   #FFC23D on #0B0C14
+ 5:  7-18  #FFC23D on #0B0C14
+ 5: 21-24  #F5F1E8 on #0B0C14 bold
+ 6:  7-18  #FFC23D on #0B0C14
+ 6: 21-22  #F5F1E8 on #0B0C14 bold
+ 7:  7-18  #FFC23D on #0B0C14
+ 7: 21-24  #F5F1E8 on #0B0C14 bold
+ 8:  5-16  #FFC23D on #0B0C14
+ 9:  7-14  #FFC23D on #0B0C14
+ 9: 17-20  #F5F1E8 on #0B0C14 bold
+10:  7-14  #FFC23D on #0B0C14
+11:  5-10  #FFC23D on #0B0C14
+12:  7-30  #FFC23D on #0B0C14
+12: 33-39  #F5F1E8 on #0B0C14 bold
+13:  7-30  #FFC23D on #0B0C14
+13: 33-34  #F5F1E8 on #0B0C14 bold
+14:  7-30  #FFC23D on #0B0C14
+14: 33-40  #F5F1E8 on #0B0C14 bold
+15:  7-30  #FFC23D on #0B0C14
+15: 33-35  #F5F1E8 on #0B0C14 bold
+16:  7-30  #FFC23D on #0B0C14
+16: 33-40  #F5F1E8 on #0B0C14 bold
+17:  7-30  #FFC23D on #0B0C14
+17: 33-36  #F5F1E8 on #0B0C14 bold
+18:  5-17  #FFC23D on #0B0C14
+19:  7-14  #FFC23D on #0B0C14
+19: 17-21  #F5F1E8 on #0B0C14 bold
+21:  1-3   #FFC23D on #0B0C14
+23:  3-3   #FFC23D on #0B0C14
+23:  7-17  #FFC23D on #0B0C14 bold

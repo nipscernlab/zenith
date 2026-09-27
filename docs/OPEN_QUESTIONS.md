@@ -12,54 +12,33 @@ find. Those are not ZENITH's to decide.
 
 ## What ZENITH needed from SOLAR and did not find
 
-### The manifest does not say whether batches are accepted
+### The exit codes of `solar replay` are not in the contract
 
-SOLAR's contract adds batches to `solar/1` in section 3.2 and limits them to 64
-elements. The manifest says neither: there is no member that tells a client this build
-answers batches, nor what its limit is, and the protocol stayed `solar/1` when they
-arrived. SOLAR 0.1.0 answers a batch with `UNIMPLEMENTED` / `BATCH_NOT_SUPPORTED`, and
-SOLAR 0.2.0 with an array, which `cargo xtask walkthrough` saw on 27 September 2026,
-both under the same protocol name.
+Section 14 of SOLAR's contract gives the exit codes of `solar call` and `solar serve`,
+and none for `solar replay`. On 27 September 2026, with SOLAR 0.3.0 on this machine, it
+exited 0 when every answer was the same, 5 when one differed or had no recorded answer,
+and 2 when the file declared a major version of the format it does not read.
 
-**Chosen.** ZENITH sends no batches of its own. Finding out by sending a probe batch
-would be working around a missing declaration, which ADR 0001 rules out. A person can
-still send one by hand with `/raw [...]`, and ZENITH shows the answer as one card per
-element, which is how batches are tested by hand.
+**Chosen.** The test that proves `solar replay` accepts what `/export` writes, and the
+walkthrough's row for `/export`, take exit 0 as every answer being the same, which is
+what was seen.
 
-**What would close it.** A member of the manifest, at its root, that declares the batch
-support and its limit, for example `"batch": {"max_elements": 64}`, with a minor bump of
-`schema_version`. ZENITH would then run the examples of an API as one batch with `a`,
-which is the use it has for them.
+**What would close it.** The exit codes of `solar replay` in section 14 of the contract.
 
-### The log level cannot be changed while SOLAR runs
+### `solar replay` reports a batch's answer as different when only its times differ
 
-SOLAR reads `SOLAR_LOG` once, when it starts. The Log tab must show standard error "at a
-level chosen in the interface", and there is no API to tell SOLAR a new level.
+Section 12 of SOLAR's contract says replay ignores the members of `meta` that differ
+between any two runs and every timestamp anywhere in a response. On 27 September 2026,
+SOLAR 0.3.0, built at `341484d90c78` with uncommitted changes, replayed a recording it had
+written itself, with one batch in it, and reported the batch's answer as different: the
+only differences were `received_at`, `started_at` and `duration_us` inside the array. The
+same members outside a batch were ignored.
 
-**Chosen.** ZENITH starts SOLAR at `trace` and filters in the interface, so choosing a
-level is instant and never restarts SOLAR. `--solar-log <level>` starts it lower, for
-whoever wants SOLAR to do less work; the tab then says what SOLAR was started with.
+**Chosen.** Nothing in ZENITH works around it. The test of the replay records no batch,
+so that it tests ZENITH's recording and not this.
 
-**The cost.** At `trace`, SOLAR writes every line it reads and every line it writes to
-standard error, so the pipe carries each message twice. The cost per call is measured in
-`STATUS.md`.
-
-**What would close it.** An API such as `solar.set_log_level`, or a documented statement
-that the level is fixed for the life of a session.
-
-### The recording format of `solar serve --record` is not documented
-
-The History must be exportable as a recording `solar replay` accepts "if SOLAR's
-recording format is documented". SOLAR's README says a recording is NDJSON with every
-line in, every line out and the time each crossed, and nothing more: no member names, no
-version, no promise that the format will not change.
-
-**Chosen.** ZENITH exports in a format of its own, specified in `docs/DESIGN.md`,
-section 12. Writing SOLAR's format from what a recording looks like on this machine would
-be inventing a fact about SOLAR from an observation.
-
-**What would close it.** A section of SOLAR's contract, or a document beside it, that
-specifies the recording, with a version. The exporter is one function.
+**What would close it.** Replay ignoring those members inside the answer to a batch too,
+or the contract saying that it does not.
 
 ## Naming
 
@@ -146,6 +125,20 @@ When no call is in flight and the line has text, the first `Ctrl+C` clears it an
 the second, which quits. That is what shells and Claude Code do, and it makes `Ctrl+C`
 never quit on the first press.
 
+### The Log tab's keys set SOLAR's own level
+
+The brief asks the Log tab to change SOLAR's level at run time, and a SOLAR with
+`solar.set_log_level` can. There is one level, not two: the level chosen in the tab is the
+level SOLAR logs at, so choosing `info` stops SOLAR writing what is below it, and choosing
+`trace` afterwards shows only what comes from then on. A restart starts the next SOLAR at
+the level the last one logged at, rather than at `--solar-log`.
+
+**Rules out.** Keeping SOLAR at `trace` while the tab shows less, which was what ZENITH
+did before SOLAR could change its level, and what it still does for a SOLAR that cannot.
+
+**Revisit when** someone wants to read what SOLAR wrote below the level they chose: the
+filter and SOLAR's level would then be two settings.
+
 ## Validation
 
 ### A keyword ZENITH does not check never fails a call
@@ -182,6 +175,29 @@ member: ZENITH would then require it from the version that brought it.
 Sixty-four bits make an accidental collision a matter of one in eighteen quintillion,
 and the name stays short enough to read in a path. The copy lives under `%TEMP%`, which
 the system cleans on its own schedule.
+
+### `/export` writes the current connection, in SOLAR's recording format
+
+SOLAR's recording format is one file per session, and each connection is a session of its
+own, with ids that start from one again. So `/export` writes the calls of the current
+connection only, and says how many of earlier connections it left out. A request that was
+never answered is written without its answer, which is what happened; a call whose answer
+was too long for ZENITH to keep is left out whole, and counted, because its answer cannot
+be written as it crossed. The header names the writer `ZENITH <version>`, as
+`docs/RECORDING.md` asks of a writer that is not SOLAR. ZENITH's own history format of
+0.1.0, `zenith-history`, is gone: the report keeps ZENITH's own format, which holds more
+than a recording can.
+
+**Revisit when** one file per connection, for every connection of a session, is wanted.
+
+### A request longer than SOLAR declares is not sent, unless it is sent by hand
+
+When the manifest declares `limits.max_request_bytes`, a call ZENITH builds whose line is
+longer is refused before it is sent, and the band says so. A line sent with `/raw` is sent
+whatever its length, because SOLAR's answer to it, `MESSAGE_TOO_LARGE`, is what sending it
+by hand is for. The other limits are shown on the card of `/list` and not enforced: ZENITH
+lets at most 256 calls wait at once, which is also the number of requests SOLAR 0.3.0
+declares it queues.
 
 ## Colour and characters
 

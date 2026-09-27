@@ -357,7 +357,10 @@ fn on_windows_zenith_runs_solar_from_a_copy_and_never_where_it_was_found() {
 fn ctrl_c_cancels_a_call_in_flight_when_the_manifest_offers_solar_cancel() {
     let mut driven = Driven::start(double(), &[("ZENITH_DOUBLE", "cancel")]);
     driven.until("the handshake", |app| app.link.connected());
-    assert!(driven.app().link.capabilities.cancel);
+    assert_eq!(
+        driven.app().link.capabilities.cancel.as_deref(),
+        Some("solar.cancel")
+    );
     driven.run(r#"/call double.slow {"ms": 3000}"#);
     driven.runtime.step(Duration::from_millis(100)).unwrap();
     driven.key(KeyCode::Char('c'), KeyModifiers::CONTROL);
@@ -509,4 +512,120 @@ fn record_the_session_the_readme_shows() {
         recording.calls.len(),
         path.display()
     );
+}
+
+/// `/export` writes SOLAR's recording format, and the installed SOLAR's `solar replay`
+/// sends every request of it again and finds every answer the same. It runs the binary
+/// ZENITH runs, which on Windows is the copy, never the build.
+///
+/// The contract gives no exit codes for `solar replay`; that it exits 0 when every
+/// answer matches, and 5 when one differs, is what it was seen to do on 27 September 2026.
+#[test]
+fn an_export_is_a_recording_that_solar_replay_finds_the_same() {
+    let Some(solar) = solar_under_test() else {
+        return;
+    };
+    let directory = std::env::temp_dir().join(format!("zenith-replay-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&directory);
+    std::fs::create_dir_all(&directory).unwrap();
+    let mut driven = Driven::connected(solar);
+    for line in [
+        "/ping for the recording",
+        "/describe solar.ping",
+        "/version",
+    ] {
+        driven.run(line);
+        driven.until(line, idle);
+    }
+    let recording = directory.join("session.ndjson");
+    driven.run(&format!("/export {}", recording.display()));
+    driven.until("the recording", |app| {
+        app.flash
+            .as_ref()
+            .is_some_and(|(_, text)| text.starts_with("Wrote the recording"))
+    });
+    let text = std::fs::read_to_string(&recording).unwrap();
+    let lines: Vec<serde_json::Value> = text
+        .lines()
+        .map(|line| serde_json::from_str(line).unwrap())
+        .collect();
+    assert_eq!(lines[0]["solar_recording"], "1.0.0");
+    assert_eq!(lines[0]["protocol"], "solar/1");
+    assert!(
+        lines[0]["solar_version"]
+            .as_str()
+            .unwrap()
+            .starts_with("ZENITH ")
+    );
+    // The two calls of the handshake and the three typed, each a request and an answer.
+    assert_eq!(lines.len(), 1 + 2 * 5, "{text}");
+    let binary = driven.app().link.binary.clone().unwrap();
+    let output = std::process::Command::new(&binary.runs)
+        .arg("replay")
+        .arg(&recording)
+        .output()
+        .unwrap();
+    let said = format!(
+        "{}{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(
+        output.status.success(),
+        "solar replay exited with {:?}:\n{said}\nThe recording was:\n{text}",
+        output.status.code()
+    );
+    let _ = std::fs::remove_dir_all(&directory);
+}
+
+/// The Log tab's keys set the installed SOLAR's own level, when its manifest has
+/// `solar.set_log_level`: at `error` a ping writes nothing to SOLAR's standard error, and
+/// back at `trace` the next one is there. SOLAR's standard error is one stream, in order,
+/// so a line about the first ping would have arrived before the lines about the second.
+#[test]
+fn the_log_tab_sets_the_level_of_the_installed_solar() {
+    let Some(solar) = solar_under_test() else {
+        return;
+    };
+    let mut driven = Driven::connected(solar);
+    for _ in 0..2 {
+        driven.key(KeyCode::Tab, KeyModifiers::NONE);
+    }
+    assert_eq!(driven.app().tab, Tab::Log);
+    if !driven.app().log.can_set {
+        // A SOLAR without solar.set_log_level: the keys filter, and nothing is sent.
+        driven.key(KeyCode::Char('e'), KeyModifiers::NONE);
+        assert!(idle(driven.app()));
+        eprintln!("the installed SOLAR has no solar.set_log_level; only the filter was tested");
+        return;
+    }
+    driven.key(KeyCode::Char('e'), KeyModifiers::NONE);
+    driven.until("SOLAR at error", |app| {
+        app.log.solar_level == "error" && app.log.setting.is_none()
+    });
+    let mentions = |app: &App, words: &str| {
+        app.log
+            .entries
+            .iter()
+            .any(|(_, entry)| entry.message.contains(words))
+    };
+    driven.key(KeyCode::BackTab, KeyModifiers::SHIFT);
+    driven.key(KeyCode::BackTab, KeyModifiers::SHIFT);
+    assert_eq!(driven.app().tab, Tab::Session);
+    driven.run("/ping quiet please");
+    driven.until("the quiet ping", idle);
+    for _ in 0..2 {
+        driven.key(KeyCode::Tab, KeyModifiers::NONE);
+    }
+    driven.key(KeyCode::Char('t'), KeyModifiers::NONE);
+    driven.until("SOLAR at trace", |app| {
+        app.log.solar_level == "trace" && app.log.setting.is_none()
+    });
+    driven.key(KeyCode::BackTab, KeyModifiers::SHIFT);
+    driven.key(KeyCode::BackTab, KeyModifiers::SHIFT);
+    driven.run("/ping loud and clear");
+    driven.until("the loud ping in the Log", |app| {
+        mentions(app, "loud and clear")
+    });
+    assert!(!mentions(driven.app(), "quiet please"));
 }

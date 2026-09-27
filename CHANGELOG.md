@@ -22,9 +22,25 @@ either is stated here in its own line.
   palette's colours and in one colour, a separate drawing for 16 px, lockups for dark and
   light backgrounds, and terminal forms in half blocks and in ASCII, with the rules it is
   drawn by in `docs/brand/README.md`. Tests hold every file to those rules.
+- What SOLAR offers is read from the manifest's `capabilities`, layout 2.1.0, section 8.2
+  of SOLAR's contract: `Ctrl+C` cancels with the method it declares, the connected notice
+  says whether SOLAR answers batches and whether the Log tab sets its level, a call longer
+  than `limits.max_request_bytes` is refused before it is sent, `/raw` excepted, and the
+  card of `/list` shows every capability and limit. A manifest without `capabilities` is
+  read as before.
+- The Log tab's level keys set SOLAR's own level with `solar.set_log_level`, when SOLAR
+  has it, and the header says the level SOLAR logs at; a restart starts SOLAR at that
+  level. Without it, the keys filter, as before.
+- The guide's table has a row for `/export`, which the walkthrough checks with
+  `solar replay`.
 
 ### Changed
 
+- `/export`, and `x` on the History tab, write the current connection in SOLAR's
+  recording format 1.0.0, `docs/RECORDING.md` in SOLAR's repository, under the name
+  `zenith-recording-<time>.ndjson`: a header naming ZENITH as the writer, then every line
+  that crossed, in order and exactly as it crossed, so that `solar replay` sends the
+  requests again. ZENITH's own `zenith-history` format is gone; the report keeps its own.
 - The opening shows ZENITH's mark, with the name, what ZENITH is, the laboratory and the
   version beside it, and the state of the connection on the line below. SOLAR's mark
   moved to where ZENITH shows SOLAR itself, the start of every connection and the card of
