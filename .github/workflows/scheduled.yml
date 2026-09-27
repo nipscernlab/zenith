@@ -89,17 +89,25 @@ jobs:
         with:
           tool: cargo-mutants,cargo-nextest
 
+      # The baseline. cargo-mutants 27.1.0 tests only the mutated packages in its own
+      # baseline, whatever --test-workspace says, and zenith's tests need the test double,
+      # a binary of zenith-client: so this step runs the whole workspace unmutated, which
+      # also builds the double, and cargo-mutants skips its own baseline.
+      - name: The unmutated tests pass
+        env:
+          CARGO_INCREMENTAL: "1"
+        run: cargo nextest run --workspace --locked
+
       # In place, because this checkout is thrown away after the job, and with a fixed
-      # timeout, because cargo-mutants cannot scale one from the baseline in place. Every
-      # mutant is tested by the whole workspace, which is also what builds the test double
-      # the tests against SOLAR need, and incrementally, which rust-cache turns off. The
+      # timeout, because cargo-mutants has no baseline to scale one from. Every mutant is
+      # tested by the whole workspace, and incrementally, which rust-cache turns off. The
       # exit code says whether mutants survived; the summary below judges the whole run.
       - name: Mutate one shard of the shipped crates
         env:
           CARGO_INCREMENTAL: "1"
         run: |
           cargo mutants --workspace --test-workspace=true --no-shuffle --in-place \
-            --timeout 180 --shard ${{ matrix.shard }}/20 \
+            --baseline=skip --timeout 180 --shard ${{ matrix.shard }}/20 \
             || echo "cargo-mutants exited with $?, which the summary judges"
 
       - name: Keep the shard's results
