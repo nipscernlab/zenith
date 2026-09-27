@@ -12,7 +12,7 @@ expression: screen(&buffer)
 
 
 
- +------------------------------------------------------------------- 1 of 13 +
+ +------------------------------------------------------------------- 1 of 14 +
  |> /list                               every API SOLAR answers to            |
  |  /describe <api>                     one API: parameters, errors, side ... |
  |  /call <api> [json]                  any call, with its parameters as J... |

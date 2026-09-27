@@ -228,6 +228,21 @@ impl LineEditor {
         line
     }
 
+    /// Puts a line of an earlier session into the history, as the newest.
+    pub fn remember(&mut self, line: &str) {
+        if !line.trim().is_empty() {
+            self.history.push(clean(line));
+        }
+    }
+
+    /// Empties the history and says how many lines it held.
+    pub fn forget_history(&mut self) -> usize {
+        let held = self.history.len();
+        self.history.clear();
+        self.walking = None;
+        held
+    }
+
     /// Shows the previous line of the history.
     pub fn history_previous(&mut self) {
         let target = match &self.walking {

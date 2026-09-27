@@ -13,7 +13,7 @@ use std::path::Path;
 use std::thread;
 use std::time::{Duration, Instant};
 
-use crate::pty::{Session, release_binary, solar};
+use crate::pty::{Session, release_binary, scratch_data_dir, solar};
 
 const PATIENCE: Duration = Duration::from_mins(2);
 
@@ -32,7 +32,14 @@ pub(crate) fn run(root: &Path, rest: &[&str]) -> Result<(), String> {
     let zenith = release_binary(root)?;
     let solar = solar()?;
     let solar_argument = solar.display().to_string();
-    let mut session = Session::start(&zenith, &["--solar", solar_argument.as_str()], &[], 120, 40)?;
+    let data = scratch_data_dir("soak")?.display().to_string();
+    let mut session = Session::start(
+        &zenith,
+        &["--solar", solar_argument.as_str()],
+        &[("ZENITH_DATA_DIR", data.as_str())],
+        120,
+        40,
+    )?;
     session.wait_for("in orbit", PATIENCE)?;
     thread::sleep(Duration::from_secs(5));
     let (_, idle) = session.usage().ok_or("the process could not be measured")?;

@@ -11,7 +11,8 @@ which is the list of things settled by whoever wrote the code and still open to 
 overruled. When the architect confirms one, it moves here and leaves that file. Records
 0001 to 0006 were decided by the architect in the brief of the first stage, so they
 started here; 0007 to 0013 were decisions taken without asking in the first stage, which
-the architect confirmed on 27 September 2026.
+the architect confirmed on 27 September 2026; 0014 is a decision the architect made that
+day for the second stage.
 
 - **`OPEN_QUESTIONS.md`** is what is still open.
 - **`docs/adr/`** is what is settled.
@@ -35,3 +36,4 @@ the reasoning that was once persuasive is part of the history.
 | [0011](0011-the-coverage-floor-is-88-percent.md) | The coverage floor is 88 % of lines, and it only rises | Accepted |
 | [0012](0012-the-name-zenith-is-shared-with-a-system-monitor.md) | The name `zenith` is shared with a system monitor | Accepted |
 | [0013](0013-no-mouse-for-now.md) | No mouse, for now | Accepted |
+| [0014](0014-the-command-line-history-survives-between-sessions.md) | The command line history survives between sessions | Accepted |

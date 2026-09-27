@@ -340,6 +340,20 @@ pub(crate) fn solar() -> Result<std::path::PathBuf, String> {
         .map_err(|error| format!("{error} Set ZENITH_SOLAR to the solar binary."))
 }
 
+/// A new, empty directory for `ZENITH_DATA_DIR`, so that what the harness types never
+/// reaches the command line history of the person running it.
+///
+/// # Errors
+///
+/// When the directory cannot be made.
+pub(crate) fn scratch_data_dir(task: &str) -> Result<std::path::PathBuf, String> {
+    let directory = std::env::temp_dir().join(format!("zenith-{task}-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&directory);
+    std::fs::create_dir_all(&directory)
+        .map_err(|error| format!("{} could not be made: {error}", directory.display()))?;
+    Ok(directory)
+}
+
 /// A percentile of some measurements, by the nearest rank.
 pub(crate) fn percentile(sorted: &[u128], fraction: f64) -> u128 {
     if sorted.is_empty() {

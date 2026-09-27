@@ -61,9 +61,15 @@ struct Harness {
 
 impl Harness {
     fn new() -> Self {
+        Self::with(KeptHistory::default())
+    }
+
+    /// A ZENITH started with this command line history.
+    fn with(history: KeptHistory) -> Self {
         let now = Instant::now();
         let options = Options {
             opening: false,
+            history,
             ..Options::default()
         };
         let (app, effects) = App::new(options, now, wall());
@@ -71,7 +77,11 @@ impl Harness {
     }
 
     fn connected() -> Self {
-        let mut harness = Self::new();
+        Self::connected_with(KeptHistory::default())
+    }
+
+    fn connected_with(history: KeptHistory) -> Self {
+        let mut harness = Self::with(history);
         harness.start();
         harness.answer(
             1,
@@ -1054,5 +1064,145 @@ fn nothing_is_sent_while_solar_is_down_and_both_places_say_so() {
     assert!(
         errors.iter().any(|(_, error)| error == sentence),
         "{errors:?}"
+    );
+}
+
+/// A history kept in a file, with two lines from an earlier session.
+fn kept_in_a_file() -> KeptHistory {
+    KeptHistory {
+        file: Some(PathBuf::from("kept/command-history.ndjson")),
+        lines: vec!["/list".to_owned(), "/ping hello".to_owned()],
+        note: None,
+    }
+}
+
+/// The histories the application asked to be written.
+fn saved(harness: &Harness) -> Vec<Vec<String>> {
+    harness
+        .effects
+        .iter()
+        .filter_map(|effect| match effect {
+            Effect::SaveHistory { lines, .. } => Some(lines.clone()),
+            _ => None,
+        })
+        .collect()
+}
+
+#[test]
+fn a_session_starts_with_the_lines_of_the_last_one() {
+    let mut harness = Harness::connected_with(kept_in_a_file());
+    harness.key(KeyCode::Up, KeyModifiers::NONE);
+    assert_eq!(harness.app.session.editor.text(), "/ping hello");
+    harness.key(KeyCode::Up, KeyModifiers::NONE);
+    assert_eq!(harness.app.session.editor.text(), "/list");
+    assert!(
+        saved(&harness).is_empty(),
+        "nothing is written until a line runs"
+    );
+}
+
+#[test]
+fn every_line_that_runs_writes_the_whole_history_and_a_repeat_or_a_mistake_does_not() {
+    let mut harness = Harness::connected_with(kept_in_a_file());
+    harness.run("/version");
+    assert_eq!(
+        saved(&harness),
+        vec![vec![
+            "/list".to_owned(),
+            "/ping hello".to_owned(),
+            "/version".to_owned()
+        ]]
+    );
+    let Some(Effect::SaveHistory { file, .. }) = harness
+        .effects
+        .iter()
+        .find(|effect| matches!(effect, Effect::SaveHistory { .. }))
+    else {
+        panic!("no history was saved");
+    };
+    assert_eq!(file, &PathBuf::from("kept/command-history.ndjson"));
+    harness.effects.clear();
+    harness.run("/version");
+    assert!(
+        saved(&harness).is_empty(),
+        "a repeat of the last line is not kept"
+    );
+    harness.run("ping");
+    assert!(
+        saved(&harness).is_empty(),
+        "a line that is not a command is not kept"
+    );
+}
+
+#[test]
+fn forget_empties_the_history_here_and_in_its_file() {
+    let mut harness = Harness::connected_with(kept_in_a_file());
+    harness.run("/forget");
+    assert!(harness.app.session.editor.history().is_empty());
+    assert_eq!(saved(&harness), vec![Vec::<String>::new()]);
+    assert!(harness.notices().iter().any(|notice| {
+        notice.starts_with("Forgot the 2 lines of the command line history, here and in ")
+    }));
+    harness.key(KeyCode::Up, KeyModifiers::NONE);
+    assert_eq!(
+        harness.app.session.editor.text(),
+        "",
+        "not even /forget is left"
+    );
+}
+
+#[test]
+fn a_session_that_keeps_no_file_writes_nothing_and_says_so_when_it_forgets() {
+    let mut harness = Harness::connected();
+    harness.run("/version");
+    harness.run("/forget");
+    assert!(saved(&harness).is_empty());
+    assert!(harness.notices().iter().any(|notice| {
+        notice.starts_with("Forgot the 1 line of the command line history. This session keeps none")
+    }));
+}
+
+#[test]
+fn the_note_about_the_history_is_told_at_the_start() {
+    let harness = Harness::with(KeptHistory {
+        note: Some("2 lines of kept were not a line of the command line history.".to_owned()),
+        ..KeptHistory::default()
+    });
+    assert!(
+        harness
+            .notices()
+            .iter()
+            .any(|notice| notice.starts_with("2 lines of kept"))
+    );
+}
+
+#[test]
+fn a_history_that_cannot_be_written_is_said_once() {
+    let mut harness = Harness::connected_with(kept_in_a_file());
+    for _ in 0..2 {
+        harness.feed(Incoming::Wrote {
+            what: Written::CommandHistory,
+            result: Err("kept: access is denied.".to_owned()),
+        });
+    }
+    let warnings: Vec<String> = harness
+        .notices()
+        .into_iter()
+        .filter(|notice| notice.starts_with("Could not keep the command line history"))
+        .collect();
+    assert_eq!(warnings.len(), 1, "{warnings:?}");
+    assert!(warnings[0].contains("kept: access is denied."));
+    harness.feed(Incoming::Wrote {
+        what: Written::CommandHistory,
+        result: Ok((PathBuf::from("kept"), 3)),
+    });
+    assert_eq!(
+        harness
+            .notices()
+            .iter()
+            .filter(|notice| notice.starts_with("Could not keep"))
+            .count(),
+        1,
+        "a write that works says nothing"
     );
 }

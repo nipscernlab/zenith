@@ -12,7 +12,7 @@ use std::path::{Path, PathBuf};
 use std::thread;
 use std::time::Duration;
 
-use crate::pty::{Session, solar};
+use crate::pty::{Session, scratch_data_dir, solar};
 
 /// The guide whose table this walks.
 const GUIDE: &str = include_str!("../../docs/TESTING_BY_HAND.md");
@@ -289,15 +289,59 @@ const STEPS: &[Step] = &[
             }
         },
     },
+    Step {
+        row: "Start ZENITH again, and press `↑`",
+        run: |walk| {
+            walk.restart()?;
+            walk.press(UP)?;
+            // The last line of the last session: every row starts by clearing the transcript.
+            walk.see("\u{203a} /clear")
+        },
+    },
+    Step {
+        row: "`/forget`",
+        run: |walk| {
+            walk.press(CTRL_U)?;
+            walk.line("/forget")?;
+            walk.see("Forgot the ")?;
+            walk.see("of the command line history, here and in")?;
+            walk.press(UP)?;
+            walk.see("Type / for the commands")?;
+            walk.session.quit(PATIENCE)
+        },
+    },
 ];
 
 /// A session being walked through.
 struct Walk {
     session: Session,
     notes: Vec<String>,
+    /// What starts it again: the program, the SOLAR it is given, and its data directory.
+    zenith: PathBuf,
+    solar: String,
+    data: String,
 }
 
 impl Walk {
+    /// ZENITH, started in a new pseudo-terminal, connected.
+    fn start(zenith: &Path, solar: &str, data: &str) -> Result<Session, String> {
+        let session = Session::start(
+            zenith,
+            &["--solar", solar],
+            &[("ZENITH_DATA_DIR", data)],
+            COLUMNS,
+            ROWS,
+        )?;
+        session.wait_for("in orbit", PATIENCE)?;
+        Ok(session)
+    }
+
+    /// ZENITH started again, as a person starts it after quitting.
+    fn restart(&mut self) -> Result<(), String> {
+        self.session = Self::start(&self.zenith, &self.solar, &self.data)?;
+        Ok(())
+    }
+
     /// Bytes, as keys pressed, and a moment for the screen to follow.
     fn press(&mut self, keys: &[u8]) -> Result<(), String> {
         self.session.write(keys)?;
@@ -464,13 +508,18 @@ pub(crate) fn run(root: &Path) -> Result<(), String> {
         Err(why) => return Err(why),
     };
     let zenith = debug_binary(root)?;
-    let solar_text = solar.display().to_string();
-    let session = Session::start(&zenith, &["--solar", &solar_text], &[], COLUMNS, ROWS)?;
+    let solar = solar.display().to_string();
+    // A command line history of its own, so that nothing typed here reaches the one of the
+    // person running the walkthrough.
+    let data = scratch_data_dir("walkthrough")?.display().to_string();
+    let session = Walk::start(&zenith, &solar, &data)?;
     let mut walk = Walk {
         session,
         notes: Vec::new(),
+        zenith,
+        solar,
+        data,
     };
-    walk.see("in orbit")?;
     for (index, step) in STEPS.iter().enumerate() {
         let notes = walk.notes.len();
         (step.run)(&mut walk)

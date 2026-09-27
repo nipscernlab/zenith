@@ -108,6 +108,12 @@ pub const COMMANDS: &[Spec] = &[
         argument: Argument::None,
     },
     Spec {
+        name: "forget",
+        usage: "/forget",
+        summary: "empty the command line history, here and in the file that keeps it",
+        argument: Argument::None,
+    },
+    Spec {
         name: "export",
         usage: "/export [path]",
         summary: "write the History to a file",
@@ -175,6 +181,8 @@ pub enum Command {
     Reconnect,
     /// `/clear`.
     Clear,
+    /// `/forget`.
+    Forget,
     /// `/export [path]`.
     Export {
         /// The path.
@@ -331,6 +339,7 @@ pub fn parse(line: &str, api_names: &[&str]) -> Result<Option<Command>, ParseErr
         },
         "reconnect" => Command::Reconnect,
         "clear" => Command::Clear,
+        "forget" => Command::Forget,
         "export" => Command::Export {
             path: optional(rest),
         },

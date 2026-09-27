@@ -86,6 +86,7 @@ parameter names and values the schema allows at the cursor:
 | `/raw <line>` | Send a line exactly as typed: a batch, a broken envelope |
 | `/reconnect` | Restart SOLAR, and pick up a new build of it |
 | `/clear` | Empty the transcript; the History keeps everything |
+| `/forget` | Empty the command line history, here and in the file that keeps it |
 | `/export [path]` | Write the History to a file |
 | `/report [path]` | Write one file with everything a bug report needs |
 
@@ -129,6 +130,8 @@ and colour never carries meaning alone.
 | | `NO_COLOR` | No colour at all ([no-color.org](https://no-color.org)); `--color` is the one thing that overrides it |
 | `--ascii` | `ZENITH_ASCII` | 7-bit ASCII only, for terminals without Unicode |
 | `--solar-log <level>` | | The level SOLAR is started at; the Log tab filters below it |
+| `--no-history` | `ZENITH_NO_HISTORY` | Keep the command line history for this session only |
+| | `ZENITH_DATA_DIR` | The directory the command line history is kept in, instead of the system's own |
 
 ZENITH works at 80 × 24 and above, handles resizing, and gives the terminal back as it
 found it, even after a panic.

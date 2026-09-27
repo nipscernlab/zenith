@@ -14,13 +14,14 @@ Everything the brief asks for, as `docs/DESIGN.md` describes it.
 | ---- | ------------- |
 | The connection | `solar` found by `--solar`, `ZENITH_SOLAR` or the `PATH`, and on Windows run from a copy under `%TEMP%\zenith\solar\<hash>\` so that SOLAR's build can always replace its binary. The handshake checks the protocol, `solar/1`, and the manifest layout, 2, and says both versions when they differ. Every failure, from a missing `solar` to one that exits or breaks the contract, is one sentence of what happened and one of what to do, with SOLAR's last lines of standard error, and `Ctrl+R` or `/reconnect` starts it again. |
 | The tabs | Session, with the command line, its history and completion, and every response laid out; APIs, the catalogue of the manifest, with each example run by a key and judged against what it declares, and a form for the parameters; Log, SOLAR's standard error by level; History, every call with its timing. |
-| The commands | The eight of the brief, `/list`, `/describe`, `/call`, `/ping`, `/version`, `/theme`, `/help` and `/quit`, and five more: `/raw`, `/reconnect`, `/clear`, `/export` and `/report`. |
+| The commands | The eight of the brief, `/list`, `/describe`, `/call`, `/ping`, `/version`, `/theme`, `/help` and `/quit`, five more of the first stage, `/raw`, `/reconnect`, `/clear`, `/export` and `/report`, and `/forget`. |
 | Checking | Parameters checked against the API's schema before they are sent, with the wrong part of the line underlined, by a validator of ZENITH's own that property tests hold to the verdicts of the `jsonschema` crate. Every response checked against sections 5, 6 and 7 of SOLAR's contract, and a breach shown with its section. |
 | Cancelling | `Ctrl+C` sends `solar.cancel` for the call in flight when the manifest offers it, and pressed again quits. |
 | The keys | One table that dispatches the keys and draws the help overlay. Every action has a plain key or a `Ctrl` key, for macOS Terminal, where Option is not Alt; a character typed with `AltGr` is text. |
 | The look | The five colours of SOLAR's brand in three themes, night, light and high-contrast, each at four depths down to none, with `NO_COLOR` obeyed; the contrast of every colour computed against WCAG 2.2; WGL4 characters, or 7-bit ASCII with `--ascii`; the SOLAR mark from SOLAR's brand, byte for byte. Works at 80 × 24 and above, follows resizing, and gives the terminal back on exit, on a signal and after a panic. |
 | Memory | Every collection that grows with use is a ring buffer with a limit in entries and in bytes, and says how much it dropped. `/export` and `/report` are written as they go. |
 | Bug reports | `/report` writes one file with the versions of ZENITH and SOLAR, the system as `system.info` reports it, the recent log and the calls of the session. |
+| The command line history | Kept between sessions in the per-user data directory of each system, written atomically after every line, in a documented format; `/forget` empties it and `--no-history` turns it off. |
 
 ## Tested
 
@@ -121,8 +122,10 @@ handshake, the coverage floor at 88 %, the name `zenith`, and no mouse, for now.
 `docs/OPEN_QUESTIONS.md` has each decision that is still open, with what it rules out and
 what would change it. The ones with the most consequence:
 
-- **Nothing is written to disk unless asked**: no configuration file, no persistent
-  history.
+- **Where the command line history is kept**, `nipscern-zenith/command-history.ndjson`
+  in the system's per-user data directory, the command `/forget` and the flag
+  `--no-history`, and that two ZENITHs at once each write their own, the last one winning.
+- **The theme is not remembered**: no configuration file.
 - **The limits on memory**, and the soak's rule for growth.
 - **Mutation testing that reports and does not gate yet**, and development builds with
   line tables only, for the disk.

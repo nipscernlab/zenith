@@ -26,6 +26,7 @@ use zenith_client::locate::{Placement, Search, locate, prepare};
 use crate::app::link::Failure;
 use crate::app::{App, Effect, Incoming, Options, StartSteps, Started, Written, report};
 use crate::clock::Utc;
+use crate::command_history;
 
 /// How many events may wait in the channel. When the interface falls behind, the threads
 /// that read SOLAR wait, and then SOLAR waits on its pipe: nothing piles up between.
@@ -78,6 +79,77 @@ impl Timings {
     }
 }
 
+/// Writes the command line history on a thread of its own, so that the loop never waits
+/// for the disk. When several snapshots are waiting, only the newest is written.
+#[derive(Debug)]
+struct HistoryWriter {
+    snapshots: Option<mpsc::Sender<(PathBuf, Vec<String>)>>,
+    thread: Option<thread::JoinHandle<()>>,
+    report: SyncSender<Incoming>,
+}
+
+impl HistoryWriter {
+    /// The thread, which says through `report` when a write fails.
+    fn start(report: SyncSender<Incoming>) -> Self {
+        let (snapshots, waiting) = mpsc::channel::<(PathBuf, Vec<String>)>();
+        let failures = report.clone();
+        let thread = thread::Builder::new()
+            .name("zenith-history".to_owned())
+            .spawn(move || {
+                while let Ok(mut snapshot) = waiting.recv() {
+                    while let Ok(newer) = waiting.try_recv() {
+                        snapshot = newer;
+                    }
+                    let (file, lines) = snapshot;
+                    if let Err(why) = write_history(&file, &lines) {
+                        let _ = failures.try_send(history_failed(why));
+                    }
+                }
+            })
+            .ok();
+        Self {
+            snapshots: thread.as_ref().map(|_| snapshots),
+            thread,
+            report,
+        }
+    }
+
+    /// Writes `lines` to `file`, on the thread, or here when there is no thread.
+    fn save(&self, file: PathBuf, lines: Vec<String>) {
+        match &self.snapshots {
+            Some(snapshots) => {
+                let _ = snapshots.send((file, lines));
+            }
+            None => {
+                if let Err(why) = write_history(&file, &lines) {
+                    let _ = self.report.try_send(history_failed(why));
+                }
+            }
+        }
+    }
+
+    /// Writes what is still waiting, and ends the thread.
+    fn finish(&mut self) {
+        drop(self.snapshots.take());
+        if let Some(thread) = self.thread.take() {
+            let _ = thread.join();
+        }
+    }
+}
+
+/// The history written to its file, or why it was not, as a sentence.
+fn write_history(file: &Path, lines: &[String]) -> Result<(), String> {
+    command_history::write(file, lines).map_err(|error| format!("{}: {error}.", file.display()))
+}
+
+/// The event that says the history could not be written, and why.
+fn history_failed(why: String) -> Incoming {
+    Incoming::Wrote {
+        what: Written::CommandHistory,
+        result: Err(why),
+    }
+}
+
 /// The loop, its terminal, and the connections it holds.
 #[derive(Debug)]
 pub struct Runtime<B: Backend> {
@@ -88,12 +160,14 @@ pub struct Runtime<B: Backend> {
     connections: Connections,
     queue: VecDeque<Incoming>,
     timings: Option<Timings>,
+    history: HistoryWriter,
 }
 
 impl<B: Backend> Runtime<B> {
     /// The application, started, with its first effects done.
     pub fn new(terminal: Terminal<B>, options: Options, timings: Option<Timings>) -> Self {
         let (sender, receiver) = mpsc::sync_channel(CHANNEL_CAPACITY);
+        let history = HistoryWriter::start(sender.clone());
         let (app, effects) = App::new(options, Instant::now(), SystemTime::now());
         let mut runtime = Self {
             terminal,
@@ -103,6 +177,7 @@ impl<B: Backend> Runtime<B> {
             connections: Arc::new(Mutex::new(HashMap::new())),
             queue: VecDeque::new(),
             timings,
+            history,
         };
         if let Ok(size) = runtime.terminal.size() {
             runtime.queue.push_back(Incoming::Resize {
@@ -245,6 +320,7 @@ impl<B: Backend> Runtime<B> {
     }
 
     fn finish(&mut self) {
+        self.history.finish();
         if let Some(timings) = &mut self.timings {
             let (wakeups, frames) = (u128::from(timings.wakeups), u128::from(timings.frames));
             timings.mark("exit", &[("wakeups", wakeups), ("frames", frames)]);
@@ -290,6 +366,7 @@ impl<B: Backend> Runtime<B> {
                         result,
                     });
                 }
+                Effect::SaveHistory { file, lines } => self.history.save(file, lines),
                 Effect::Repaint => {
                     let _ = self.terminal.clear();
                 }
@@ -378,7 +455,9 @@ impl<B: Backend> Runtime<B> {
         let mut out = BufWriter::new(file);
         let written = match what {
             Written::History => self.app.history.export(&mut out, SystemTime::now()),
-            Written::Report => Ok(0),
+            // Written elsewhere: the report by `write_report`, the command line history by
+            // its thread.
+            Written::Report | Written::CommandHistory => Ok(0),
         }
         .and_then(|count| out.flush().map(|()| count))
         .map_err(|error| format!("{}: {error}", path.display()))?;
@@ -501,6 +580,54 @@ mod tests {
         std::fs::write(&given, b"keep me").unwrap();
         assert!(create(Some(given.clone()), "x", SystemTime::UNIX_EPOCH).is_err());
         assert_eq!(std::fs::read(&given).unwrap(), b"keep me");
+        let _ = std::fs::remove_dir_all(&directory);
+    }
+
+    #[test]
+    fn the_history_is_on_disk_once_the_writer_has_finished() {
+        let directory = std::env::temp_dir().join(format!("zenith-writer-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&directory);
+        let file = directory.join(command_history::FILE_NAME);
+        let (sender, receiver) = mpsc::sync_channel(8);
+        let mut writer = HistoryWriter::start(sender);
+        writer.save(file.clone(), vec!["/list".to_owned()]);
+        writer.save(file.clone(), vec!["/list".to_owned(), "/ping".to_owned()]);
+        writer.finish();
+        assert_eq!(
+            command_history::read(&file),
+            command_history::Loaded::Lines {
+                lines: vec!["/list".to_owned(), "/ping".to_owned()],
+                skipped: 0
+            }
+        );
+        assert!(receiver.try_recv().is_err(), "no write failed");
+        let _ = std::fs::remove_dir_all(&directory);
+    }
+
+    #[test]
+    fn a_history_that_cannot_be_written_is_reported_to_the_loop() {
+        let directory =
+            std::env::temp_dir().join(format!("zenith-writer-fails-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&directory);
+        std::fs::create_dir_all(&directory).unwrap();
+        // A file where the history's directory would have to be.
+        let blocker = directory.join("a-file");
+        std::fs::write(&blocker, b"").unwrap();
+        let (sender, receiver) = mpsc::sync_channel(8);
+        let mut writer = HistoryWriter::start(sender);
+        writer.save(
+            blocker.join(command_history::FILE_NAME),
+            vec!["/list".to_owned()],
+        );
+        writer.finish();
+        let Ok(Incoming::Wrote {
+            what: Written::CommandHistory,
+            result: Err(why),
+        }) = receiver.try_recv()
+        else {
+            panic!("the failure was not reported");
+        };
+        assert!(why.contains("a-file"), "{why}");
         let _ = std::fs::remove_dir_all(&directory);
     }
 }

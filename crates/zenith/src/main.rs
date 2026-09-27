@@ -9,6 +9,7 @@ use std::time::Instant;
 use clap::Parser;
 use ratatui::crossterm::event::{self, Event, KeyEventKind};
 use zenith::app::{Incoming, Options};
+use zenith::command_history::{self, System};
 use zenith::glyphs::Charset;
 use zenith::keys::LevelKey;
 use zenith::runtime::{Runtime, Timings};
@@ -22,8 +23,9 @@ use zenith::theme::{Depth, ThemeName};
     about = zenith::ABOUT,
     long_about = None,
     disable_version_flag = true,
-    after_help = "Environment: ZENITH_SOLAR, ZENITH_THEME, ZENITH_COLOR, ZENITH_ASCII, NO_COLOR. \
-                  docs/DESIGN.md in nipscernlab/zenith says what each does."
+    after_help = "Environment: ZENITH_SOLAR, ZENITH_THEME, ZENITH_COLOR, ZENITH_ASCII, NO_COLOR, \
+                  ZENITH_NO_HISTORY, ZENITH_DATA_DIR. docs/DESIGN.md in nipscernlab/zenith says \
+                  what each does."
 )]
 struct Args {
     /// The solar program to start. Without it, `ZENITH_SOLAR`, then the PATH.
@@ -47,6 +49,11 @@ struct Args {
     /// filters below it.
     #[arg(long, value_name = "LEVEL", default_value = "trace", value_parser = parse_level)]
     solar_log: String,
+
+    /// Keep the command line history for this session only: nothing is read from its file or
+    /// written to it. Also `ZENITH_NO_HISTORY`.
+    #[arg(long)]
+    no_history: bool,
 
     /// Print the version and what this program is, and exit.
     #[arg(short = 'V', long)]
@@ -107,6 +114,8 @@ fn options(args: &Args) -> Options {
     } else {
         Charset::Unicode
     };
+    let off = args.no_history || variable("ZENITH_NO_HISTORY").is_some();
+    let file = command_history::path(System::this(), variable);
     Options {
         theme,
         depth,
@@ -115,6 +124,7 @@ fn options(args: &Args) -> Options {
         solar_log: args.solar_log.clone(),
         opening: true,
         environment: Vec::new(),
+        history: command_history::kept(off, file),
     }
 }
 
