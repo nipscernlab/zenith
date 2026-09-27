@@ -8,6 +8,11 @@ on:
     # Mondays at 06:00 UTC, before the working day in Brazil and in Geneva.
     - cron: "0 6 * * 1"
   workflow_dispatch:
+    inputs:
+      shards:
+        description: "The mutation shards to run, as a JSON list; all twenty when empty"
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -60,7 +65,8 @@ jobs:
       fail-fast: false
       max-parallel: 12
       matrix:
-        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+        # All twenty, unless a run started by hand names some, to run a shard again.
+        shard: ${{ fromJSON(inputs.shards || '[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]') }}
     env:
       ZENITH_REQUIRE_SOLAR: "1"
     steps:
@@ -102,10 +108,16 @@ jobs:
       # timeout, because cargo-mutants has no baseline to scale one from. Every mutant is
       # tested by the whole workspace, and incrementally, which rust-cache turns off. The
       # exit code says whether mutants survived; the summary below judges the whole run.
+      # Each process may take six GiB of address space and no more. A mutant can take away
+      # the cap on what ZENITH keeps of a line from SOLAR, and the test of an endless line
+      # then takes all of the runner's memory: on 27 September 2026 that brought the
+      # runner of shard 14 down, and its results with it. With the limit, such a mutant
+      # fails its own test instead.
       - name: Mutate one shard of the shipped crates
         env:
           CARGO_INCREMENTAL: "1"
         run: |
+          ulimit -v 6291456
           cargo mutants --workspace --test-workspace=true --no-shuffle --in-place \
             --baseline=skip --timeout 180 --shard ${{ matrix.shard }}/20 \
             || echo "cargo-mutants exited with $?, which the summary judges"
