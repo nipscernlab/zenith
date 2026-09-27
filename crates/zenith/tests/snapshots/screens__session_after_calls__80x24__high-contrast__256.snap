@@ -1,0 +1,55 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, 80, 24))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·     ? keys
+   executable           /home/lab/solar/target/release/solar
+   os                   linux
+   os_build             null
+   os_family            unix
+   os_name              AlmaLinux
+   os_release           "9.8"
+   path_list_separator  :
+   path_separator       /
+   pointer_width        64
+   temp_dir             /tmp
+ › /describe solar.pign
+    error   NOT_FOUND · API_NOT_FOUND · solar.describe · 0.31 ms · #5
+   No API is registered under the name solar.pign.
+   /api    expected  solar.ping
+           received  solar.pign
+           hint      Did you mean "solar.ping"? The edit distance is 2.
+           docs      docs/ERRORS.md#not_found
+ › /call solar.version
+   ∙ solar.version, waiting 300.0 ms
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ › Type / for the commands, or ? for every key.                               │
+└──────────────────────────────────────────────────────────────────────────────┘
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 0.31 ms ─── in orbit 3s ────────────
+--- every cell not listed is @255 on @233
+ 0:  0-7   @215 on @233 bold
+ 0: 10-18  @215 on @233 bold underlined
+ 0: 73-73  @215 on @233 bold
+ 1:  3-21  @215 on @233
+ 2:  3-21  @215 on @233
+ 3:  3-21  @215 on @233
+ 4:  3-21  @215 on @233
+ 5:  3-21  @215 on @233
+ 6:  3-21  @215 on @233
+ 7:  3-21  @215 on @233
+ 8:  3-21  @215 on @233
+ 9:  3-21  @215 on @233
+ 9: 24-25  @255 on @233 bold
+10:  3-21  @215 on @233
+11:  0-22  @215 on @233
+12:  3-9   @215 on @233 bold reversed
+12: 12-20  @215 on @233 bold
+12: 24-36  @215 on @233 bold
+12: 37-53  @215 on @233
+14:  3-8   @215 on @233
+18:  0-21  @215 on @233
+19:  3-3   @215 on @233
+19:  5-17  @215 on @233
+21:  1-3   @215 on @233
+23:  3-3   @215 on @233
+23:  7-17  @215 on @233 bold

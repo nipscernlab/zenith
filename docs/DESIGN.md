@@ -53,7 +53,7 @@ At the minimum size, 80 columns by 24 rows, the screen is four bands.
  ┌─────────────────────────────────────────────────────────────────────────────┐
  │ › /describe solar.p                                                         │
  └─────────────────────────────────────────────────────────────────────────────┘
- ──●── SOLAR 0.1.0 · solar/1 ─── last call 0.49 ms ─── in orbit 2m ── connected ─
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 0.49 ms ─── in orbit 2m ────────────
 ```
 
 | Band | Rows | What it holds |
@@ -73,8 +73,14 @@ and in every snapshot; they never move and never cost a redraw.
 | State | Body | Text |
 | ----- | ---- | ---- |
 | Connecting | `○` | `SOLAR connecting · 0.3 s` |
-| Connected | `●` | `SOLAR 0.1.0 · solar/1`, then `last call 0.49 ms`, then `in orbit 2m`, then `connected` |
+| Connected | `●` | `SOLAR 0.1.0 · solar/1`, then `last call 0.49 ms`, then `in orbit 2m` |
 | Disconnected | `○` | `SOLAR disconnected · exited with code 1`, then `Ctrl+R reconnect` |
+
+The state is always in words, `in orbit`, `connecting` or `disconnected`, beside a body
+that is full or hollow, so that it reads with no colour. When the bar is too narrow for
+everything, the stretches drop from the end, and the first thing to go is never the state.
+A message for the person, such as what `Ctrl+C` is about to do, takes the place of the
+stretches until the next key.
 
 `last call` is the round trip ZENITH measured, from writing the request to reading the
 response. What SOLAR measured of its own work, `meta.duration_us`, is shown beside each

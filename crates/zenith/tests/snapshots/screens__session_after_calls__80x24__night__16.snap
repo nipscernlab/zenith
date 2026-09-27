@@ -1,0 +1,78 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, 80, 24))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·     ? keys
+   executable           /home/lab/solar/target/release/solar
+   os                   linux
+   os_build             null
+   os_family            unix
+   os_name              AlmaLinux
+   os_release           "9.8"
+   path_list_separator  :
+   path_separator       /
+   pointer_width        64
+   temp_dir             /tmp
+ › /describe solar.pign
+    error   NOT_FOUND · API_NOT_FOUND · solar.describe · 0.31 ms · #5
+   No API is registered under the name solar.pign.
+   /api    expected  solar.ping
+           received  solar.pign
+           hint      Did you mean "solar.ping"? The edit distance is 2.
+           docs      docs/ERRORS.md#not_found
+ › /call solar.version
+   ∙ solar.version, waiting 300.0 ms
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ › Type / for the commands, or ? for every key.                               │
+└──────────────────────────────────────────────────────────────────────────────┘
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 0.31 ms ─── in orbit 3s ────────────
+--- every cell not listed is Gray on Black
+ 0:  0-7   Yellow on Black bold
+ 0: 10-18  Yellow on Black bold underlined
+ 0: 21-26  DarkGray on Black
+ 0: 29-33  DarkGray on Black
+ 0: 36-72  DarkGray on Black
+ 0: 73-73  Yellow on Black bold
+ 0: 74-79  DarkGray on Black
+ 1:  3-21  Yellow on Black bold
+ 2:  3-21  Yellow on Black bold
+ 3:  3-21  Yellow on Black bold
+ 3: 24-27  DarkGray on Black
+ 4:  3-21  Yellow on Black bold
+ 5:  3-21  Yellow on Black bold
+ 6:  3-21  Yellow on Black bold
+ 7:  3-21  Yellow on Black bold
+ 8:  3-21  Yellow on Black bold
+ 9:  3-21  Yellow on Black bold
+ 9: 24-25  Gray on Black bold
+10:  3-21  Yellow on Black bold
+11:  0-22  Yellow on Black bold
+12:  3-9   Yellow on Black bold reversed
+12: 12-20  Yellow on Black bold
+12: 21-23  DarkGray on Black
+12: 24-53  Yellow on Black bold
+12: 64-68  DarkGray on Black
+14:  3-8   Yellow on Black bold
+14: 11-18  DarkGray on Black
+15: 11-18  DarkGray on Black
+16: 11-18  DarkGray on Black
+17: 11-18  DarkGray on Black
+17: 21-44  DarkGray on Black
+18:  0-21  Yellow on Black bold
+19:  3-3   Yellow on Black bold
+19:  5-17  Yellow on Black bold
+19: 18-35  DarkGray on Black
+20:  0-79  DarkGray on Black
+21:  0-0   DarkGray on Black
+21:  1-3   Yellow on Black bold
+21:  4-47  DarkGray on Black
+21: 79-79  DarkGray on Black
+22:  0-79  DarkGray on Black
+23:  0-2   DarkGray on Black
+23:  3-3   Yellow on Black bold
+23:  4-6   DarkGray on Black
+23:  7-17  Yellow on Black bold
+23: 18-20  DarkGray on Black
+23: 28-42  DarkGray on Black
+23: 50-63  DarkGray on Black
+23: 66-79  DarkGray on Black

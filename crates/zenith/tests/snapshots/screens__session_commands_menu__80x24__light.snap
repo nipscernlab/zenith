@@ -1,0 +1,96 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, width, height))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·     ? keys
+
+
+
+
+
+
+
+
+
+ ┌─────────────────────────────────────────────────────────────────── 1 of 13 ┐
+ │› /list                               every API SOLAR answers to            │
+ │  /describe <api>                     one API: parameters, errors, side ef… │
+ │  /call <api> [json]                  any call, with its parameters as JSO… │
+ │  /ping [message]                     the round trip, and SOLAR's own time  │
+ │  /version                            the versions of SOLAR, its protocol … │
+ │  /theme [night|light|high-contrast]  the colours; with no name, the next … │
+ │  /help [command]                     the commands, or one of them          │
+ │  /quit                               leave ZENITH                          │
+ └ Tab inserts  ↑ ↓ choose  Esc closes ───────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ › /                                                                          │
+└──────────────────────────────────────────────────────────────────────────────┘
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 1.84 ms ─── in orbit 42s ───────────
+--- every cell not listed is #17161C on #F5F1E8
+ 0:  0-7   #8C4907 on #F5F1E8 bold
+ 0: 10-18  #8C4907 on #F5F1E8 bold underlined
+ 0: 21-26  #555355 on #F5F1E8
+ 0: 29-33  #555355 on #F5F1E8
+ 0: 36-44  #555355 on #F5F1E8
+ 0: 45-72  #868482 on #F5F1E8
+ 0: 73-73  #8C4907 on #F5F1E8 bold
+ 0: 74-79  #555355 on #F5F1E8
+10:  1-68  #868482 on #F5F1E8
+10: 69-77  #555355 on #F5F1E8
+10: 78-78  #868482 on #F5F1E8
+11:  1-1   #868482 on #F5F1E8
+11:  2-37  #8C4907 on #F5F1E8
+11: 38-39  #17161C on #DAD7D0
+11: 40-65  #555355 on #F5F1E8
+11: 78-78  #868482 on #F5F1E8
+12:  1-1   #868482 on #F5F1E8
+12:  2-37  #8C4907 on #F5F1E8
+12: 40-76  #555355 on #F5F1E8
+12: 78-78  #868482 on #F5F1E8
+13:  1-1   #868482 on #F5F1E8
+13:  2-37  #8C4907 on #F5F1E8
+13: 40-76  #555355 on #F5F1E8
+13: 78-78  #868482 on #F5F1E8
+14:  1-1   #868482 on #F5F1E8
+14:  2-37  #8C4907 on #F5F1E8
+14: 40-75  #555355 on #F5F1E8
+14: 78-78  #868482 on #F5F1E8
+15:  1-1   #868482 on #F5F1E8
+15:  2-37  #8C4907 on #F5F1E8
+15: 40-76  #555355 on #F5F1E8
+15: 78-78  #868482 on #F5F1E8
+16:  1-1   #868482 on #F5F1E8
+16:  2-37  #8C4907 on #F5F1E8
+16: 40-76  #555355 on #F5F1E8
+16: 78-78  #868482 on #F5F1E8
+17:  1-1   #868482 on #F5F1E8
+17:  2-37  #8C4907 on #F5F1E8
+17: 40-67  #555355 on #F5F1E8
+17: 78-78  #868482 on #F5F1E8
+18:  1-1   #868482 on #F5F1E8
+18:  2-37  #8C4907 on #F5F1E8
+18: 40-51  #555355 on #F5F1E8
+18: 78-78  #868482 on #F5F1E8
+19:  1-1   #868482 on #F5F1E8
+19:  2-5   #8C4907 on #F5F1E8 bold
+19:  6-15  #555355 on #F5F1E8
+19: 16-18  #8C4907 on #F5F1E8 bold
+19: 19-27  #555355 on #F5F1E8
+19: 28-30  #8C4907 on #F5F1E8 bold
+19: 31-38  #555355 on #F5F1E8
+19: 39-78  #868482 on #F5F1E8
+20:  0-79  #868482 on #F5F1E8
+21:  0-0   #868482 on #F5F1E8
+21:  1-3   #8C4907 on #F5F1E8
+21: 79-79  #868482 on #F5F1E8
+22:  0-79  #868482 on #F5F1E8
+23:  0-2   #868482 on #F5F1E8
+23:  3-3   #8C4907 on #F5F1E8
+23:  4-6   #868482 on #F5F1E8
+23:  7-17  #8C4907 on #F5F1E8 bold
+23: 18-20  #555355 on #F5F1E8
+23: 28-32  #868482 on #F5F1E8
+23: 33-42  #555355 on #F5F1E8
+23: 50-54  #868482 on #F5F1E8
+23: 55-63  #555355 on #F5F1E8
+23: 67-79  #868482 on #F5F1E8

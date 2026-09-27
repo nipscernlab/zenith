@@ -1,0 +1,80 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, width, height))"
+---
+
+               ▄▄██████▄▄
+       ∙     ▄████████████▄
+         *  ▄████              SOLAR
+ •   ∙·     ████████████████   The central API of the Constellation
+  ·         ████████████████   NIPS-CERN
+                       ████▀   not connected                            ∙    *
+             ▀████████████▀
+∙              ▀▀██████▀▀                                               •
+
+
+                   ZENITH 0.1.0, the terminal of Constellation
+
+    ┌──────────────────────────────────────────────────────────────────────┐
+    │ ZENITH could not find solar on the PATH, which has 23 directories.   │
+    │ Put the folder that holds solar on the PATH, SOLAR's target/release  │
+*   │ when it was built from source, or give the path with --solar <path>  │
+    │ or the variable ZENITH_SOLAR.                                        │
+    │                                                                      │
+    │ r try again   Enter go to the tabs   q quit                          │
+    └──────────────────────────────────────────────────────────────────────┘
+
+       *            •          •
+                                 *        *·   ∙
+--- every cell not listed is #17161C on #F5F1E8
+ 1: 12-27  #B35A00 on #F5F1E8
+ 2:  7-7   #868482 on #F5F1E8
+ 2: 12-27  #B35A00 on #F5F1E8
+ 3:  9-9   #555355 on #F5F1E8
+ 3: 12-27  #B35A00 on #F5F1E8
+ 3: 31-35  #8C4907 on #F5F1E8 bold
+ 4:  1-1   #868482 on #F5F1E8
+ 4:  5-5   #868482 on #F5F1E8
+ 4:  6-6   #555355 on #F5F1E8
+ 4: 12-27  #B35A00 on #F5F1E8
+ 5:  2-2   #555355 on #F5F1E8
+ 5: 12-27  #B35A00 on #F5F1E8
+ 5: 31-39  #555355 on #F5F1E8
+ 6: 12-27  #B35A00 on #F5F1E8
+ 6: 31-43  #8C4907 on #F5F1E8 bold
+ 6: 72-72  #555355 on #F5F1E8
+ 6: 77-77  #555355 on #F5F1E8
+ 7: 12-27  #B35A00 on #F5F1E8
+ 8:  0-0   #868482 on #F5F1E8
+ 8: 12-27  #B35A00 on #F5F1E8
+ 8: 72-72  #555355 on #F5F1E8
+11: 19-61  #555355 on #F5F1E8
+13:  4-75  #868482 on #F5F1E8
+14:  4-4   #868482 on #F5F1E8
+14:  6-71  #8C4907 on #F5F1E8 bold
+14: 75-75  #868482 on #F5F1E8
+15:  4-4   #868482 on #F5F1E8
+15: 75-75  #868482 on #F5F1E8
+16:  0-0   #555355 on #F5F1E8
+16:  4-4   #868482 on #F5F1E8
+16: 75-75  #868482 on #F5F1E8
+17:  4-4   #868482 on #F5F1E8
+17: 75-75  #868482 on #F5F1E8
+18:  4-4   #868482 on #F5F1E8
+18: 75-75  #868482 on #F5F1E8
+19:  4-4   #868482 on #F5F1E8
+19:  6-6   #8C4907 on #F5F1E8 bold
+19:  7-19  #555355 on #F5F1E8
+19: 20-24  #8C4907 on #F5F1E8 bold
+19: 25-42  #555355 on #F5F1E8
+19: 43-43  #8C4907 on #F5F1E8 bold
+19: 44-48  #555355 on #F5F1E8
+19: 75-75  #868482 on #F5F1E8
+20:  4-75  #868482 on #F5F1E8
+22:  7-7   #868482 on #F5F1E8
+22: 20-20  #868482 on #F5F1E8
+22: 31-31  #868482 on #F5F1E8
+23: 33-33  #868482 on #F5F1E8
+23: 42-42  #555355 on #F5F1E8
+23: 43-43  #868482 on #F5F1E8
+23: 47-47  #868482 on #F5F1E8

@@ -1,0 +1,38 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, width, height))"
+---
+                                   *   *                            ·
+                                         •             ∙
+       ∙        ·                                       *
+         **        •               •       *
+ •   ∙·
+  ·
+               ▄▄██████▄▄                                               ∙    *
+             ▄████████████▄
+∙           ▄████              SOLAR                                    •
+            ████████████████   The central API of the Constellation
+            ████████████████   NIPS-CERN
+                       ████▀   connecting
+             ▀████████████▀
+               ▀▀██████▀▀
+
+
+*                  ZENITH 0.1.0, the terminal of Constellation   ·
+
+
+                *                        ·     ∙            *         ·
+
+                       •                                           •
+       *            •          •
+                                 *        *·   ∙
+--- every cell not listed is #F5F1E8 on #0B0C14
+ 6: 12-27  #FFC23D on #0B0C14
+ 7: 12-27  #FFC23D on #0B0C14
+ 8: 12-27  #FFC23D on #0B0C14
+ 8: 31-35  #FFC23D on #0B0C14 bold
+ 9: 12-27  #FFC23D on #0B0C14
+10: 12-27  #FFC23D on #0B0C14
+11: 12-27  #FFC23D on #0B0C14
+12: 12-27  #FFC23D on #0B0C14
+13: 12-27  #FFC23D on #0B0C14

@@ -1,0 +1,102 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, width, height))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·                        ••      ·        ∙  ·                                        ? keys
+                                ┌ keys ────────────────────────────────────────────────────────────────────────────────────────┐
+                                │ Everywhere                                                                                   │
+                                │   ?                       every key, by where it works                                       │
+                                │   Tab                     the next tab                                                       │
+                                │   Shift+Tab               the previous tab                                                   │
+                                │   F1, Alt+1               Session, where the terminal delivers the key                       │
+                                │   F2, Alt+2               APIs, where the terminal delivers the key                          │
+                                │   F3, Alt+3               Log, where the terminal delivers the key                           │
+                                │   F4, Alt+4               History, where the terminal delivers the key                       │
+                                │   /                       a command, on the Session tab                                      │
+                                │   Ctrl+O                  the whole envelope of the latest call                              │
+                                │   Ctrl+R                  restart SOLAR, and pick up a new build                             │
+                                │   Ctrl+L                  draw the whole screen again                                        │
+                                │   Ctrl+C                  cancel the call in flight when SOLAR offers solar.cancel; again,   │
+                                │                           quit                                                               │
+                                │   Esc                     close the overlay, menu or form                                    │
+                                │                                                                                              │
+                                │ The command line                                                                             │
+                                │   Enter                   run the line as typed                                              │
+                                │   Tab                     complete, and the next candidate                                   │
+                                │   Shift+Tab               the previous candidate                                             │
+                                │   Tab                     on an empty line, the next tab                                     │
+                                │   Shift+Tab               on an empty line, the previous tab                                 │
+                                │   ↑                       the menu when it is open, the history otherwise                    │
+                                │   ↓                       the menu when it is open, the history otherwise                    │
+                                │   ←                       move left                                                          │
+                                │   →                       move right                                                         │
+                                │   Home, Ctrl+A            the start of the line                                              │
+                                │   End, Ctrl+E             the end of the line                                                │
+                                │   Ctrl+←, Alt+B           a word left                                                        │
+                                │   Ctrl+→, Alt+F           a word right                                                       │
+                                │   Backspace               delete back                                                        │
+                                │   Delete                  delete forward                                                     │
+                                │   Ctrl+W                  delete the word before                                             │
+                                │   Ctrl+U                  delete to the start                                                │
+                                │   Ctrl+K                  delete to the end                                                  │
+                                │   PgUp, Ctrl+B            scroll the transcript up                                           │
+                                │   PgDn, Ctrl+F            scroll the transcript down, and follow it at the bottom            │
+                                │   ?                       on an empty line, this help                                        │
+                                │                                                                                              │
+                                │ Lists                                                                                        │
+                                │   ↑, k                    up one                                                             │
+                                │   ↓, j                    down one                                                           │
+                                │   PgUp, Ctrl+B            up a page                                                          │
+                                │   PgDn, Ctrl+F            down a page                                                        │
+                                └ Esc close  ↑ ↓ scroll  ──────────────────────────────────────────────────────────────────────┘
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 1.84 ms ─── in orbit 42s ───────────────────────────────────────────────────────────────────────────────────────────
+--- every cell not listed is #F5F1E8 on #0B0C14
+ 0:  0-7   #FFC23D on #0B0C14 bold
+ 0: 10-18  #FFC23D on #0B0C14 bold underlined
+ 0:153-153 #FFC23D on #0B0C14 bold
+ 1: 33-38  #FFC23D on #0B0C14 bold
+ 2: 34-43  #FFC23D on #0B0C14 bold
+ 3: 36-57  #FFC23D on #0B0C14 bold
+ 4: 36-57  #FFC23D on #0B0C14 bold
+ 5: 36-57  #FFC23D on #0B0C14 bold
+ 6: 36-57  #FFC23D on #0B0C14 bold
+ 7: 36-57  #FFC23D on #0B0C14 bold
+ 8: 36-57  #FFC23D on #0B0C14 bold
+ 9: 36-57  #FFC23D on #0B0C14 bold
+10: 36-57  #FFC23D on #0B0C14 bold
+11: 36-57  #FFC23D on #0B0C14 bold
+12: 36-57  #FFC23D on #0B0C14 bold
+13: 36-57  #FFC23D on #0B0C14 bold
+14: 36-57  #FFC23D on #0B0C14 bold
+16: 36-57  #FFC23D on #0B0C14 bold
+18: 34-49  #FFC23D on #0B0C14 bold
+19: 36-57  #FFC23D on #0B0C14 bold
+20: 36-57  #FFC23D on #0B0C14 bold
+21: 36-57  #FFC23D on #0B0C14 bold
+22: 36-57  #FFC23D on #0B0C14 bold
+23: 36-57  #FFC23D on #0B0C14 bold
+24: 36-57  #FFC23D on #0B0C14 bold
+25: 36-57  #FFC23D on #0B0C14 bold
+26: 36-57  #FFC23D on #0B0C14 bold
+27: 36-57  #FFC23D on #0B0C14 bold
+28: 36-57  #FFC23D on #0B0C14 bold
+29: 36-57  #FFC23D on #0B0C14 bold
+30: 36-57  #FFC23D on #0B0C14 bold
+31: 36-57  #FFC23D on #0B0C14 bold
+32: 36-57  #FFC23D on #0B0C14 bold
+33: 36-57  #FFC23D on #0B0C14 bold
+34: 36-57  #FFC23D on #0B0C14 bold
+35: 36-57  #FFC23D on #0B0C14 bold
+36: 36-57  #FFC23D on #0B0C14 bold
+37: 36-57  #FFC23D on #0B0C14 bold
+38: 36-57  #FFC23D on #0B0C14 bold
+39: 36-57  #FFC23D on #0B0C14 bold
+41: 34-38  #FFC23D on #0B0C14 bold
+42: 36-57  #FFC23D on #0B0C14 bold
+43: 36-57  #FFC23D on #0B0C14 bold
+44: 36-57  #FFC23D on #0B0C14 bold
+45: 36-57  #FFC23D on #0B0C14 bold
+46: 34-36  #FFC23D on #0B0C14 bold
+46: 45-47  #FFC23D on #0B0C14 bold
+47:  3-3   #FFC23D on #0B0C14
+47:  7-17  #FFC23D on #0B0C14 bold

@@ -1,0 +1,82 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, 80, 24))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·     ? keys
+   executable           /home/lab/solar/target/release/solar
+   os                   linux
+   os_build             null
+   os_family            unix
+   os_name              AlmaLinux
+   os_release           "9.8"
+   path_list_separator  :
+   path_separator       /
+   pointer_width        64
+   temp_dir             /tmp
+ › /describe solar.pign
+    error   NOT_FOUND · API_NOT_FOUND · solar.describe · 0.31 ms · #5
+   No API is registered under the name solar.pign.
+   /api    expected  solar.ping
+           received  solar.pign
+           hint      Did you mean "solar.ping"? The edit distance is 2.
+           docs      docs/ERRORS.md#not_found
+ › /call solar.version
+   ∙ solar.version, waiting 300.0 ms
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ › Type / for the commands, or ? for every key.                               │
+└──────────────────────────────────────────────────────────────────────────────┘
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 0.31 ms ─── in orbit 3s ────────────
+--- every cell not listed is @234 on @255
+ 0:  0-7   @94 on @255 bold
+ 0: 10-18  @94 on @255 bold underlined
+ 0: 21-26  @240 on @255
+ 0: 29-33  @240 on @255
+ 0: 36-44  @240 on @255
+ 0: 45-72  @102 on @255
+ 0: 73-73  @94 on @255 bold
+ 0: 74-79  @240 on @255
+ 1:  3-21  @94 on @255
+ 2:  3-21  @94 on @255
+ 3:  3-21  @94 on @255
+ 3: 24-27  @240 on @255
+ 4:  3-21  @94 on @255
+ 5:  3-21  @94 on @255
+ 6:  3-21  @94 on @255
+ 7:  3-21  @94 on @255
+ 8:  3-21  @94 on @255
+ 9:  3-21  @94 on @255
+ 9: 24-25  @234 on @255 bold
+10:  3-21  @94 on @255
+11:  0-22  @94 on @255
+12:  3-9   @94 on @255 bold reversed
+12: 12-20  @94 on @255 bold
+12: 21-23  @240 on @255
+12: 24-36  @94 on @255 bold
+12: 37-53  @94 on @255
+12: 64-68  @240 on @255
+14:  3-8   @94 on @255
+14: 11-18  @240 on @255
+15: 11-18  @240 on @255
+16: 11-18  @240 on @255
+17: 11-18  @240 on @255
+17: 21-44  @240 on @255
+18:  0-21  @94 on @255
+19:  3-3   @94 on @255
+19:  5-17  @94 on @255
+19: 18-35  @240 on @255
+20:  0-79  @102 on @255
+21:  0-0   @102 on @255
+21:  1-3   @94 on @255
+21:  4-47  @240 on @255
+21: 79-79  @102 on @255
+22:  0-79  @102 on @255
+23:  0-2   @102 on @255
+23:  3-3   @94 on @255
+23:  4-6   @102 on @255
+23:  7-17  @94 on @255 bold
+23: 18-20  @240 on @255
+23: 28-32  @102 on @255
+23: 33-42  @240 on @255
+23: 50-54  @102 on @255
+23: 55-63  @240 on @255
+23: 66-79  @102 on @255

@@ -1,0 +1,92 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, width, height))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·                        ••      ·        ∙  ·                                        ? keys
+┌ call 3 · solar.ping · 0.52 ms ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ request  sent 15:47:42.001 UTC                                                                                                                               │
+│ {                                                                                                                                                            │
+│   "jsonrpc": "2.0",                                                                                                                                          │
+│   "id": 3,                                                                                                                                                   │
+│   "method": "solar.ping",                                                                                                                                    │
+│   "params": {                                                                                                                                                │
+│     "message": "hello"                                                                                                                                       │
+│   }                                                                                                                                                          │
+│ }                                                                                                                                                            │
+│                                                                                                                                                              │
+│ response  received 15:47:42.002 UTC                                                                                                                          │
+│ {                                                                                                                                                            │
+│   "jsonrpc": "2.0",                                                                                                                                          │
+│   "id": 3,                                                                                                                                                   │
+│   "result": {                                                                                                                                                │
+│     "data": {                                                                                                                                                │
+│       "echo": "hello",                                                                                                                                       │
+│       "pong": true,                                                                                                                                          │
+│       "received_at": "2026-09-27T15:47:42.100521Z"                                                                                                           │
+│     },                                                                                                                                                       │
+│     "meta": {                                                                                                                                                │
+│       "request_id": 3,                                                                                                                                       │
+│       "method": "solar.ping",                                                                                                                                │
+│       "api_version": "1.0.0",                                                                                                                                │
+│       "solar_version": "0.1.0",                                                                                                                              │
+│       "protocol": "solar/1",                                                                                                                                 │
+│       "started_at": "2026-09-27T15:47:00.000000Z",                                                                                                           │
+│       "duration_us": 170,                                                                                                                                    │
+│       "os": "windows",                                                                                                                                       │
+│       "arch": "x86_64"                                                                                                                                       │
+│     },                                                                                                                                                       │
+│     "warnings": []                                                                                                                                           │
+│   }                                                                                                                                                          │
+│ }                                                                                                                                                            │
+│                                                                                                                                                              │
+│                                                                                                                                                              │
+│                                                                                                                                                              │
+│                                                                                                                                                              │
+│                                                                                                                                                              │
+│                                                                                                                                                              │
+│                                                                                                                                                              │
+│                                                                                                                                                              │
+│                                                                                                                                                              │
+│                                                                                                                                                              │
+└ ← → other calls  Esc close  ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 0.52 ms ─── in orbit 42s ───────────────────────────────────────────────────────────────────────────────────────────
+--- every cell not listed is #F5F1E8 on #0B0C14
+ 0:  0-7   #FFC23D on #0B0C14 bold
+ 0: 10-18  #FFC23D on #0B0C14 bold underlined
+ 0:153-153 #FFC23D on #0B0C14 bold
+ 1:  1-31  #FFC23D on #0B0C14 bold
+ 2:  2-8   #FFC23D on #0B0C14 bold
+ 4:  4-12  #FFC23D on #0B0C14
+ 5:  4-7   #FFC23D on #0B0C14
+ 5: 10-10  #F5F1E8 on #0B0C14 bold
+ 6:  4-11  #FFC23D on #0B0C14
+ 7:  4-11  #FFC23D on #0B0C14
+ 8:  6-14  #FFC23D on #0B0C14
+12:  2-9   #FFC23D on #0B0C14 bold
+14:  4-12  #FFC23D on #0B0C14
+15:  4-7   #FFC23D on #0B0C14
+15: 10-10  #F5F1E8 on #0B0C14 bold
+16:  4-11  #FFC23D on #0B0C14
+17:  6-11  #FFC23D on #0B0C14
+18:  8-13  #FFC23D on #0B0C14
+19:  8-13  #FFC23D on #0B0C14
+19: 16-19  #F5F1E8 on #0B0C14 bold
+20:  8-20  #FFC23D on #0B0C14
+22:  6-11  #FFC23D on #0B0C14
+23:  8-19  #FFC23D on #0B0C14
+23: 22-22  #F5F1E8 on #0B0C14 bold
+24:  8-15  #FFC23D on #0B0C14
+25:  8-20  #FFC23D on #0B0C14
+26:  8-22  #FFC23D on #0B0C14
+27:  8-17  #FFC23D on #0B0C14
+28:  8-19  #FFC23D on #0B0C14
+29:  8-20  #FFC23D on #0B0C14
+29: 23-25  #F5F1E8 on #0B0C14 bold
+30:  8-11  #FFC23D on #0B0C14
+31:  8-13  #FFC23D on #0B0C14
+33:  6-15  #FFC23D on #0B0C14
+33: 18-19  #F5F1E8 on #0B0C14 bold
+46:  2-4   #FFC23D on #0B0C14 bold
+46: 19-21  #FFC23D on #0B0C14 bold
+47:  3-3   #FFC23D on #0B0C14
+47:  7-17  #FFC23D on #0B0C14 bold

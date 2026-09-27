@@ -1,0 +1,87 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, width, height))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·                        ••      ·        ∙  ·                                        ? keys
+ 5 APIs · manifest 2.0.0                │ solar.ping 1.0.0 · experimental · since 0.1.0
+   solar.describe               1.0.0   │ Answers immediately, to prove SOLAR is there
+   solar.manifest               1.1.0   │ side effects none · idempotent · budget 1000 ms
+ › solar.ping                   1.0.0   │
+   solar.version                1.0.0   │ parameters
+   system.info                  1.1.0   │   message  string or null  optional
+                                        │            Anything the caller wants back, to tell one ping from another.
+                                        │ errors
+                                        │   none beyond those of dispatch
+                                        │ examples
+                                        │   1 bare            {}
+                                        │                     A ping with no message at all · compared by exact
+                                        │                     matches the example · 0.48 ms
+                                        │   2 with_a_message  {"message":"hi"}
+                                        │                     A ping that carries something to echo · compared by exact
+                                        │                     differs at /echo: expected "hi", received null
+                                        │ returns
+                                        │   echo         string or null
+                                        │   pong         boolean
+                                        │   received_at  string
+                                        │ description
+                                        │   The cheapest call SOLAR has. It touches nothing, reads nothing and starts nothing, so the time it takes is the
+                                        │   time the protocol itself costs: the round trip of a line through a pipe plus dispatch. That makes it the call to
+                                        │   measure with, and the call to reach for when something is not answering and the question is whether SOLAR is alive
+                                        │   at all.
+                                        │   Whatever is passed in `message` comes back in `echo`, untouched, which is how a caller tells one ping from another
+                                        │   when several are in flight.
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+ 1 to 9 run an example   a all   Enter form   e edit   f filter   R reload
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 0.47 ms ─── in orbit 42s ───────────────────────────────────────────────────────────────────────────────────────────
+--- every cell not listed is #F5F1E8 on #0B0C14
+ 0:  0-7   #FFC23D on #0B0C14 bold
+ 0: 21-26  #FFC23D on #0B0C14 bold underlined
+ 0:153-153 #FFC23D on #0B0C14 bold
+ 1: 42-51  #FFC23D on #0B0C14 bold
+ 2:  0-2   #FFC23D on #0B0C14
+ 3:  0-2   #FFC23D on #0B0C14
+ 4:  0-2   #FFC23D on #0B0C14 reversed
+ 4:  3-30  #FFC23D on #0B0C14 bold reversed
+ 4: 31-39  #F5F1E8 on #0B0C14 reversed
+ 5:  0-2   #FFC23D on #0B0C14
+ 5: 42-51  #FFC23D on #0B0C14 bold
+ 6:  0-2   #FFC23D on #0B0C14
+ 6: 44-50  #FFC23D on #0B0C14
+ 8: 42-47  #FFC23D on #0B0C14 bold
+10: 42-49  #FFC23D on #0B0C14 bold
+11: 44-44  #FFC23D on #0B0C14 bold
+11: 46-59  #FFC23D on #0B0C14
+13: 62-90  #FFC23D on #0B0C14
+14: 44-44  #FFC23D on #0B0C14 bold
+14: 46-59  #FFC23D on #0B0C14
+16: 62-107 #FFC23D on #0B0C14 bold
+17: 42-48  #FFC23D on #0B0C14 bold
+18: 44-54  #FFC23D on #0B0C14
+19: 44-54  #FFC23D on #0B0C14
+20: 44-54  #FFC23D on #0B0C14
+21: 42-52  #FFC23D on #0B0C14 bold
+46:  1-6   #FFC23D on #0B0C14 bold
+46: 25-25  #FFC23D on #0B0C14 bold
+46: 33-37  #FFC23D on #0B0C14 bold
+46: 46-46  #FFC23D on #0B0C14 bold
+46: 55-55  #FFC23D on #0B0C14 bold
+46: 66-66  #FFC23D on #0B0C14 bold
+47:  3-3   #FFC23D on #0B0C14
+47:  7-17  #FFC23D on #0B0C14 bold

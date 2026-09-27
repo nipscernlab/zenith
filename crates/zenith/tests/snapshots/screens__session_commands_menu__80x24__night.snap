@@ -1,0 +1,96 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, width, height))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·     ? keys
+
+
+
+
+
+
+
+
+
+ ┌─────────────────────────────────────────────────────────────────── 1 of 13 ┐
+ │› /list                               every API SOLAR answers to            │
+ │  /describe <api>                     one API: parameters, errors, side ef… │
+ │  /call <api> [json]                  any call, with its parameters as JSO… │
+ │  /ping [message]                     the round trip, and SOLAR's own time  │
+ │  /version                            the versions of SOLAR, its protocol … │
+ │  /theme [night|light|high-contrast]  the colours; with no name, the next … │
+ │  /help [command]                     the commands, or one of them          │
+ │  /quit                               leave ZENITH                          │
+ └ Tab inserts  ↑ ↓ choose  Esc closes ───────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ › /                                                                          │
+└──────────────────────────────────────────────────────────────────────────────┘
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 1.84 ms ─── in orbit 42s ───────────
+--- every cell not listed is #F5F1E8 on #0B0C14
+ 0:  0-7   #FFC23D on #0B0C14 bold
+ 0: 10-18  #FFC23D on #0B0C14 bold underlined
+ 0: 21-26  #9C9A97 on #0B0C14
+ 0: 29-33  #9C9A97 on #0B0C14
+ 0: 36-44  #9C9A97 on #0B0C14
+ 0: 45-72  #646365 on #0B0C14
+ 0: 73-73  #FFC23D on #0B0C14 bold
+ 0: 74-79  #9C9A97 on #0B0C14
+10:  1-68  #646365 on #0B0C14
+10: 69-77  #9C9A97 on #0B0C14
+10: 78-78  #646365 on #0B0C14
+11:  1-1   #646365 on #0B0C14
+11:  2-37  #FFC23D on #0B0C14
+11: 38-39  #F5F1E8 on #2C2C32
+11: 40-65  #9C9A97 on #0B0C14
+11: 78-78  #646365 on #0B0C14
+12:  1-1   #646365 on #0B0C14
+12:  2-37  #FFC23D on #0B0C14
+12: 40-76  #9C9A97 on #0B0C14
+12: 78-78  #646365 on #0B0C14
+13:  1-1   #646365 on #0B0C14
+13:  2-37  #FFC23D on #0B0C14
+13: 40-76  #9C9A97 on #0B0C14
+13: 78-78  #646365 on #0B0C14
+14:  1-1   #646365 on #0B0C14
+14:  2-37  #FFC23D on #0B0C14
+14: 40-75  #9C9A97 on #0B0C14
+14: 78-78  #646365 on #0B0C14
+15:  1-1   #646365 on #0B0C14
+15:  2-37  #FFC23D on #0B0C14
+15: 40-76  #9C9A97 on #0B0C14
+15: 78-78  #646365 on #0B0C14
+16:  1-1   #646365 on #0B0C14
+16:  2-37  #FFC23D on #0B0C14
+16: 40-76  #9C9A97 on #0B0C14
+16: 78-78  #646365 on #0B0C14
+17:  1-1   #646365 on #0B0C14
+17:  2-37  #FFC23D on #0B0C14
+17: 40-67  #9C9A97 on #0B0C14
+17: 78-78  #646365 on #0B0C14
+18:  1-1   #646365 on #0B0C14
+18:  2-37  #FFC23D on #0B0C14
+18: 40-51  #9C9A97 on #0B0C14
+18: 78-78  #646365 on #0B0C14
+19:  1-1   #646365 on #0B0C14
+19:  2-5   #FFC23D on #0B0C14 bold
+19:  6-15  #9C9A97 on #0B0C14
+19: 16-18  #FFC23D on #0B0C14 bold
+19: 19-27  #9C9A97 on #0B0C14
+19: 28-30  #FFC23D on #0B0C14 bold
+19: 31-38  #9C9A97 on #0B0C14
+19: 39-78  #646365 on #0B0C14
+20:  0-79  #646365 on #0B0C14
+21:  0-0   #646365 on #0B0C14
+21:  1-3   #FFC23D on #0B0C14
+21: 79-79  #646365 on #0B0C14
+22:  0-79  #646365 on #0B0C14
+23:  0-2   #646365 on #0B0C14
+23:  3-3   #FFC23D on #0B0C14
+23:  4-6   #646365 on #0B0C14
+23:  7-17  #FFC23D on #0B0C14 bold
+23: 18-20  #9C9A97 on #0B0C14
+23: 28-32  #646365 on #0B0C14
+23: 33-42  #9C9A97 on #0B0C14
+23: 50-54  #646365 on #0B0C14
+23: 55-63  #9C9A97 on #0B0C14
+23: 67-79  #646365 on #0B0C14

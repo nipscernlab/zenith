@@ -1,0 +1,121 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, width, height))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·                        ••      ·        ∙  ·                                        ? keys
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   · Connected to SOLAR 0.1.0 in 1.84 ms: protocol solar/1, manifest 2.0.0, 5 APIs.
+     This SOLAR has no solar.cancel. Type / for the commands, or ? for every key.
+ › /ping hello
+    ok   pong in 0.52 ms · 0.17 ms in SOLAR · echo hello · solar.ping 1.0.0 · #3
+ › /call system.info
+    ok   system.info 1.0.0 · 0.61 ms · 0.17 ms in SOLAR · #4
+   arch                 x86_64
+   cpu_count            16
+   current_dir          /home/lab/zenith
+   executable           /home/lab/solar/target/release/solar
+   os                   linux
+   os_build             null
+   os_family            unix
+   os_name              AlmaLinux
+   os_release           "9.8"
+   path_list_separator  :
+   path_separator       /
+   pointer_width        64
+   temp_dir             /tmp
+ › /describe solar.pign
+    error   NOT_FOUND · API_NOT_FOUND · solar.describe · 0.31 ms · #5
+   No API is registered under the name solar.pign.
+   /api    expected  solar.ping
+           received  solar.pign
+           hint      Did you mean "solar.ping"? The edit distance is 2.
+           docs      docs/ERRORS.md#not_found
+ › /call solar.version
+   ∙ solar.version, waiting 300.0 ms
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ › Type / for the commands, or ? for every key.                                                                                                               │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 0.31 ms ─── in orbit 3s ────────────────────────────────────────────────────────────────────────────────────────────
+--- every cell not listed is #17161C on #F5F1E8
+ 0:  0-7   #8C4907 on #F5F1E8 bold
+ 0: 10-18  #8C4907 on #F5F1E8 bold underlined
+ 0: 21-26  #555355 on #F5F1E8
+ 0: 29-33  #555355 on #F5F1E8
+ 0: 36-44  #555355 on #F5F1E8
+ 0: 45-152 #868482 on #F5F1E8
+ 0:153-153 #8C4907 on #F5F1E8 bold
+ 0:154-159 #555355 on #F5F1E8
+16:  3-3   #8C4907 on #F5F1E8
+18:  0-13  #8C4907 on #F5F1E8
+19:  3-6   #8C4907 on #F5F1E8 bold reversed
+19:  9-12  #8C4907 on #F5F1E8 bold
+19: 24-50  #555355 on #F5F1E8
+19: 56-79  #555355 on #F5F1E8
+20:  0-19  #8C4907 on #F5F1E8
+21:  3-6   #8C4907 on #F5F1E8 bold reversed
+21:  9-19  #8C4907 on #F5F1E8
+21: 20-25  #555355 on #F5F1E8
+21: 36-59  #555355 on #F5F1E8
+22:  3-21  #8C4907 on #F5F1E8
+23:  3-21  #8C4907 on #F5F1E8
+23: 24-25  #17161C on #F5F1E8 bold
+24:  3-21  #8C4907 on #F5F1E8
+25:  3-21  #8C4907 on #F5F1E8
+26:  3-21  #8C4907 on #F5F1E8
+27:  3-21  #8C4907 on #F5F1E8
+27: 24-27  #555355 on #F5F1E8
+28:  3-21  #8C4907 on #F5F1E8
+29:  3-21  #8C4907 on #F5F1E8
+30:  3-21  #8C4907 on #F5F1E8
+31:  3-21  #8C4907 on #F5F1E8
+32:  3-21  #8C4907 on #F5F1E8
+33:  3-21  #8C4907 on #F5F1E8
+33: 24-25  #17161C on #F5F1E8 bold
+34:  3-21  #8C4907 on #F5F1E8
+35:  0-22  #8C4907 on #F5F1E8
+36:  3-9   #8C4907 on #F5F1E8 bold reversed
+36: 12-20  #8C4907 on #F5F1E8 bold
+36: 21-23  #555355 on #F5F1E8
+36: 24-36  #8C4907 on #F5F1E8 bold
+36: 37-53  #8C4907 on #F5F1E8
+36: 64-68  #555355 on #F5F1E8
+38:  3-8   #8C4907 on #F5F1E8
+38: 11-18  #555355 on #F5F1E8
+39: 11-18  #555355 on #F5F1E8
+40: 11-18  #555355 on #F5F1E8
+41: 11-18  #555355 on #F5F1E8
+41: 21-44  #555355 on #F5F1E8
+42:  0-21  #8C4907 on #F5F1E8
+43:  3-3   #8C4907 on #F5F1E8
+43:  5-17  #8C4907 on #F5F1E8
+43: 18-35  #555355 on #F5F1E8
+44:  0-159 #868482 on #F5F1E8
+45:  0-0   #868482 on #F5F1E8
+45:  1-3   #8C4907 on #F5F1E8
+45:  4-47  #555355 on #F5F1E8
+45:159-159 #868482 on #F5F1E8
+46:  0-159 #868482 on #F5F1E8
+47:  0-2   #868482 on #F5F1E8
+47:  3-3   #8C4907 on #F5F1E8
+47:  4-6   #868482 on #F5F1E8
+47:  7-17  #8C4907 on #F5F1E8 bold
+47: 18-20  #555355 on #F5F1E8
+47: 28-32  #868482 on #F5F1E8
+47: 33-42  #555355 on #F5F1E8
+47: 50-54  #868482 on #F5F1E8
+47: 55-63  #555355 on #F5F1E8
+47: 66-159 #868482 on #F5F1E8

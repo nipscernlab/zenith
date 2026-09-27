@@ -1,0 +1,93 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, width, height))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·                        ••      ·        ∙  ·                                        ? keys
+ level  error  warn  info  debug [trace]                                                                    6 lines · 0 dropped · keeps 20 000 lines or 16 MiB
+ 15:47:00.000 TRACE --> {"jsonrpc":"2.0","id":1,"method":"solar.version","params":{}}
+ 15:47:00.000 TRACE <-- {"jsonrpc":"2.0","id":1,"result":{"data":{"solar_version":"0.1.0"}}}
+ 15:47:03.100 DEBUG #3 solar.ping 0.17 ms answered
+ 15:47:03.200 WARN  #4 system.info the os-release file could not be read
+ 15:47:09.000 INFO  the session ended after 4 calls
+ 15:47:42.001 RAW   thread 'main' panicked at crates/solar-core/src/dispatch.rs:120:9:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ e w i d t level   ← → fewer, more   Enter whole line   G follow   c clear
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 1.84 ms ─── in orbit 42s ───────────────────────────────────────────────────────────────────────────────────────────
+--- every cell not listed is #F5F1E8 on #0B0C14
+ 0:  0-7   #FFC23D on #0B0C14 bold
+ 0: 10-18  #9C9A97 on #0B0C14
+ 0: 21-26  #9C9A97 on #0B0C14
+ 0: 29-33  #FFC23D on #0B0C14 bold underlined
+ 0: 36-44  #9C9A97 on #0B0C14
+ 0: 45-152 #646365 on #0B0C14
+ 0:153-153 #FFC23D on #0B0C14 bold
+ 0:154-159 #9C9A97 on #0B0C14
+ 1:  0-32  #9C9A97 on #0B0C14
+ 1: 33-39  #FFC23D on #0B0C14 bold underlined
+ 1: 40-158 #9C9A97 on #0B0C14
+ 2:  0-19  #9C9A97 on #0B0C14
+ 3:  0-19  #9C9A97 on #0B0C14
+ 4:  0-19  #9C9A97 on #0B0C14
+ 4: 20-41  #FFC23D on #0B0C14
+ 5:  0-13  #9C9A97 on #0B0C14
+ 5: 14-34  #FFC23D on #0B0C14
+ 6:  0-13  #9C9A97 on #0B0C14
+ 7:  0-13  #9C9A97 on #0B0C14
+ 7: 14-19  #D98E1F on #0B0C14 bold
+46:  1-9   #FFC23D on #0B0C14 bold
+46: 10-18  #9C9A97 on #0B0C14
+46: 19-21  #FFC23D on #0B0C14 bold
+46: 22-36  #9C9A97 on #0B0C14
+46: 37-41  #FFC23D on #0B0C14 bold
+46: 42-55  #9C9A97 on #0B0C14
+46: 56-56  #FFC23D on #0B0C14 bold
+46: 57-66  #9C9A97 on #0B0C14
+46: 67-67  #FFC23D on #0B0C14 bold
+46: 68-76  #9C9A97 on #0B0C14
+47:  0-2   #646365 on #0B0C14
+47:  3-3   #FFC23D on #0B0C14
+47:  4-6   #646365 on #0B0C14
+47:  7-17  #FFC23D on #0B0C14 bold
+47: 18-20  #9C9A97 on #0B0C14
+47: 28-32  #646365 on #0B0C14
+47: 33-42  #9C9A97 on #0B0C14
+47: 50-54  #646365 on #0B0C14
+47: 55-63  #9C9A97 on #0B0C14
+47: 67-159 #646365 on #0B0C14

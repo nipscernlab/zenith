@@ -1,0 +1,147 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, width, height))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·                        ••      ·        ∙  ·                                        ? keys
+ 5 APIs · manifest 2.0.0                │ solar.describe parameters
+ › solar.describe               1.0.0   │
+   solar.manifest               1.1.0   │ › api  string  required
+   solar.ping                   1.0.0   │     [ text_ ]
+   solar.version                1.0.0   │     The method name to describe, for example `solar.ping`.
+   system.info                  1.1.0   │      error  api is required.
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+ Enter run   Tab next field   Space toggle   Esc close
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 1.84 ms ─── in orbit 42s ───────────────────────────────────────────────────────────────────────────────────────────
+--- every cell not listed is #F5F1E8 on #0B0C14
+ 0:  0-7   #FFC23D on #0B0C14 bold
+ 0: 10-18  #9C9A97 on #0B0C14
+ 0: 21-26  #FFC23D on #0B0C14 bold underlined
+ 0: 29-33  #9C9A97 on #0B0C14
+ 0: 36-44  #9C9A97 on #0B0C14
+ 0: 45-152 #646365 on #0B0C14
+ 0:153-153 #FFC23D on #0B0C14 bold
+ 0:154-159 #9C9A97 on #0B0C14
+ 1:  0-23  #9C9A97 on #0B0C14
+ 1: 40-40  #646365 on #0B0C14
+ 1: 42-55  #FFC23D on #0B0C14 bold
+ 1: 56-66  #9C9A97 on #0B0C14
+ 2:  0-2   #FFC23D on #0B0C14
+ 2:  3-30  #FFC23D on #0B0C14 bold
+ 2: 31-39  #9C9A97 on #0B0C14
+ 2: 40-40  #646365 on #0B0C14
+ 3:  0-2   #FFC23D on #0B0C14
+ 3: 31-39  #9C9A97 on #0B0C14
+ 3: 40-40  #646365 on #0B0C14
+ 3: 41-43  #FFC23D on #0B0C14
+ 3: 44-46  #FFC23D on #0B0C14 bold
+ 3: 55-64  #9C9A97 on #0B0C14
+ 4:  0-2   #FFC23D on #0B0C14
+ 4: 31-39  #9C9A97 on #0B0C14
+ 4: 40-40  #646365 on #0B0C14
+ 4: 41-45  #F5F1E8 on #2C2C32
+ 4: 46-51  #646365 on #0B0C14
+ 4: 52-52  #FFC23D on #0B0C14
+ 4: 53-54  #646365 on #0B0C14
+ 5:  0-2   #FFC23D on #0B0C14
+ 5: 31-39  #9C9A97 on #0B0C14
+ 5: 40-40  #646365 on #0B0C14
+ 5: 46-99  #9C9A97 on #0B0C14
+ 6:  0-2   #FFC23D on #0B0C14
+ 6: 31-39  #9C9A97 on #0B0C14
+ 6: 40-40  #646365 on #0B0C14
+ 6: 46-52  #D98E1F on #0B0C14 bold reversed
+ 7: 40-40  #646365 on #0B0C14
+ 8: 40-40  #646365 on #0B0C14
+ 9: 40-40  #646365 on #0B0C14
+10: 40-40  #646365 on #0B0C14
+11: 40-40  #646365 on #0B0C14
+12: 40-40  #646365 on #0B0C14
+13: 40-40  #646365 on #0B0C14
+14: 40-40  #646365 on #0B0C14
+15: 40-40  #646365 on #0B0C14
+16: 40-40  #646365 on #0B0C14
+17: 40-40  #646365 on #0B0C14
+18: 40-40  #646365 on #0B0C14
+19: 40-40  #646365 on #0B0C14
+20: 40-40  #646365 on #0B0C14
+21: 40-40  #646365 on #0B0C14
+22: 40-40  #646365 on #0B0C14
+23: 40-40  #646365 on #0B0C14
+24: 40-40  #646365 on #0B0C14
+25: 40-40  #646365 on #0B0C14
+26: 40-40  #646365 on #0B0C14
+27: 40-40  #646365 on #0B0C14
+28: 40-40  #646365 on #0B0C14
+29: 40-40  #646365 on #0B0C14
+30: 40-40  #646365 on #0B0C14
+31: 40-40  #646365 on #0B0C14
+32: 40-40  #646365 on #0B0C14
+33: 40-40  #646365 on #0B0C14
+34: 40-40  #646365 on #0B0C14
+35: 40-40  #646365 on #0B0C14
+36: 40-40  #646365 on #0B0C14
+37: 40-40  #646365 on #0B0C14
+38: 40-40  #646365 on #0B0C14
+39: 40-40  #646365 on #0B0C14
+40: 40-40  #646365 on #0B0C14
+41: 40-40  #646365 on #0B0C14
+42: 40-40  #646365 on #0B0C14
+43: 40-40  #646365 on #0B0C14
+44: 40-40  #646365 on #0B0C14
+45: 40-40  #646365 on #0B0C14
+46:  1-5   #FFC23D on #0B0C14 bold
+46:  6-12  #9C9A97 on #0B0C14
+46: 13-15  #FFC23D on #0B0C14 bold
+46: 16-29  #9C9A97 on #0B0C14
+46: 30-34  #FFC23D on #0B0C14 bold
+46: 35-44  #9C9A97 on #0B0C14
+46: 45-47  #FFC23D on #0B0C14 bold
+46: 48-56  #9C9A97 on #0B0C14
+47:  0-2   #646365 on #0B0C14
+47:  3-3   #FFC23D on #0B0C14
+47:  4-6   #646365 on #0B0C14
+47:  7-17  #FFC23D on #0B0C14 bold
+47: 18-20  #9C9A97 on #0B0C14
+47: 28-32  #646365 on #0B0C14
+47: 33-42  #9C9A97 on #0B0C14
+47: 50-54  #646365 on #0B0C14
+47: 55-63  #9C9A97 on #0B0C14
+47: 67-159 #646365 on #0B0C14

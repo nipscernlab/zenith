@@ -1,0 +1,164 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, width, height))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·                        ••      ·        ∙  ·                                        ? keys
+ 5 APIs · manifest 2.0.0                │ solar.ping 1.0.0 · experimental · since 0.1.0
+   solar.describe               1.0.0   │ Answers immediately, to prove SOLAR is there
+   solar.manifest               1.1.0   │ side effects none · idempotent · budget 1000 ms
+ › solar.ping                   1.0.0   │
+   solar.version                1.0.0   │ parameters
+   system.info                  1.1.0   │   message  string or null  optional
+                                        │            Anything the caller wants back, to tell one ping from another.
+                                        │ errors
+                                        │   none beyond those of dispatch
+                                        │ examples
+                                        │   1 bare            {}
+                                        │                     A ping with no message at all · compared by exact
+                                        │                     matches the example · 0.48 ms
+                                        │   2 with_a_message  {"message":"hi"}
+                                        │                     A ping that carries something to echo · compared by exact
+                                        │                     differs at /echo: expected "hi", received null
+                                        │ returns
+                                        │   echo         string or null
+                                        │   pong         boolean
+                                        │   received_at  string
+                                        │ description
+                                        │   The cheapest call SOLAR has. It touches nothing, reads nothing and starts nothing, so the time it takes is the
+                                        │   time the protocol itself costs: the round trip of a line through a pipe plus dispatch. That makes it the call to
+                                        │   measure with, and the call to reach for when something is not answering and the question is whether SOLAR is alive
+                                        │   at all.
+                                        │   Whatever is passed in `message` comes back in `echo`, untouched, which is how a caller tells one ping from another
+                                        │   when several are in flight.
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+                                        │
+ 1 to 9 run an example   a all   Enter form   e edit   f filter   R reload
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 0.47 ms ─── in orbit 42s ───────────────────────────────────────────────────────────────────────────────────────────
+--- every cell not listed is #17161C on #F5F1E8
+ 0:  0-7   #8C4907 on #F5F1E8 bold
+ 0: 10-18  #555355 on #F5F1E8
+ 0: 21-26  #8C4907 on #F5F1E8 bold underlined
+ 0: 29-33  #555355 on #F5F1E8
+ 0: 36-44  #555355 on #F5F1E8
+ 0: 45-152 #868482 on #F5F1E8
+ 0:153-153 #8C4907 on #F5F1E8 bold
+ 0:154-159 #555355 on #F5F1E8
+ 1:  0-23  #555355 on #F5F1E8
+ 1: 40-40  #868482 on #F5F1E8
+ 1: 42-51  #8C4907 on #F5F1E8 bold
+ 1: 58-86  #555355 on #F5F1E8
+ 2:  0-2   #8C4907 on #F5F1E8
+ 2: 31-39  #555355 on #F5F1E8
+ 2: 40-40  #868482 on #F5F1E8
+ 3:  0-2   #8C4907 on #F5F1E8
+ 3: 31-39  #555355 on #F5F1E8
+ 3: 40-40  #868482 on #F5F1E8
+ 3: 42-54  #555355 on #F5F1E8
+ 3: 59-88  #555355 on #F5F1E8
+ 4:  0-2   #8C4907 on #F5F1E8
+ 4:  3-30  #8C4907 on #F5F1E8 bold
+ 4: 31-39  #555355 on #F5F1E8
+ 4: 40-40  #868482 on #F5F1E8
+ 5:  0-2   #8C4907 on #F5F1E8
+ 5: 31-39  #555355 on #F5F1E8
+ 5: 40-40  #868482 on #F5F1E8
+ 5: 42-51  #8C4907 on #F5F1E8 bold
+ 6:  0-2   #8C4907 on #F5F1E8
+ 6: 31-39  #555355 on #F5F1E8
+ 6: 40-40  #868482 on #F5F1E8
+ 6: 44-50  #8C4907 on #F5F1E8
+ 6: 67-76  #555355 on #F5F1E8
+ 7: 40-40  #868482 on #F5F1E8
+ 7: 53-114 #555355 on #F5F1E8
+ 8: 40-40  #868482 on #F5F1E8
+ 8: 42-47  #8C4907 on #F5F1E8 bold
+ 9: 40-40  #868482 on #F5F1E8
+ 9: 41-72  #555355 on #F5F1E8
+10: 40-40  #868482 on #F5F1E8
+10: 42-49  #8C4907 on #F5F1E8 bold
+11: 40-40  #868482 on #F5F1E8
+11: 44-44  #8C4907 on #F5F1E8 bold
+11: 46-59  #8C4907 on #F5F1E8
+12: 40-40  #868482 on #F5F1E8
+12: 62-110 #555355 on #F5F1E8
+13: 40-40  #868482 on #F5F1E8
+13: 62-90  #8C4907 on #F5F1E8
+14: 40-40  #868482 on #F5F1E8
+14: 44-44  #8C4907 on #F5F1E8 bold
+14: 46-59  #8C4907 on #F5F1E8
+15: 40-40  #868482 on #F5F1E8
+15: 62-118 #555355 on #F5F1E8
+16: 40-40  #868482 on #F5F1E8
+16: 62-107 #8C4907 on #F5F1E8 bold
+17: 40-40  #868482 on #F5F1E8
+17: 42-48  #8C4907 on #F5F1E8 bold
+18: 40-40  #868482 on #F5F1E8
+18: 44-54  #8C4907 on #F5F1E8
+19: 40-40  #868482 on #F5F1E8
+19: 44-54  #8C4907 on #F5F1E8
+20: 40-40  #868482 on #F5F1E8
+20: 44-54  #8C4907 on #F5F1E8
+21: 40-40  #868482 on #F5F1E8
+21: 42-52  #8C4907 on #F5F1E8 bold
+22: 40-40  #868482 on #F5F1E8
+23: 40-40  #868482 on #F5F1E8
+24: 40-40  #868482 on #F5F1E8
+25: 40-40  #868482 on #F5F1E8
+26: 40-40  #868482 on #F5F1E8
+27: 40-40  #868482 on #F5F1E8
+28: 40-40  #868482 on #F5F1E8
+29: 40-40  #868482 on #F5F1E8
+30: 40-40  #868482 on #F5F1E8
+31: 40-40  #868482 on #F5F1E8
+32: 40-40  #868482 on #F5F1E8
+33: 40-40  #868482 on #F5F1E8
+34: 40-40  #868482 on #F5F1E8
+35: 40-40  #868482 on #F5F1E8
+36: 40-40  #868482 on #F5F1E8
+37: 40-40  #868482 on #F5F1E8
+38: 40-40  #868482 on #F5F1E8
+39: 40-40  #868482 on #F5F1E8
+40: 40-40  #868482 on #F5F1E8
+41: 40-40  #868482 on #F5F1E8
+42: 40-40  #868482 on #F5F1E8
+43: 40-40  #868482 on #F5F1E8
+44: 40-40  #868482 on #F5F1E8
+45: 40-40  #868482 on #F5F1E8
+46:  1-6   #8C4907 on #F5F1E8 bold
+46:  7-24  #555355 on #F5F1E8
+46: 25-25  #8C4907 on #F5F1E8 bold
+46: 26-32  #555355 on #F5F1E8
+46: 33-37  #8C4907 on #F5F1E8 bold
+46: 38-45  #555355 on #F5F1E8
+46: 46-46  #8C4907 on #F5F1E8 bold
+46: 47-54  #555355 on #F5F1E8
+46: 55-55  #8C4907 on #F5F1E8 bold
+46: 56-65  #555355 on #F5F1E8
+46: 66-66  #8C4907 on #F5F1E8 bold
+46: 67-76  #555355 on #F5F1E8
+47:  0-2   #868482 on #F5F1E8
+47:  3-3   #8C4907 on #F5F1E8
+47:  4-6   #868482 on #F5F1E8
+47:  7-17  #8C4907 on #F5F1E8 bold
+47: 18-20  #555355 on #F5F1E8
+47: 28-32  #868482 on #F5F1E8
+47: 33-42  #555355 on #F5F1E8
+47: 50-54  #868482 on #F5F1E8
+47: 55-63  #555355 on #F5F1E8
+47: 67-159 #868482 on #F5F1E8

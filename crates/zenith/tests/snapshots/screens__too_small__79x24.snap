@@ -1,0 +1,16 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "characters(&draw(&script.app, 79, 24))"
+---
+
+
+
+
+
+
+
+
+
+
+
+              ZENITH needs 80 × 24, and this terminal is 79 × 24.

@@ -1,0 +1,78 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: screen(&buffer)
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                .     .     ? keys
+
+
+
+
+
+
+
+
+
+ +------------------------------------------------------------------- 1 of 13 +
+ |> /list                               every API SOLAR answers to            |
+ |  /describe <api>                     one API: parameters, errors, side ... |
+ |  /call <api> [json]                  any call, with its parameters as J... |
+ |  /ping [message]                     the round trip, and SOLAR's own time  |
+ |  /version                            the versions of SOLAR, its protoco... |
+ |  /theme [night|light|high-contrast]  the colours; with no name, the nex... |
+ |  /help [command]                     the commands, or one of them          |
+ |  /quit                               leave ZENITH                          |
+ + Tab inserts  Up Down choose  Esc closes -----------------------------------+
++------------------------------------------------------------------------------+
+| > /                                                                          |
++------------------------------------------------------------------------------+
+ --*-- SOLAR 0.1.0 - solar/1 --- last call 1.84 ms --- in orbit 42s -----------
+--- every cell not listed is - on -
+ 0:  0-7   - on - bold
+ 0: 10-18  - on - bold underlined
+ 0: 45-72  - on - dim
+ 0: 73-73  - on - bold
+10:  1-78  - on - dim
+11:  1-1   - on - dim
+11:  2-37  - on - bold reversed
+11: 38-65  - on - reversed
+11: 78-78  - on - dim
+12:  1-1   - on - dim
+12:  2-37  - on - bold
+12: 78-78  - on - dim
+13:  1-1   - on - dim
+13:  2-37  - on - bold
+13: 78-78  - on - dim
+14:  1-1   - on - dim
+14:  2-37  - on - bold
+14: 78-78  - on - dim
+15:  1-1   - on - dim
+15:  2-37  - on - bold
+15: 78-78  - on - dim
+16:  1-1   - on - dim
+16:  2-37  - on - bold
+16: 78-78  - on - dim
+17:  1-1   - on - dim
+17:  2-37  - on - bold
+17: 78-78  - on - dim
+18:  1-1   - on - dim
+18:  2-37  - on - bold
+18: 78-78  - on - dim
+19:  1-1   - on - dim
+19:  2-5   - on - bold dim
+19:  6-15  - on - dim
+19: 16-22  - on - bold dim
+19: 23-31  - on - dim
+19: 32-34  - on - bold dim
+19: 35-78  - on - dim
+20:  0-79  - on - dim
+21:  0-0   - on - dim
+21:  1-3   - on - bold
+21: 79-79  - on - dim
+22:  0-79  - on - dim
+23:  0-2   - on - dim
+23:  3-3   - on - bold
+23:  4-6   - on - dim
+23:  7-17  - on - bold
+23: 28-32  - on - dim
+23: 50-54  - on - dim
+23: 67-79  - on - dim

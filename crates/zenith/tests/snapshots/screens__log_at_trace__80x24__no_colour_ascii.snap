@@ -1,0 +1,49 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: screen(&buffer)
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                .     .     ? keys
+ level  error  warn  info  debug [trace]                   6 lines - 0 dropped
+ 15:47:00.000 TRACE --> {"jsonrpc":"2.0","id":1,"method":"solar.version","par...
+ 15:47:00.000 TRACE <-- {"jsonrpc":"2.0","id":1,"result":{"data":{"solar_vers...
+ 15:47:03.100 DEBUG #3 solar.ping 0.17 ms answered
+ 15:47:03.200 WARN  #4 system.info the os-release file could not be read
+ 15:47:09.000 INFO  the session ended after 4 calls
+ 15:47:42.001 RAW   thread 'main' panicked at crates/solar-core/src/dispatch....
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ e w i d t level   Left Right fewer, more   Enter whole line   G follow   c clea
+ --*-- SOLAR 0.1.0 - solar/1 --- last call 1.84 ms --- in orbit 42s -----------
+--- every cell not listed is - on -
+ 0:  0-7   - on - bold
+ 0: 29-33  - on - bold underlined
+ 0: 45-72  - on - dim
+ 0: 73-73  - on - bold
+ 1: 33-39  - on - bold underlined
+ 4: 20-41  - on - bold
+ 5: 14-34  - on - bold
+ 7: 14-19  - on - bold
+22:  1-9   - on - bold
+22: 19-28  - on - bold
+22: 44-48  - on - bold
+22: 63-63  - on - bold
+22: 74-74  - on - bold
+23:  0-2   - on - dim
+23:  3-3   - on - bold
+23:  4-6   - on - dim
+23:  7-17  - on - bold
+23: 28-32  - on - dim
+23: 50-54  - on - dim
+23: 67-79  - on - dim

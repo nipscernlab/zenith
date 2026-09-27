@@ -1,0 +1,55 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: screen(&buffer)
+---
+                                   *   *                            .
+                                         +             '
+       '        .                                       *
+         **        +               +       *
+ +   '.
+  .
+               ..######..                                               '    *
+             .############.
+'           .####              SOLAR                                    +
+            ################   The central API of the Constellation
+            ################   NIPS-CERN
+                       ####'   connecting
+             '############'
+               ''######''
+
+
+*                  ZENITH 0.1.0, the terminal of Constellation   .
+
+
+                *                        .     '            *         .
+
+                       +                                           +
+       *            +          +
+                                 *        *.   '
+--- every cell not listed is - on -
+ 0: 39-39  - on - dim
+ 0: 68-68  - on - dim
+ 1: 55-55  - on - dim
+ 2:  7-7   - on - dim
+ 2: 16-16  - on - dim
+ 2: 56-56  - on - dim
+ 3: 10-10  - on - dim
+ 3: 19-19  - on - dim
+ 3: 43-43  - on - dim
+ 4:  1-1   - on - dim
+ 4:  5-5   - on - dim
+ 8:  0-0   - on - dim
+ 8: 31-35  - on - bold
+16: 65-65  - on - dim
+19: 41-41  - on - dim
+19: 47-47  - on - dim
+19: 60-60  - on - dim
+19: 70-70  - on - dim
+21: 23-23  - on - dim
+21: 67-67  - on - dim
+22:  7-7   - on - dim
+22: 20-20  - on - dim
+22: 31-31  - on - dim
+23: 33-33  - on - dim
+23: 43-43  - on - dim
+23: 47-47  - on - dim

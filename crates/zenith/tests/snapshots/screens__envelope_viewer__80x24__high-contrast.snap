@@ -1,0 +1,54 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, width, height))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·     ? keys
+┌ call 3 · solar.ping · 0.52 ms ───────────────────────────────────────────────┐
+│ request  sent 15:47:42.001 UTC                                               │
+│ {                                                                            │
+│   "jsonrpc": "2.0",                                                          │
+│   "id": 3,                                                                   │
+│   "method": "solar.ping",                                                    │
+│   "params": {                                                                │
+│     "message": "hello"                                                       │
+│   }                                                                          │
+│ }                                                                            │
+│                                                                              │
+│ response  received 15:47:42.002 UTC                                          │
+│ {                                                                            │
+│   "jsonrpc": "2.0",                                                          │
+│   "id": 3,                                                                   │
+│   "result": {                                                                │
+│     "data": {                                                                │
+│       "echo": "hello",                                                       │
+│       "pong": true,                                                          │
+│       "received_at": "2026-09-27T15:47:42.100521Z"                           │
+│     },                                                                       │
+└ ← → other calls  Esc close  ─────────────────────────────────────────────────┘
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 0.52 ms ─── in orbit 42s ───────────
+--- every cell not listed is #F5F1E8 on #0B0C14
+ 0:  0-7   #FFC23D on #0B0C14 bold
+ 0: 10-18  #FFC23D on #0B0C14 bold underlined
+ 0: 73-73  #FFC23D on #0B0C14 bold
+ 1:  1-31  #FFC23D on #0B0C14 bold
+ 2:  2-8   #FFC23D on #0B0C14 bold
+ 4:  4-12  #FFC23D on #0B0C14
+ 5:  4-7   #FFC23D on #0B0C14
+ 5: 10-10  #F5F1E8 on #0B0C14 bold
+ 6:  4-11  #FFC23D on #0B0C14
+ 7:  4-11  #FFC23D on #0B0C14
+ 8:  6-14  #FFC23D on #0B0C14
+12:  2-9   #FFC23D on #0B0C14 bold
+14:  4-12  #FFC23D on #0B0C14
+15:  4-7   #FFC23D on #0B0C14
+15: 10-10  #F5F1E8 on #0B0C14 bold
+16:  4-11  #FFC23D on #0B0C14
+17:  6-11  #FFC23D on #0B0C14
+18:  8-13  #FFC23D on #0B0C14
+19:  8-13  #FFC23D on #0B0C14
+19: 16-19  #F5F1E8 on #0B0C14 bold
+20:  8-20  #FFC23D on #0B0C14
+22:  2-4   #FFC23D on #0B0C14 bold
+22: 19-21  #FFC23D on #0B0C14 bold
+23:  3-3   #FFC23D on #0B0C14
+23:  7-17  #FFC23D on #0B0C14 bold

@@ -1,0 +1,78 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, 80, 24))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·     ? keys
+   executable           /home/lab/solar/target/release/solar
+   os                   linux
+   os_build             null
+   os_family            unix
+   os_name              AlmaLinux
+   os_release           "9.8"
+   path_list_separator  :
+   path_separator       /
+   pointer_width        64
+   temp_dir             /tmp
+ › /describe solar.pign
+    error   NOT_FOUND · API_NOT_FOUND · solar.describe · 0.31 ms · #5
+   No API is registered under the name solar.pign.
+   /api    expected  solar.ping
+           received  solar.pign
+           hint      Did you mean "solar.ping"? The edit distance is 2.
+           docs      docs/ERRORS.md#not_found
+ › /call solar.version
+   ∙ solar.version, waiting 300.0 ms
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ › Type / for the commands, or ? for every key.                               │
+└──────────────────────────────────────────────────────────────────────────────┘
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 0.31 ms ─── in orbit 3s ────────────
+--- every cell not listed is Black on White
+ 0:  0-7   Red on White bold
+ 0: 10-18  Red on White bold underlined
+ 0: 21-26  DarkGray on White
+ 0: 29-33  DarkGray on White
+ 0: 36-72  DarkGray on White
+ 0: 73-73  Red on White bold
+ 0: 74-79  DarkGray on White
+ 1:  3-21  Red on White bold
+ 2:  3-21  Red on White bold
+ 3:  3-21  Red on White bold
+ 3: 24-27  DarkGray on White
+ 4:  3-21  Red on White bold
+ 5:  3-21  Red on White bold
+ 6:  3-21  Red on White bold
+ 7:  3-21  Red on White bold
+ 8:  3-21  Red on White bold
+ 9:  3-21  Red on White bold
+ 9: 24-25  Black on White bold
+10:  3-21  Red on White bold
+11:  0-22  Red on White bold
+12:  3-9   Red on White bold reversed
+12: 12-20  Red on White bold
+12: 21-23  DarkGray on White
+12: 24-53  Red on White bold
+12: 64-68  DarkGray on White
+14:  3-8   Red on White bold
+14: 11-18  DarkGray on White
+15: 11-18  DarkGray on White
+16: 11-18  DarkGray on White
+17: 11-18  DarkGray on White
+17: 21-44  DarkGray on White
+18:  0-21  Red on White bold
+19:  3-3   Red on White bold
+19:  5-17  Red on White bold
+19: 18-35  DarkGray on White
+20:  0-79  DarkGray on White
+21:  0-0   DarkGray on White
+21:  1-3   Red on White bold
+21:  4-47  DarkGray on White
+21: 79-79  DarkGray on White
+22:  0-79  DarkGray on White
+23:  0-2   DarkGray on White
+23:  3-3   Red on White bold
+23:  4-6   DarkGray on White
+23:  7-17  Red on White bold
+23: 18-20  DarkGray on White
+23: 28-42  DarkGray on White
+23: 50-63  DarkGray on White
+23: 66-79  DarkGray on White

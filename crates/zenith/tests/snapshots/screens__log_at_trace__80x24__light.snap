@@ -1,0 +1,69 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, width, height))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·     ? keys
+ level  error  warn  info  debug [trace]                   6 lines · 0 dropped
+ 15:47:00.000 TRACE --> {"jsonrpc":"2.0","id":1,"method":"solar.version","param…
+ 15:47:00.000 TRACE <-- {"jsonrpc":"2.0","id":1,"result":{"data":{"solar_versio…
+ 15:47:03.100 DEBUG #3 solar.ping 0.17 ms answered
+ 15:47:03.200 WARN  #4 system.info the os-release file could not be read
+ 15:47:09.000 INFO  the session ended after 4 calls
+ 15:47:42.001 RAW   thread 'main' panicked at crates/solar-core/src/dispatch.rs…
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ e w i d t level   ← → fewer, more   Enter whole line   G follow   c clear
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 1.84 ms ─── in orbit 42s ───────────
+--- every cell not listed is #17161C on #F5F1E8
+ 0:  0-7   #8C4907 on #F5F1E8 bold
+ 0: 10-18  #555355 on #F5F1E8
+ 0: 21-26  #555355 on #F5F1E8
+ 0: 29-33  #8C4907 on #F5F1E8 bold underlined
+ 0: 36-44  #555355 on #F5F1E8
+ 0: 45-72  #868482 on #F5F1E8
+ 0: 73-73  #8C4907 on #F5F1E8 bold
+ 0: 74-79  #555355 on #F5F1E8
+ 1:  0-32  #555355 on #F5F1E8
+ 1: 33-39  #8C4907 on #F5F1E8 bold underlined
+ 1: 40-78  #555355 on #F5F1E8
+ 2:  0-19  #555355 on #F5F1E8
+ 3:  0-19  #555355 on #F5F1E8
+ 4:  0-19  #555355 on #F5F1E8
+ 4: 20-41  #8C4907 on #F5F1E8
+ 5:  0-13  #555355 on #F5F1E8
+ 5: 14-34  #8C4907 on #F5F1E8
+ 6:  0-13  #555355 on #F5F1E8
+ 7:  0-13  #555355 on #F5F1E8
+ 7: 14-19  #8C4907 on #F5F1E8 bold
+22:  1-9   #8C4907 on #F5F1E8 bold
+22: 10-18  #555355 on #F5F1E8
+22: 19-21  #8C4907 on #F5F1E8 bold
+22: 22-36  #555355 on #F5F1E8
+22: 37-41  #8C4907 on #F5F1E8 bold
+22: 42-55  #555355 on #F5F1E8
+22: 56-56  #8C4907 on #F5F1E8 bold
+22: 57-66  #555355 on #F5F1E8
+22: 67-67  #8C4907 on #F5F1E8 bold
+22: 68-76  #555355 on #F5F1E8
+23:  0-2   #868482 on #F5F1E8
+23:  3-3   #8C4907 on #F5F1E8
+23:  4-6   #868482 on #F5F1E8
+23:  7-17  #8C4907 on #F5F1E8 bold
+23: 18-20  #555355 on #F5F1E8
+23: 28-32  #868482 on #F5F1E8
+23: 33-42  #555355 on #F5F1E8
+23: 50-54  #868482 on #F5F1E8
+23: 55-63  #555355 on #F5F1E8
+23: 67-79  #868482 on #F5F1E8

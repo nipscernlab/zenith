@@ -15,6 +15,7 @@ pub mod keys;
 pub mod limits;
 pub mod ring;
 pub mod theme;
+pub mod ui;
 
 /// The version of this build, from `Cargo.toml`.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

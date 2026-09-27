@@ -1,0 +1,78 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, width, height))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·                        ••      ·        ∙  ·                                        ? keys
+ 6 calls · 0 dropped · kept 10 000 calls or 32 MiB
+   #     sent, UTC     method                            outcome           round trip  in SOLAR
+   1     15:47:00.000  solar.version                     ok                   1.21 ms   0.17 ms
+   2     15:47:00.000  solar.manifest                    ok                   1.84 ms   0.17 ms
+   3     15:47:03.001  solar.ping                        ok                   0.52 ms   0.17 ms
+   4     15:47:03.002  system.info                       ok                   0.61 ms   0.17 ms
+ › 5     15:47:03.002  solar.describe                    error NOT_FOUND      0.31 ms   0.05 ms
+   6     15:47:03.003  solar.version                     waiting
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ request   {"jsonrpc":"2.0","id":5,"method":"solar.describe","params":{"api":"solar.pign"}}
+ response  {"jsonrpc":"2.0","id":5,"error":{"code":-32601,"message":"No API is registered under the name solar.pign.","data":{"status":"NOT_FOUND","reason":"A…
+ Enter view   r send again   e edit   x export
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 0.31 ms ─── in orbit 3s ────────────────────────────────────────────────────────────────────────────────────────────
+--- every cell not listed is #F5F1E8 on #0B0C14
+ 0:  0-7   #FFC23D on #0B0C14 bold
+ 0: 36-44  #FFC23D on #0B0C14 bold underlined
+ 0:153-153 #FFC23D on #0B0C14 bold
+ 3:  0-2   #FFC23D on #0B0C14
+ 3: 23-54  #FFC23D on #0B0C14
+ 4:  0-2   #FFC23D on #0B0C14
+ 4: 23-54  #FFC23D on #0B0C14
+ 5:  0-2   #FFC23D on #0B0C14
+ 5: 23-54  #FFC23D on #0B0C14
+ 6:  0-2   #FFC23D on #0B0C14
+ 6: 23-54  #FFC23D on #0B0C14
+ 7:  0-2   #FFC23D on #0B0C14 reversed
+ 7:  3-22  #F5F1E8 on #0B0C14 reversed
+ 7: 23-54  #FFC23D on #0B0C14 reversed
+ 7: 55-56  #F5F1E8 on #0B0C14 reversed
+ 7: 57-72  #FFC23D on #0B0C14 bold reversed
+ 7: 73-94  #F5F1E8 on #0B0C14 reversed
+ 8:  0-2   #FFC23D on #0B0C14
+ 8: 23-54  #FFC23D on #0B0C14
+46:  1-5   #FFC23D on #0B0C14 bold
+46: 14-14  #FFC23D on #0B0C14 bold
+46: 29-29  #FFC23D on #0B0C14 bold
+46: 38-38  #FFC23D on #0B0C14 bold
+47:  3-3   #FFC23D on #0B0C14
+47:  7-17  #FFC23D on #0B0C14 bold

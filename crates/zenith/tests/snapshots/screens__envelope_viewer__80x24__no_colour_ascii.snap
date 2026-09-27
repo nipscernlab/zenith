@@ -1,0 +1,105 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: screen(&buffer)
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                .     .     ? keys
++ call 3 - solar.ping - 0.52 ms -----------------------------------------------+
+| request  sent 15:47:42.001 UTC                                               |
+| {                                                                            |
+|   "jsonrpc": "2.0",                                                          |
+|   "id": 3,                                                                   |
+|   "method": "solar.ping",                                                    |
+|   "params": {                                                                |
+|     "message": "hello"                                                       |
+|   }                                                                          |
+| }                                                                            |
+|                                                                              |
+| response  received 15:47:42.002 UTC                                          |
+| {                                                                            |
+|   "jsonrpc": "2.0",                                                          |
+|   "id": 3,                                                                   |
+|   "result": {                                                                |
+|     "data": {                                                                |
+|       "echo": "hello",                                                       |
+|       "pong": true,                                                          |
+|       "received_at": "2026-09-27T15:47:42.100521Z"                           |
+|     },                                                                       |
++ Left Right other calls  Esc close  ------------------------------------------+
+ --*-- SOLAR 0.1.0 - solar/1 --- last call 0.52 ms --- in orbit 42s -----------
+--- every cell not listed is - on -
+ 0:  0-7   - on - bold
+ 0: 10-18  - on - bold underlined
+ 0: 45-72  - on - dim
+ 0: 73-73  - on - bold
+ 1:  0-0   - on - dim
+ 1:  1-31  - on - bold dim
+ 1: 32-79  - on - dim
+ 2:  0-0   - on - dim
+ 2:  2-8   - on - bold
+ 2: 79-79  - on - dim
+ 3:  0-0   - on - dim
+ 3: 79-79  - on - dim
+ 4:  0-0   - on - dim
+ 4:  4-12  - on - bold
+ 4: 79-79  - on - dim
+ 5:  0-0   - on - dim
+ 5:  4-7   - on - bold
+ 5: 10-10  - on - bold
+ 5: 79-79  - on - dim
+ 6:  0-0   - on - dim
+ 6:  4-11  - on - bold
+ 6: 79-79  - on - dim
+ 7:  0-0   - on - dim
+ 7:  4-11  - on - bold
+ 7: 79-79  - on - dim
+ 8:  0-0   - on - dim
+ 8:  6-14  - on - bold
+ 8: 79-79  - on - dim
+ 9:  0-0   - on - dim
+ 9: 79-79  - on - dim
+10:  0-0   - on - dim
+10: 79-79  - on - dim
+11:  0-0   - on - dim
+11: 79-79  - on - dim
+12:  0-0   - on - dim
+12:  2-9   - on - bold
+12: 79-79  - on - dim
+13:  0-0   - on - dim
+13: 79-79  - on - dim
+14:  0-0   - on - dim
+14:  4-12  - on - bold
+14: 79-79  - on - dim
+15:  0-0   - on - dim
+15:  4-7   - on - bold
+15: 10-10  - on - bold
+15: 79-79  - on - dim
+16:  0-0   - on - dim
+16:  4-11  - on - bold
+16: 79-79  - on - dim
+17:  0-0   - on - dim
+17:  6-11  - on - bold
+17: 79-79  - on - dim
+18:  0-0   - on - dim
+18:  8-13  - on - bold
+18: 79-79  - on - dim
+19:  0-0   - on - dim
+19:  8-13  - on - bold
+19: 16-19  - on - bold
+19: 79-79  - on - dim
+20:  0-0   - on - dim
+20:  8-20  - on - bold
+20: 79-79  - on - dim
+21:  0-0   - on - dim
+21: 79-79  - on - dim
+22:  0-1   - on - dim
+22:  2-11  - on - bold dim
+22: 12-25  - on - dim
+22: 26-28  - on - bold dim
+22: 29-79  - on - dim
+23:  0-2   - on - dim
+23:  3-3   - on - bold
+23:  4-6   - on - dim
+23:  7-17  - on - bold
+23: 28-32  - on - dim
+23: 50-54  - on - dim
+23: 67-79  - on - dim

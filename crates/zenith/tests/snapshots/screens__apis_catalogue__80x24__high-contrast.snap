@@ -1,0 +1,59 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, width, height))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·     ? keys
+ 5 APIs · manifest 2.0.0    │ solar.ping 1.0.0 · experimental · since 0.1.0
+   solar.describe   1.0.0   │ Answers immediately, to prove SOLAR is there
+   solar.manifest   1.1.0   │ side effects none · idempotent · budget 1000 ms
+ › solar.ping       1.0.0   │
+   solar.version    1.0.0   │ parameters
+   system.info      1.1.0   │   message  string or null  optional
+                            │            Anything the caller wants back, to
+                            │            tell one ping from another.
+                            │ errors
+                            │   none beyond those of dispatch
+                            │ examples
+                            │   1 bare            {}
+                            │                     A ping with no message at
+                            │                     all · compared by exact
+                            │                     matches the example · 0.48
+                            │                     ms
+                            │   2 with_a_message  {"message":"hi"}
+                            │                     A ping that carries
+                            │                     something to echo · compared
+                            │                     by exact
+                            │                     differs at /echo: expected
+ 1 to 9 run an example   a all   Enter form   e edit   f filter   R reload
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 0.47 ms ─── in orbit 42s ───────────
+--- every cell not listed is #F5F1E8 on #0B0C14
+ 0:  0-7   #FFC23D on #0B0C14 bold
+ 0: 21-26  #FFC23D on #0B0C14 bold underlined
+ 0: 73-73  #FFC23D on #0B0C14 bold
+ 1: 30-39  #FFC23D on #0B0C14 bold
+ 2:  0-2   #FFC23D on #0B0C14
+ 3:  0-2   #FFC23D on #0B0C14
+ 4:  0-2   #FFC23D on #0B0C14 reversed
+ 4:  3-18  #FFC23D on #0B0C14 bold reversed
+ 4: 19-27  #F5F1E8 on #0B0C14 reversed
+ 5:  0-2   #FFC23D on #0B0C14
+ 5: 30-39  #FFC23D on #0B0C14 bold
+ 6:  0-2   #FFC23D on #0B0C14
+ 6: 32-38  #FFC23D on #0B0C14
+ 9: 30-35  #FFC23D on #0B0C14 bold
+11: 30-37  #FFC23D on #0B0C14 bold
+12: 32-32  #FFC23D on #0B0C14 bold
+12: 34-47  #FFC23D on #0B0C14
+15: 50-75  #FFC23D on #0B0C14
+16: 50-51  #FFC23D on #0B0C14
+17: 32-32  #FFC23D on #0B0C14 bold
+17: 34-47  #FFC23D on #0B0C14
+21: 50-75  #FFC23D on #0B0C14 bold
+22:  1-6   #FFC23D on #0B0C14 bold
+22: 25-25  #FFC23D on #0B0C14 bold
+22: 33-37  #FFC23D on #0B0C14 bold
+22: 46-46  #FFC23D on #0B0C14 bold
+22: 55-55  #FFC23D on #0B0C14 bold
+22: 66-66  #FFC23D on #0B0C14 bold
+23:  3-3   #FFC23D on #0B0C14
+23:  7-17  #FFC23D on #0B0C14 bold

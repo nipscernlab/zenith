@@ -1,0 +1,116 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, width, height))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·     ? keys
+ 5 APIs · manifest 2.0.0    │ solar.ping 1.0.0 · experimental · since 0.1.0
+   solar.describe   1.0.0   │ Answers immediately, to prove SOLAR is there
+   solar.manifest   1.1.0   │ side effects none · idempotent · budget 1000 ms
+ › solar.ping       1.0.0   │
+   solar.version    1.0.0   │ parameters
+   system.info      1.1.0   │   message  string or null  optional
+                            │            Anything the caller wants back, to
+                            │            tell one ping from another.
+                            │ errors
+                            │   none beyond those of dispatch
+                            │ examples
+                            │   1 bare            {}
+                            │                     A ping with no message at
+                            │                     all · compared by exact
+                            │                     matches the example · 0.48
+                            │                     ms
+                            │   2 with_a_message  {"message":"hi"}
+                            │                     A ping that carries
+                            │                     something to echo · compared
+                            │                     by exact
+                            │                     differs at /echo: expected
+ 1 to 9 run an example   a all   Enter form   e edit   f filter   R reload
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 0.47 ms ─── in orbit 42s ───────────
+--- every cell not listed is #F5F1E8 on #0B0C14
+ 0:  0-7   #FFC23D on #0B0C14 bold
+ 0: 10-18  #9C9A97 on #0B0C14
+ 0: 21-26  #FFC23D on #0B0C14 bold underlined
+ 0: 29-33  #9C9A97 on #0B0C14
+ 0: 36-44  #9C9A97 on #0B0C14
+ 0: 45-72  #646365 on #0B0C14
+ 0: 73-73  #FFC23D on #0B0C14 bold
+ 0: 74-79  #9C9A97 on #0B0C14
+ 1:  0-23  #9C9A97 on #0B0C14
+ 1: 28-28  #646365 on #0B0C14
+ 1: 30-39  #FFC23D on #0B0C14 bold
+ 1: 46-74  #9C9A97 on #0B0C14
+ 2:  0-2   #FFC23D on #0B0C14
+ 2: 19-27  #9C9A97 on #0B0C14
+ 2: 28-28  #646365 on #0B0C14
+ 3:  0-2   #FFC23D on #0B0C14
+ 3: 19-27  #9C9A97 on #0B0C14
+ 3: 28-28  #646365 on #0B0C14
+ 3: 30-42  #9C9A97 on #0B0C14
+ 3: 47-76  #9C9A97 on #0B0C14
+ 4:  0-2   #FFC23D on #0B0C14
+ 4:  3-18  #FFC23D on #0B0C14 bold
+ 4: 19-27  #9C9A97 on #0B0C14
+ 4: 28-28  #646365 on #0B0C14
+ 5:  0-2   #FFC23D on #0B0C14
+ 5: 19-27  #9C9A97 on #0B0C14
+ 5: 28-28  #646365 on #0B0C14
+ 5: 30-39  #FFC23D on #0B0C14 bold
+ 6:  0-2   #FFC23D on #0B0C14
+ 6: 19-27  #9C9A97 on #0B0C14
+ 6: 28-28  #646365 on #0B0C14
+ 6: 32-38  #FFC23D on #0B0C14
+ 6: 55-64  #9C9A97 on #0B0C14
+ 7: 28-28  #646365 on #0B0C14
+ 7: 41-74  #9C9A97 on #0B0C14
+ 8: 28-28  #646365 on #0B0C14
+ 8: 41-67  #9C9A97 on #0B0C14
+ 9: 28-28  #646365 on #0B0C14
+ 9: 30-35  #FFC23D on #0B0C14 bold
+10: 28-28  #646365 on #0B0C14
+10: 29-60  #9C9A97 on #0B0C14
+11: 28-28  #646365 on #0B0C14
+11: 30-37  #FFC23D on #0B0C14 bold
+12: 28-28  #646365 on #0B0C14
+12: 32-32  #FFC23D on #0B0C14 bold
+12: 34-47  #FFC23D on #0B0C14
+13: 28-28  #646365 on #0B0C14
+13: 50-74  #9C9A97 on #0B0C14
+14: 28-28  #646365 on #0B0C14
+14: 50-72  #9C9A97 on #0B0C14
+15: 28-28  #646365 on #0B0C14
+15: 50-75  #FFC23D on #0B0C14
+16: 28-28  #646365 on #0B0C14
+16: 50-51  #FFC23D on #0B0C14
+17: 28-28  #646365 on #0B0C14
+17: 32-32  #FFC23D on #0B0C14 bold
+17: 34-47  #FFC23D on #0B0C14
+18: 28-28  #646365 on #0B0C14
+18: 50-68  #9C9A97 on #0B0C14
+19: 28-28  #646365 on #0B0C14
+19: 50-77  #9C9A97 on #0B0C14
+20: 28-28  #646365 on #0B0C14
+20: 50-57  #9C9A97 on #0B0C14
+21: 28-28  #646365 on #0B0C14
+21: 50-75  #D98E1F on #0B0C14 bold
+22:  1-6   #FFC23D on #0B0C14 bold
+22:  7-24  #9C9A97 on #0B0C14
+22: 25-25  #FFC23D on #0B0C14 bold
+22: 26-32  #9C9A97 on #0B0C14
+22: 33-37  #FFC23D on #0B0C14 bold
+22: 38-45  #9C9A97 on #0B0C14
+22: 46-46  #FFC23D on #0B0C14 bold
+22: 47-54  #9C9A97 on #0B0C14
+22: 55-55  #FFC23D on #0B0C14 bold
+22: 56-65  #9C9A97 on #0B0C14
+22: 66-66  #FFC23D on #0B0C14 bold
+22: 67-76  #9C9A97 on #0B0C14
+23:  0-2   #646365 on #0B0C14
+23:  3-3   #FFC23D on #0B0C14
+23:  4-6   #646365 on #0B0C14
+23:  7-17  #FFC23D on #0B0C14 bold
+23: 18-20  #9C9A97 on #0B0C14
+23: 28-32  #646365 on #0B0C14
+23: 33-42  #9C9A97 on #0B0C14
+23: 50-54  #646365 on #0B0C14
+23: 55-63  #9C9A97 on #0B0C14
+23: 67-79  #646365 on #0B0C14

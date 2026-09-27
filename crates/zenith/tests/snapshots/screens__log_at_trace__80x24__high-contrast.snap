@@ -1,0 +1,43 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, width, height))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·     ? keys
+ level  error  warn  info  debug [trace]                   6 lines · 0 dropped
+ 15:47:00.000 TRACE --> {"jsonrpc":"2.0","id":1,"method":"solar.version","param…
+ 15:47:00.000 TRACE <-- {"jsonrpc":"2.0","id":1,"result":{"data":{"solar_versio…
+ 15:47:03.100 DEBUG #3 solar.ping 0.17 ms answered
+ 15:47:03.200 WARN  #4 system.info the os-release file could not be read
+ 15:47:09.000 INFO  the session ended after 4 calls
+ 15:47:42.001 RAW   thread 'main' panicked at crates/solar-core/src/dispatch.rs…
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ e w i d t level   ← → fewer, more   Enter whole line   G follow   c clear
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 1.84 ms ─── in orbit 42s ───────────
+--- every cell not listed is #F5F1E8 on #0B0C14
+ 0:  0-7   #FFC23D on #0B0C14 bold
+ 0: 29-33  #FFC23D on #0B0C14 bold underlined
+ 0: 73-73  #FFC23D on #0B0C14 bold
+ 1: 33-39  #FFC23D on #0B0C14 bold underlined
+ 4: 20-41  #FFC23D on #0B0C14
+ 5: 14-34  #FFC23D on #0B0C14
+ 7: 14-19  #FFC23D on #0B0C14 bold
+22:  1-9   #FFC23D on #0B0C14 bold
+22: 19-21  #FFC23D on #0B0C14 bold
+22: 37-41  #FFC23D on #0B0C14 bold
+22: 56-56  #FFC23D on #0B0C14 bold
+22: 67-67  #FFC23D on #0B0C14 bold
+23:  3-3   #FFC23D on #0B0C14
+23:  7-17  #FFC23D on #0B0C14 bold

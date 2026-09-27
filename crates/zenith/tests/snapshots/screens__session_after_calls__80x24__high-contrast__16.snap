@@ -1,0 +1,54 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, 80, 24))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·     ? keys
+   executable           /home/lab/solar/target/release/solar
+   os                   linux
+   os_build             null
+   os_family            unix
+   os_name              AlmaLinux
+   os_release           "9.8"
+   path_list_separator  :
+   path_separator       /
+   pointer_width        64
+   temp_dir             /tmp
+ › /describe solar.pign
+    error   NOT_FOUND · API_NOT_FOUND · solar.describe · 0.31 ms · #5
+   No API is registered under the name solar.pign.
+   /api    expected  solar.ping
+           received  solar.pign
+           hint      Did you mean "solar.ping"? The edit distance is 2.
+           docs      docs/ERRORS.md#not_found
+ › /call solar.version
+   ∙ solar.version, waiting 300.0 ms
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ › Type / for the commands, or ? for every key.                               │
+└──────────────────────────────────────────────────────────────────────────────┘
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 0.31 ms ─── in orbit 3s ────────────
+--- every cell not listed is White on Black
+ 0:  0-7   LightYellow on Black bold
+ 0: 10-18  LightYellow on Black bold underlined
+ 0: 73-73  LightYellow on Black bold
+ 1:  3-21  LightYellow on Black bold
+ 2:  3-21  LightYellow on Black bold
+ 3:  3-21  LightYellow on Black bold
+ 4:  3-21  LightYellow on Black bold
+ 5:  3-21  LightYellow on Black bold
+ 6:  3-21  LightYellow on Black bold
+ 7:  3-21  LightYellow on Black bold
+ 8:  3-21  LightYellow on Black bold
+ 9:  3-21  LightYellow on Black bold
+ 9: 24-25  White on Black bold
+10:  3-21  LightYellow on Black bold
+11:  0-22  LightYellow on Black bold
+12:  3-9   LightYellow on Black bold reversed
+12: 12-20  LightYellow on Black bold
+12: 24-53  LightYellow on Black bold
+14:  3-8   LightYellow on Black bold
+18:  0-21  LightYellow on Black bold
+19:  3-3   LightYellow on Black bold
+19:  5-17  LightYellow on Black bold
+21:  1-3   LightYellow on Black bold
+23:  3-3   LightYellow on Black bold
+23:  7-17  LightYellow on Black bold

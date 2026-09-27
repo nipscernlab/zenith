@@ -48,5 +48,9 @@ either is stated here in its own line.
   underline, examples judged against what they declare, the parameter form, `Ctrl+C` that
   cancels when SOLAR offers `solar.cancel`, the Log filtered by level, the History, and
   `/export` and `/report` written as they go.
+- Every screen drawn: the opening with the SOLAR mark in a starfield, the header, the
+  status bar drawn as SOLAR's orbit, the four tabs, the completion menu, the help and the
+  envelope viewer. 105 snapshots of every screen at 80 × 24 and 160 × 48 in each theme,
+  and without colour in ASCII. Every control character from SOLAR is drawn as an escape.
 
 [Unreleased]: https://github.com/nipscernlab/zenith/commits/main

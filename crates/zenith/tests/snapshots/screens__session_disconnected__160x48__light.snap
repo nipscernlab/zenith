@@ -1,0 +1,82 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, width, height))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·                        ••      ·        ∙  ·                                        ? keys
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   · Connected to SOLAR 0.1.0 in 1.84 ms: protocol solar/1, manifest 2.0.0, 5 APIs.
+     This SOLAR has no solar.cancel. Type / for the commands, or ? for every key.
+ › /ping
+    closed   solar.ping: the connection ended before SOLAR answered
+    error   SOLAR exited with code 101 after 3m connected, with 1 call still waiting.
+            Its last words are below and the Log tab has the rest. Ctrl+R starts it again.
+              thread 'main' panicked at crates/solar-core/src/dispatch.rs:120:9:
+              the dispatcher was told to fall over
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ › Type / for the commands, or ? for every key.                                                                                                               │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ ──○── SOLAR disconnected · exited with code 101 ─── Ctrl+R reconnect ─────────────────────────────────────────────────────────────────────────────────────────
+--- every cell not listed is #17161C on #F5F1E8
+ 0:  0-7   #8C4907 on #F5F1E8 bold
+ 0: 10-18  #8C4907 on #F5F1E8 bold underlined
+ 0: 21-26  #555355 on #F5F1E8
+ 0: 29-33  #555355 on #F5F1E8
+ 0: 36-44  #555355 on #F5F1E8
+ 0: 45-152 #868482 on #F5F1E8
+ 0:153-153 #8C4907 on #F5F1E8 bold
+ 0:154-159 #555355 on #F5F1E8
+36:  3-3   #8C4907 on #F5F1E8
+38:  0-7   #8C4907 on #F5F1E8
+39:  3-10  #8C4907 on #F5F1E8 bold reversed
+39: 13-22  #8C4907 on #F5F1E8
+40:  3-9   #8C4907 on #F5F1E8 bold reversed
+40: 12-84  #8C4907 on #F5F1E8 bold
+44:  0-159 #868482 on #F5F1E8
+45:  0-0   #868482 on #F5F1E8
+45:  1-3   #8C4907 on #F5F1E8
+45:  4-47  #555355 on #F5F1E8
+45:159-159 #868482 on #F5F1E8
+46:  0-159 #868482 on #F5F1E8
+47:  0-2   #868482 on #F5F1E8
+47:  3-3   #8C4907 on #F5F1E8 bold
+47:  4-6   #868482 on #F5F1E8
+47:  7-24  #8C4907 on #F5F1E8 bold
+47: 25-27  #555355 on #F5F1E8
+47: 48-52  #868482 on #F5F1E8
+47: 53-58  #8C4907 on #F5F1E8 bold
+47: 59-68  #555355 on #F5F1E8
+47: 69-159 #868482 on #F5F1E8
