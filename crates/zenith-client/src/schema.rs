@@ -1441,6 +1441,24 @@ mod tests {
     }
 
     #[test]
+    fn what_then_or_else_evaluates_counts_when_if_is_a_boolean() {
+        // A boolean `if` is the same schema as `{}` or `{"not": {}}`, and the branch it
+        // chooses evaluates what it evaluates. The `jsonschema` crate, 0.58.1, disagrees,
+        // which `tests/validator_agrees_with_jsonschema.rs` works around.
+        let items =
+            json!({"if": false, "else": {"prefixItems": [true]}, "unevaluatedItems": false});
+        assert!(valid(&items, &json!([[1]])));
+        assert!(!valid(&items, &json!([[1], 2])));
+        let properties = json!({
+            "if": true,
+            "then": {"properties": {"a": true}},
+            "unevaluatedProperties": false
+        });
+        assert!(valid(&properties, &json!({"a": 1})));
+        assert!(!valid(&properties, &json!({"a": 1, "b": 2})));
+    }
+
+    #[test]
     fn the_ping_schema_accepts_what_solar_accepts() {
         let schema = json!({
             "additionalProperties": false,

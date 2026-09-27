@@ -1,0 +1,7 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc 9e8493927cc2dd346597477f478a857031b1de4b21c61672fe999fb99f21d60e # shrinks to schema = Object {"$defs": Object {"x": Object {}}, "anyOf": Array [Object {"if": Bool(false), "then": Object {"$ref": String("#/$defs/x")}, "else": Object {"prefixItems": Array [Object {"minimum": Number(0)}], "items": Object {"$ref": String("#/$defs/x")}}}], "unevaluatedItems": Object {"prefixItems": Array [Object {"multipleOf": Number(2)}], "items": Object {"$ref": String("#/$defs/x")}}}, instance = Array [Array [Number(1)]]

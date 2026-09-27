@@ -20,9 +20,38 @@ use zenith_client::schema::Schema;
 fn reference_verdict(schema: &Value, instance: &Value) -> Option<bool> {
     let validator = jsonschema::draft202012::options()
         .should_validate_formats(false)
-        .build(schema)
+        .build(&with_object_ifs(schema))
         .ok()?;
     Some(validator.is_valid(instance))
+}
+
+/// The schema with every boolean `if` written as the object schema it stands for, `true`
+/// as `{}` and `false` as `{"not": {}}`, which the specification makes the same schema.
+///
+/// `jsonschema` 0.58.1 drops the annotations of `then` and `else` when `if` is a boolean,
+/// so that `unevaluatedItems` and `unevaluatedProperties` see as unevaluated what they
+/// evaluated. On 27 September 2026 it judged `{"if": false, "else": {"prefixItems":
+/// [true]}, "unevaluatedItems": false}` to refuse `[[1]]`, and the same schema with
+/// `{"not": {}}` for `if` to accept it; ZENITH's validator and the Python `jsonschema`
+/// 4.26.0 accept it both ways. The names this file generates are never `if`, so every
+/// `if` it finds is the keyword.
+fn with_object_ifs(schema: &Value) -> Value {
+    match schema {
+        Value::Object(map) => Value::Object(
+            map.iter()
+                .map(|(key, value)| {
+                    let value = match (key.as_str(), value) {
+                        ("if", Value::Bool(true)) => json!({}),
+                        ("if", Value::Bool(false)) => json!({"not": {}}),
+                        _ => with_object_ifs(value),
+                    };
+                    (key.clone(), value)
+                })
+                .collect(),
+        ),
+        Value::Array(items) => Value::Array(items.iter().map(with_object_ifs).collect()),
+        other => other.clone(),
+    }
 }
 
 fn zenith_verdict(schema: &Value, instance: &Value) -> bool {
