@@ -258,3 +258,12 @@ terminal can be asked reliably whether it has a glyph.
 | Calls in flight | 256 | | More would be a script, not a person |
 
 They are constants in `crates/zenith/src/limits.rs`, each with this reason beside it.
+
+## Measuring and testing
+
+### Development builds keep line tables only
+
+Full debug information made `target/debug` 3.6 GB on the machine ZENITH was written on,
+whose disk filled once. Development builds keep file and line for backtraces and the
+dependencies keep no debug information at all; nobody steps through them. `[profile.dev]`
+in `Cargo.toml` says so beside the setting.

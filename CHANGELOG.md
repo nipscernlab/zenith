@@ -77,6 +77,11 @@ either is stated here in its own line.
   to the constants of `limits.rs`, so that the documents cannot say one size and the code
   keep another.
 
+### Changed
+
+- Development builds keep file and line for backtraces and no more, and the dependencies
+  keep no debug information: full debug information made `target/debug` 3.6 GB.
+
 ### Fixed
 
 - A backslash before a character outside ASCII inside a JSON string, such as `"\é"`, no

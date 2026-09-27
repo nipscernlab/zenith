@@ -54,6 +54,15 @@ print_stdout = "deny"
 print_stderr = "warn"
 doc_markdown = "warn"
 
+# Tests and development builds keep file and line for backtraces, and no more. Full debug
+# information made target/debug 3.6 GB on Windows, most of it the dependencies' debug
+# databases, which nobody steps through.
+[profile.dev]
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+debug = false
+
 [profile.release]
 lto = "fat"
 codegen-units = 1
