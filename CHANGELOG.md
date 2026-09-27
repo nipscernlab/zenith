@@ -55,5 +55,11 @@ either is stated here in its own line.
 - The `zenith` binary: the loop that waits on one channel and wakes only for a deadline,
   the terminal given back on a panic or a signal, SOLAR found, copied and started on a
   thread of its own, and `--solar`, `--theme`, `--color`, `--ascii` and `--solar-log`.
+- ZENITH's own loop driven by keys against the installed SOLAR: a walk through every API
+  of the manifest that runs every example from the APIs tab and opens every form, every
+  API described from the command line, the commands of the brief, a batch sent by hand,
+  `/report` and `/export`, `Ctrl+R`, and the copy on Windows; and against the double,
+  `Ctrl+C` cancelling a call in flight, a SOLAR that exits at once, one that speaks another
+  protocol and one that is not there.
 
 [Unreleased]: https://github.com/nipscernlab/zenith/commits/main
