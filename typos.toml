@@ -49,4 +49,6 @@ extend-exclude = [
   # Screens recorded from SOLAR's answers, which quote SOLAR's own words.
   "crates/*/tests/snapshots/*.snap",
   "crates/*/tests/fixtures/*",
+  # The README's pictures, drawn from those snapshots.
+  "docs/screenshots/*.svg",
 ]

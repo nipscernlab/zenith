@@ -311,7 +311,7 @@ mod tests {
 
     #[test]
     fn no_key_is_ever_cut() {
-        // Found by the walkthrough: `/version` once showed manifest_schema_versio.
+        // Found by the walkthrough: `/version` once cut the last letter of this name.
         let value = json!({"manifest_schema_version": "2.0.0", "protocol": "solar/1"});
         assert_eq!(
             texts(&human(&value, 3, 100, &theme())),

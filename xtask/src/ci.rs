@@ -90,6 +90,11 @@ const STEPS: &[Step] = &[
         slow: false,
     },
     Step {
+        name: "The guide, done in a pseudo-terminal",
+        kind: Kind::Task(crate::walkthrough::run),
+        slow: false,
+    },
+    Step {
         name: "Supply chain",
         kind: Kind::Tool("cargo", &["deny", "check"], "cargo-deny"),
         slow: false,

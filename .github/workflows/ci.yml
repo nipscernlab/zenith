@@ -129,6 +129,11 @@ jobs:
       - name: The screenshots are the snapshots
         run: cargo run --package xtask --locked --quiet -- screenshots --check
 
+      # The table of docs/TESTING_BY_HAND.md, typed row by row into the real zenith in a
+      # pseudo-terminal against SOLAR, so that the guide says only what ZENITH does.
+      - name: The guide, done in a pseudo-terminal
+        run: cargo run --package xtask --locked --quiet -- walkthrough
+
       # Advisories, licences, sources and duplicates. One system is enough for a check
       # about the dependency tree, which is the same everywhere.
       - name: Supply chain

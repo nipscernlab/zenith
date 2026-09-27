@@ -23,9 +23,14 @@ unicode-width.workspace = true
 zenith-client.workspace = true
 
 [dev-dependencies]
+criterion.workspace = true
 insta.workspace = true
 proptest.workspace = true
 serde.workspace = true
+
+[[bench]]
+name = "draw"
+harness = false
 
 [lints]
 workspace = true

@@ -259,6 +259,13 @@ terminal can be asked reliably whether it has a glyph.
 
 They are constants in `crates/zenith/src/limits.rs`, each with this reason beside it.
 
+### The soak judges growth against the figure at twenty thousand calls
+
+By twenty thousand calls every ring buffer is full, the History at ten thousand calls and
+the Log at twenty thousand lines, so from there on the memory can only stay level.
+`cargo xtask soak` fails when its last figure is more than a fifth above that one; the
+fifth is room for the allocator, which does not hand pages back at once.
+
 ## Measuring and testing
 
 ### The coverage floor is 88 % of lines

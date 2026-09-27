@@ -11,7 +11,9 @@ part, which is how SOLAR is tested by hand on Windows, on Linux and on the labor
 (ADR 0004).
 
 The steps marked **Mac only** are for the laboratory Mac; everything else is the same on
-the three systems. If a step does not do what it says, that is worth reporting too.
+the three systems. CI does every row of the table in section 4 on Windows, Linux and
+macOS, typing it into ZENITH in a pseudo-terminal with `cargo xtask walkthrough`. If a
+step does not do what it says on your machine, that is worth reporting too.
 
 ## 1. Install the tools
 

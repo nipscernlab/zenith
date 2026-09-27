@@ -165,8 +165,9 @@ That one command runs what CI runs, in the same order and with the same flags:
 formatting, TOML formatting, spelling, lints with `-D warnings`, the tests with
 `cargo-nextest`, the doctests, the documentation, the check that every commit that changes
 code adds to `CHANGELOG.md`, the check that the pictures of this README are the snapshots
-they are drawn from, the supply chain with `cargo-deny`, and the coverage against its
-floor. CI runs it on Linux, Windows and macOS, against SOLAR built from its main branch.
+they are drawn from, the table of the guide for testing by hand typed into ZENITH in a
+pseudo-terminal, the supply chain with `cargo-deny`, and the coverage against its floor.
+CI runs it on Linux, Windows and macOS, against SOLAR built from its main branch.
 
 The pictures above are drawn from a session recorded against SOLAR 0.2.0, replayed through
 ZENITH's own drawing code and snapshotted; `cargo xtask screenshots` draws them, and CI

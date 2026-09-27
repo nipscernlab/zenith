@@ -707,11 +707,11 @@ What is measured, how, and where the numbers are:
 
 | What | How | Where |
 | ---- | --- | ----- |
-| Startup | From starting the process to the first frame drawn connected, and each step between, recorded by the process when `ZENITH_TRACE_TIMINGS` names a file | `cargo xtask perf`, `STATUS.md` |
-| A key to its redraw | For each key, from the moment it is read to the moment the frame is flushed, over a scripted session of a thousand keys | the same |
-| Idle | The processor time of the process over sixty seconds with nothing happening, and the number of times the loop woke | the same |
-| Memory | The resident memory at idle, and after a scripted session of one hundred thousand calls, sampled every ten thousand | `cargo xtask soak`, `STATUS.md` |
-| Drawing | Each screen at 80 × 24 and at 200 × 60, in-process | `cargo bench` |
+| Startup | From starting the process to the screen showing `in orbit`, over ten starts in a pseudo-terminal; and the moment the process drew its first connected frame, which it records, with each step before it, when `ZENITH_TRACE_TIMINGS` names a file | `cargo xtask perf`, `STATUS.md` |
+| A key to its redraw | For two hundred keys typed one at a time, from the loop reading the key to the frame being flushed; and for fifty of them, from writing the key into the pseudo-terminal to seeing it on its screen | the same |
+| Idle | The processor time of the process over sixty seconds after its first minute connected, and the number of times the loop woke in them | the same |
+| Memory | The resident memory at idle, and after every ten thousand of one hundred thousand `/ping` typed into it; the run fails if the last figure is more than a fifth above the one at twenty thousand, when every ring buffer is already full | `cargo xtask soak`, `STATUS.md` |
+| Drawing | Each tab of the session the README shows, and the help overlay, at 80 × 24 and at 200 × 60, in process: the building of a frame and its comparison with the last one | `cargo bench -p zenith --bench draw` |
 
 ## 16. Tests
 
@@ -723,6 +723,7 @@ What is measured, how, and where the numbers are:
 | The real SOLAR | The handshake, every command, every failure path that can be produced, cancellation and batches when the SOLAR under test has them, and a walk through every API of the manifest that runs every example through the path a person uses and checks each result against the example | `crates/zenith/tests/against_solar.rs` |
 | The README | The session its pictures show, recorded against a real SOLAR and replayed through the drawing code at 100 × 30; the pictures are drawn from those snapshots | `crates/zenith/tests/screens.rs`, `cargo xtask screenshots --check` |
 | The whole program | `zenith` started in a pseudo-terminal, keys typed into it, the screen read back | `cargo xtask perf`, `cargo xtask soak` |
+| The guide | Every row of the table in section 4 of `docs/TESTING_BY_HAND.md`, typed into the real binary in a pseudo-terminal against SOLAR, with what the row says waited for on the screen | `cargo xtask walkthrough` |
 | Mutations | Whether the tests notice when a line of the code is changed: `cargo mutants`, weekly, and only in CI | `.github/workflows/scheduled.yml` |
 
 The tests that need SOLAR find it the way ZENITH does, `ZENITH_SOLAR` first, and say

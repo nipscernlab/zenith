@@ -89,6 +89,12 @@ either is stated here in its own line.
   that every commit changing code adds to this file, the README's pictures, the supply
   chain, and the coverage against a floor of 88 % of lines. Weekly, the next compiler, the
   declared minimum, and mutation testing, which runs only in CI.
+- The real binary in a pseudo-terminal. `cargo xtask perf` measures the start, a key to
+  its redraw, the processor at idle and the price of starting SOLAR at `trace`;
+  `cargo xtask soak` the memory over a hundred thousand calls; `cargo bench` the drawing
+  of each tab. `cargo xtask walkthrough` types every row of the table in
+  `docs/TESTING_BY_HAND.md` into ZENITH and waits for what the row says, in CI on all
+  three systems, and a test holds the rows and the steps together.
 
 ### Changed
 
@@ -101,7 +107,7 @@ either is stated here in its own line.
   longer brings ZENITH down: the scanner of the command line cut the character in half.
   The property tests found it.
 - No member of a response is shown with its name cut short: `/version` showed
-  `manifest_schema_versio`. The column of names grows to a third of the line, and a longer
-  name has a line of its own.
+  `manifest_schema_version` without its last letter. The column of names grows to a third
+  of the line, and a longer name has a line of its own.
 
 [Unreleased]: https://github.com/nipscernlab/zenith/commits/main
