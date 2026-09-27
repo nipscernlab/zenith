@@ -112,5 +112,7 @@ either is stated here in its own line.
 - No member of a response is shown with its name cut short: `/version` showed
   `manifest_schema_version` without its last letter. The column of names grows to a third
   of the line, and a longer name has a line of its own.
+- The documentation builds with warnings denied, as CI builds it: a link to the `pointer`
+  module of `zenith-client` could also have meant the primitive type of that name.
 
 [Unreleased]: https://github.com/nipscernlab/zenith/commits/main

@@ -281,9 +281,11 @@ const STEPS: &[Step] = &[
             if walk.session.restored() {
                 Ok(())
             } else {
-                Err("zenith exited without giving the terminal back: the alternate screen or \
+                Err(
+                    "zenith exited without giving the terminal back: the alternate screen or \
                      the hidden cursor is still set"
-                    .to_owned())
+                        .to_owned(),
+                )
             }
         },
     },
@@ -307,7 +309,8 @@ impl Walk {
     fn type_text(&mut self, text: &str) -> Result<(), String> {
         for character in text.chars() {
             let mut buffer = [0_u8; 4];
-            self.session.write(character.encode_utf8(&mut buffer).as_bytes())?;
+            self.session
+                .write(character.encode_utf8(&mut buffer).as_bytes())?;
             thread::sleep(Duration::from_millis(4));
         }
         thread::sleep(Duration::from_millis(60));
@@ -384,14 +387,21 @@ impl Walk {
             }
             self.press(DOWN)?;
         }
-        Err(format!("{name} could not be selected; the screen was:\n{}", self.session.dump()))
+        Err(format!(
+            "{name} could not be selected; the screen was:\n{}",
+            self.session.dump()
+        ))
     }
 
     /// Checks that `text` is underlined where it stands on the command line, the last row
     /// of the screen that shows it.
     fn underlined(&self, text: &str) -> Result<(), String> {
         let rows = self.session.rows();
-        let Some((row, line)) = rows.iter().enumerate().rev().find(|(_, line)| line.contains(text))
+        let Some((row, line)) = rows
+            .iter()
+            .enumerate()
+            .rev()
+            .find(|(_, line)| line.contains(text))
         else {
             return Err(format!("{text:?} is not on the screen"));
         };
@@ -401,8 +411,11 @@ impl Walk {
         let first = u16::try_from(line[..at].chars().count()).unwrap_or(u16::MAX);
         let length = u16::try_from(text.chars().count()).unwrap_or(u16::MAX);
         let row = u16::try_from(row).unwrap_or(u16::MAX);
-        let underlined = (first..first + length)
-            .all(|column| self.session.cell(row, column).is_some_and(|(_, under)| under));
+        let underlined = (first..first + length).all(|column| {
+            self.session
+                .cell(row, column)
+                .is_some_and(|(_, under)| under)
+        });
         if underlined {
             Ok(())
         } else {
@@ -432,7 +445,11 @@ impl Walk {
 /// The first row that did not do what the guide says.
 pub(crate) fn run(root: &Path) -> Result<(), String> {
     let rows = rows_of_the_guide(GUIDE);
-    if !rows.iter().map(String::as_str).eq(STEPS.iter().map(|step| step.row)) {
+    if !rows
+        .iter()
+        .map(String::as_str)
+        .eq(STEPS.iter().map(|step| step.row))
+    {
         return Err(format!(
             "the steps of the walkthrough are not the rows of the guide, which are: {}",
             rows.join(", ")

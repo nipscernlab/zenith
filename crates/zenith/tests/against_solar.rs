@@ -455,7 +455,7 @@ fn record_the_session_the_readme_shows() {
                 }
             }
             common::Act::Key(character) => {
-                driven.key(KeyCode::Char(*character), KeyModifiers::NONE)
+                driven.key(KeyCode::Char(*character), KeyModifiers::NONE);
             }
         }
         driven.until("the calls of the act", idle);

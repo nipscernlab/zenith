@@ -18,7 +18,7 @@
 //! | [`handshake`] | Whether this SOLAR speaks the protocol and the layout ZENITH knows |
 //! | [`manifest`] | The catalogue of APIs |
 //! | [`schema`], [`schema_view`] | Validation, and schemas read as descriptions |
-//! | [`json_text`], [`pointer`] | JSON as typed text, and places inside it |
+//! | [`json_text`], [`pointer`](mod@pointer) | JSON as typed text, and places inside it |
 //! | [`example`] | Whether a response matches the example that produced it |
 
 /// The version of this build, which is ZENITH's version.
