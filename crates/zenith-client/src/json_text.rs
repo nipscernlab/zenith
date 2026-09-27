@@ -338,20 +338,21 @@ fn read_string(text: &str, from: usize) -> (Option<String>, usize, bool) {
             }
             b'\\' => {
                 decoded.push_str(&text[run_start..at]);
-                let Some(&escape) = bytes.get(at + 1) else {
+                // The character after the backslash, whole: it may be outside ASCII.
+                let Some(escape) = text[at + 1..].chars().next() else {
                     return (valid.then_some(decoded), bytes.len(), false);
                 };
-                at += 2;
+                at += 1 + escape.len_utf8();
                 match escape {
-                    b'"' => decoded.push('"'),
-                    b'\\' => decoded.push('\\'),
-                    b'/' => decoded.push('/'),
-                    b'b' => decoded.push('\u{8}'),
-                    b'f' => decoded.push('\u{c}'),
-                    b'n' => decoded.push('\n'),
-                    b'r' => decoded.push('\r'),
-                    b't' => decoded.push('\t'),
-                    b'u' => match read_unicode_escape(text, at) {
+                    '"' => decoded.push('"'),
+                    '\\' => decoded.push('\\'),
+                    '/' => decoded.push('/'),
+                    'b' => decoded.push('\u{8}'),
+                    'f' => decoded.push('\u{c}'),
+                    'n' => decoded.push('\n'),
+                    'r' => decoded.push('\r'),
+                    't' => decoded.push('\t'),
+                    'u' => match read_unicode_escape(text, at) {
                         Escape::Char(character, next) => {
                             decoded.push(character);
                             at = next;
@@ -834,6 +835,22 @@ mod tests {
             "\"\u{1}\"",
         ] {
             assert_eq!(spans(text), None, "{text:?}");
+        }
+    }
+
+    #[test]
+    fn a_backslash_before_a_character_outside_ascii_is_a_wrong_escape_not_a_crash() {
+        // Found by the property tests: the scanner once cut the character in half.
+        for text in [
+            r#""\é""#,
+            r#"{"message": "\ଲ"}"#,
+            "\"\\ଲ",
+            r#"{"a": "\😀 x"}"#,
+        ] {
+            assert_eq!(spans(text), None, "{text:?}");
+            for cursor in text.char_indices().map(|(at, _)| at).chain([text.len()]) {
+                let _ = position_at(text, cursor);
+            }
         }
     }
 

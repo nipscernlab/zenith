@@ -61,5 +61,15 @@ either is stated here in its own line.
   `/report` and `/export`, `Ctrl+R`, and the copy on Windows; and against the double,
   `Ctrl+C` cancelling a call in flight, a SOLAR that exits at once, one that speaks another
   protocol and one that is not there.
+- Property tests that give the scanner, the parser and the completer any text at all, and
+  the whole application any sequence of keys, pastes, responses, lines of standard error,
+  resizes, exits and reconnections: nothing panics, and nothing they return points outside
+  the line.
+
+### Fixed
+
+- A backslash before a character outside ASCII inside a JSON string, such as `"\é"`, no
+  longer brings ZENITH down: the scanner of the command line cut the character in half.
+  The property tests found it.
 
 [Unreleased]: https://github.com/nipscernlab/zenith/commits/main
