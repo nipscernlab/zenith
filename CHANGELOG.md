@@ -71,6 +71,8 @@ either is stated here in its own line.
 - The largest response an API may produce, `max_output_bytes`, on its card beside its
   budget, when the API declares it; the facts of that line now break between one another
   rather than inside one.
+- The file `ZENITH_TRACE_TIMINGS` names records every wake-up of the loop, and how long
+  finding SOLAR, making its copy and starting its process took.
 
 ### Fixed
 

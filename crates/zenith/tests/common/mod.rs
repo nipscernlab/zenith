@@ -18,7 +18,7 @@ use ratatui::buffer::Buffer;
 use ratatui::crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyEventState, KeyModifiers};
 use ratatui::style::{Color, Modifier, Style};
 use serde_json::{Value, json};
-use zenith::app::{App, Effect, Incoming, Options, Started};
+use zenith::app::{App, Effect, Incoming, Options, StartSteps, Started};
 use zenith_client::connection::Event as ConnectionEvent;
 use zenith_client::locate::{Found, Origin, Prepared};
 
@@ -118,6 +118,7 @@ impl Script {
             result: Ok(Started {
                 prepared,
                 pid: 4242,
+                steps: StartSteps::default(),
             }),
         });
     }

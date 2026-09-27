@@ -160,6 +160,19 @@ pub struct Started {
     pub prepared: Prepared,
     /// Its process id.
     pub pid: u32,
+    /// How long each step of the start took, which `ZENITH_TRACE_TIMINGS` records.
+    pub steps: StartSteps,
+}
+
+/// How long each step of starting SOLAR took.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct StartSteps {
+    /// Finding the binary.
+    pub locate: Duration,
+    /// Hashing it and, on Windows, finding or making its copy.
+    pub prepare: Duration,
+    /// Starting the process and the threads that read and write it.
+    pub spawn: Duration,
 }
 
 /// Which file was written.

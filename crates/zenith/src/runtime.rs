@@ -24,7 +24,7 @@ use zenith_client::connection::{Connection, Sink, describe_exit};
 use zenith_client::locate::{Placement, Search, locate, prepare};
 
 use crate::app::link::Failure;
-use crate::app::{App, Effect, Incoming, Options, Started, Written, report};
+use crate::app::{App, Effect, Incoming, Options, StartSteps, Started, Written, report};
 use crate::clock::Utc;
 
 /// How many events may wait in the channel. When the interface falls behind, the threads
@@ -182,6 +182,7 @@ impl<B: Backend> Runtime<B> {
         }
         if let Some(timings) = &mut self.timings {
             timings.wakeups += 1;
+            timings.mark("wake", &[]);
         }
         let mut handled = 0;
         while handled < BATCH {
@@ -193,6 +194,24 @@ impl<B: Backend> Runtime<B> {
                 break;
             };
             let key = matches!(incoming, Incoming::Key(_));
+            if let (
+                Some(timings),
+                Incoming::Started {
+                    result: Ok(started),
+                    ..
+                },
+            ) = (&mut self.timings, &incoming)
+            {
+                let steps = started.steps;
+                timings.mark(
+                    "solar_started",
+                    &[
+                        ("locate_us", steps.locate.as_micros()),
+                        ("prepare_us", steps.prepare.as_micros()),
+                        ("spawn_us", steps.spawn.as_micros()),
+                    ],
+                );
+            }
             let started = Instant::now();
             let effects = self.app.handle(incoming, started);
             self.execute(effects);
@@ -431,11 +450,14 @@ fn start_solar(
     sender: &SyncSender<Incoming>,
     connections: &Connections,
 ) -> Result<Started, Failure> {
+    let began = Instant::now();
     let found = locate(&Search::from_environment(flag)).map_err(Failure::Locate)?;
+    let located = Instant::now();
     let prepared =
         prepare(found, &Placement::for_this_system()).map_err(|error| Failure::Copy {
             message: error.to_string(),
         })?;
+    let ready = Instant::now();
     let sink_sender = sender.clone();
     let sink: Sink = Arc::new(move |generation, event| {
         sink_sender
@@ -450,11 +472,20 @@ fn start_solar(
                 message: error.to_string(),
             }
         })?;
+    let steps = StartSteps {
+        locate: located - began,
+        prepare: ready - located,
+        spawn: ready.elapsed(),
+    };
     let pid = connection.id();
     if let Ok(mut connections) = connections.lock() {
         connections.insert(generation, connection);
     }
-    Ok(Started { prepared, pid })
+    Ok(Started {
+        prepared,
+        pid,
+        steps,
+    })
 }
 
 #[cfg(test)]

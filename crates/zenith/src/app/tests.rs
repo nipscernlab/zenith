@@ -105,7 +105,11 @@ impl Harness {
         let generation = self.app.link.generation;
         self.feed(Incoming::Started {
             generation,
-            result: Ok(Started { prepared, pid: 42 }),
+            result: Ok(Started {
+                prepared,
+                pid: 42,
+                steps: StartSteps::default(),
+            }),
         });
     }
 
