@@ -831,7 +831,7 @@ What is measured, how, and where the numbers are:
 | The README | The session its pictures show, recorded against a real SOLAR and replayed through the drawing code at 100 × 30; the pictures are drawn from those snapshots | `crates/zenith/tests/screens.rs`, `cargo xtask screenshots --check` |
 | The whole program | `zenith` started in a pseudo-terminal, keys typed into it, the screen read back | `cargo xtask perf`, `cargo xtask soak` |
 | The guide | Every row of the table in section 4 of `docs/TESTING_BY_HAND.md`, typed into the real binary in a pseudo-terminal against SOLAR, with what the row says waited for on the screen | `cargo xtask walkthrough` |
-| Mutations | Whether the tests notice when a line of the code is changed: `cargo mutants`, weekly, and only in CI | `.github/workflows/scheduled.yml` |
+| Mutations | Whether the tests notice when a line of the code is changed: `cargo mutants` on every mutant of the two shipped crates, in twenty shards, weekly and only in CI, added up by `cargo xtask mutants` | `.github/workflows/scheduled.yml` |
 
 The tests that need SOLAR find it the way ZENITH does, `ZENITH_SOLAR` first, and say
 plainly that they were skipped when it is not there. CI always has it, because CI builds

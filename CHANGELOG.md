@@ -33,6 +33,9 @@ either is stated here in its own line.
   level. Without it, the keys filter, as before.
 - The guide's table has a row for `/export`, which the walkthrough checks with
   `solar replay`.
+- The weekly mutation run in twenty shards, each well inside the time a CI job may take,
+  testing every mutant against the whole workspace, and `cargo xtask mutants`, which adds
+  the shards up into one report with the score and every survivor by file.
 
 ### Changed
 
