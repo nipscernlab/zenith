@@ -53,6 +53,12 @@ either is stated here in its own line.
 
 ### Fixed
 
+- The property test that holds ZENITH's schema validator to the `jsonschema` crate failed
+  on a schema ZENITH judges rightly: `jsonschema` 0.58.1 ignores what `then` and `else`
+  evaluate when `if` is `true` or `false`, which the Python `jsonschema` 4.26.0 does not.
+  The test now hands the crate each boolean `if` as the object schema it stands for, and
+  keeps the case that found it.
+
 - No mark was ever seen on a fast machine: the opening lasts as long as the connection,
   32 ms on the architect's, as the design requires. Every connection now starts the
   Session tab with SOLAR's mark and the version that answered, above the notice that it

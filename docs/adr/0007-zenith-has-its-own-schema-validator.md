@@ -45,3 +45,6 @@ the manifest's `$defs`. `jsonschema` is a development dependency and never ships
 Property tests give both validators 4 096 generated schemas with generated values, and
 every schema of a real manifest with values shaped like its members, and fail on any
 verdict on which they differ: `crates/zenith-client/tests/validator_agrees_with_jsonschema.rs`.
+Since 27 September 2026 the crate is handed every boolean `if` as the object schema it
+stands for, `{}` or `{"not": {}}`: `jsonschema` 0.58.1 ignores what `then` and `else`
+evaluate after a boolean `if`, which the Python `jsonschema` 4.26.0 and ZENITH do not.
