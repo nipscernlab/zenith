@@ -5,6 +5,7 @@
 //! | `ci [--fast]` | What CI runs, in the same order, with the same flags |
 //! | `changelog [base]` | Every commit since `base` that changes code adds to `CHANGELOG.md` |
 //! | `coverage [--report]` | The coverage of the shipped crates, against its floor |
+//! | `mutants <dir> [--shards N]` | The report of a mutation run in CI, against its ceiling |
 //! | `screenshots [--check]` | The screenshots of the README, drawn from the snapshots |
 //! | `perf` | Startup, a key to its redraw, and the processor at idle, measured |
 //! | `soak [--calls N]` | The memory at idle and over a long session, measured |
@@ -24,6 +25,7 @@ use std::process::ExitCode;
 mod changelog;
 mod ci;
 mod coverage;
+mod mutants;
 mod perf;
 mod pty;
 mod screenshots;
@@ -42,6 +44,7 @@ fn main() -> ExitCode {
             _ => changelog::run(&root, changelog::DEFAULT_BASE),
         },
         "coverage" => coverage::run(&root, rest.contains(&"--report")),
+        "mutants" => mutants::run(&rest),
         "screenshots" => screenshots::run(&root, rest.contains(&"--check")),
         "perf" => perf::run(&root, &rest),
         "soak" => soak::run(&root, &rest),
@@ -68,6 +71,7 @@ const HELP: &str = "
 cargo xtask ci [--fast]          what CI runs, in the same order, with the same flags
 cargo xtask changelog [base]     every commit since base that changes code adds to CHANGELOG.md
 cargo xtask coverage [--report]  the coverage of the shipped crates, against its floor
+cargo xtask mutants <dir>        the report of a mutation run in CI, against its ceiling
 cargo xtask screenshots [--check] the screenshots of the README, drawn from the snapshots
 cargo xtask perf                 startup, a key to its redraw, and the processor at idle
 cargo xtask soak [--calls N]     the memory at idle and over a long session

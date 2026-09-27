@@ -123,11 +123,22 @@ would.
 ## Mutation testing, in CI only
 
 Coverage says which lines ran; mutation testing says whether anything checked what they
-did. It runs weekly in `.github/workflows/scheduled.yml`, with the configuration in
-`.cargo/mutants.toml`, and the survivors are in the job's artefact by file and line.
+did. It runs weekly in `.github/workflows/scheduled.yml`, and whenever it is started by
+hand from the Actions tab or with `gh workflow run scheduled.yml`, with the configuration
+in `.cargo/mutants.toml`. The mutants are split into twenty shards; the job called
+`mutation score` adds them up with `cargo xtask mutants`, shows the report on the run,
+with every survivor by file, and keeps it as the artefact `mutants-report`.
 
-**Never run `cargo mutants` locally.** It makes a full copy of the project for every job,
-and on the machine ZENITH was written on that filled the disk once already.
+To read a run here without running anything:
+
+```bash
+gh run download <run id> --pattern 'mutants-shard-*' --dir mutants-shards
+cargo xtask mutants mutants-shards --shards 20
+```
+
+**Never run `cargo mutants` locally.** It rebuilds the project for every mutant, and on
+the machine ZENITH was written on a copy of the project per job filled the disk once
+already.
 
 ## Reporting a bug
 
