@@ -5,6 +5,7 @@ use std::time::{Instant, SystemTime};
 
 use serde_json::{Value, json};
 use zenith_client::envelope::{Body, Message};
+use zenith_client::handshake::PROTOCOL;
 
 use crate::clock::Utc;
 use crate::limits;
@@ -39,6 +40,8 @@ pub enum Origin {
     },
     /// `R` on the APIs tab.
     Reload,
+    /// A key of the Log tab, asking SOLAR to log at another level.
+    LogLevel,
 }
 
 impl Origin {
@@ -55,6 +58,7 @@ impl Origin {
             Self::Again => "again",
             Self::Report { .. } => "report",
             Self::Reload => "reload",
+            Self::LogLevel => "log_level",
         }
     }
 }
@@ -192,6 +196,23 @@ impl Measured for CallRecord {
     }
 }
 
+/// The version of SOLAR's recording format that `/export` writes, `docs/RECORDING.md` in
+/// SOLAR's repository.
+pub const RECORDING_FORMAT: &str = "1.0.0";
+
+/// What a recording holds, and what it left out.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct Recorded {
+    /// The calls written.
+    pub calls: usize,
+    /// The calls of earlier connections, each of which was a session of its own.
+    pub earlier: usize,
+    /// The calls whose response was too long for ZENITH to keep, left out whole.
+    pub too_long: usize,
+    /// The calls the History had already dropped, of any connection.
+    pub dropped: u64,
+}
+
 /// The History tab: the calls, and which one is selected.
 #[derive(Debug, Clone)]
 pub struct History {
@@ -225,26 +246,67 @@ impl History {
             .or_else(|| self.calls.last().map(|(number, _)| number))
     }
 
-    /// Writes the History as NDJSON, one call a line, as `docs/DESIGN.md` section 12
-    /// specifies, straight to `out` as it walks the buffer. Returns how many calls it
-    /// wrote.
+    /// Writes the calls of one connection in SOLAR's recording format, version
+    /// [`RECORDING_FORMAT`], as `docs/DESIGN.md` section 12 says: a header that names
+    /// ZENITH as the writer, then every line that crossed, in the order it crossed, exactly
+    /// as it crossed. A request that was never answered is written without an answer,
+    /// which is what happened; a call whose answer was too long to keep is left out whole,
+    /// because its answer cannot be written as it crossed.
     ///
     /// # Errors
     ///
     /// What writing returns.
-    pub fn export(&self, out: &mut impl Write, now: SystemTime) -> io::Result<usize> {
+    pub fn record(
+        &self,
+        out: &mut impl Write,
+        connection: u64,
+        now: SystemTime,
+    ) -> io::Result<Recorded> {
+        let mut recorded = Recorded {
+            dropped: self.calls.dropped(),
+            ..Recorded::default()
+        };
+        // When each line crossed, requests before answers at the same instant, and the
+        // line itself.
+        let mut lines: Vec<(Instant, bool, SystemTime, &str, &str)> = Vec::new();
+        for (_, record) in self.calls.iter() {
+            if record.connection != connection {
+                recorded.earlier += 1;
+                continue;
+            }
+            let outcome = record.outcome.as_ref();
+            if outcome.is_some_and(|outcome| outcome.line.is_none()) {
+                recorded.too_long += 1;
+                continue;
+            }
+            lines.push((record.sent, false, record.sent_wall, "in", &record.request));
+            if let Some(outcome) = outcome
+                && let Some(line) = &outcome.line
+            {
+                lines.push((outcome.received, true, outcome.received_wall, "out", line));
+            }
+            recorded.calls += 1;
+        }
+        lines.sort_by_key(|(when, answer, ..)| (*when, *answer));
+        let started = lines.first().map_or(now, |(_, _, wall, _, _)| *wall);
         writeln!(
             out,
             "{}",
             json!({
-                "kind": "header",
-                "format": "zenith-history",
-                "format_version": "1.0.0",
-                "zenith_version": crate::VERSION,
-                "written_at": Utc::of(now).rfc3339(),
+                "solar_recording": RECORDING_FORMAT,
+                "at": Utc::of(started).rfc3339(),
+                "solar_version": format!("ZENITH {}", crate::VERSION),
+                "protocol": PROTOCOL,
             })
         )?;
-        self.write_calls(out)
+        for (_, _, wall, direction, line) in lines {
+            writeln!(
+                out,
+                "{}",
+                json!({"at": Utc::of(wall).rfc3339(), "direction": direction, "line": line})
+            )?;
+        }
+        Ok(recorded)
     }
 
     /// Writes the `dropped` line and one `call` line per call, which a report shares.
@@ -324,8 +386,16 @@ mod tests {
         }
     }
 
+    fn lines_of(out: Vec<u8>) -> Vec<Value> {
+        String::from_utf8(out)
+            .unwrap()
+            .lines()
+            .map(|line| serde_json::from_str(line).unwrap())
+            .collect()
+    }
+
     #[test]
-    fn the_export_is_a_header_what_was_dropped_and_one_line_per_call() {
+    fn the_calls_of_a_report_are_what_was_dropped_and_one_line_per_call() {
         let mut history = History::new(2, usize::MAX);
         history
             .calls
@@ -333,22 +403,169 @@ mod tests {
         history.calls.push(record(2, Some("not json")));
         history.calls.push(record(3, None));
         let mut out = Vec::new();
-        let written = history.export(&mut out, SystemTime::UNIX_EPOCH).unwrap();
+        let written = history.write_calls(&mut out).unwrap();
         assert_eq!(written, 2);
-        let lines: Vec<Value> = String::from_utf8(out)
-            .unwrap()
-            .lines()
-            .map(|line| serde_json::from_str(line).unwrap())
-            .collect();
-        assert_eq!(lines[0]["format"], json!("zenith-history"));
+        let lines = lines_of(out);
         assert_eq!(
-            lines[1],
+            lines[0],
             json!({"kind": "dropped", "calls": 1, "bytes": record(1, Some(r#"{"jsonrpc":"2.0","id":1}"#)).bytes()})
         );
-        assert_eq!(lines[2]["response"], json!("not json"));
-        assert_eq!(lines[2]["round_trip_us"], json!(520));
-        assert_eq!(lines[3]["response"], Value::Null);
-        assert_eq!(lines[3]["request"]["id"], json!(3));
+        assert_eq!(lines[1]["response"], json!("not json"));
+        assert_eq!(lines[1]["round_trip_us"], json!(520));
+        assert_eq!(lines[2]["response"], Value::Null);
+        assert_eq!(lines[2]["request"]["id"], json!(3));
+    }
+
+    /// The timestamp of SOLAR's recording format: RFC 3339, UTC, microseconds, `Z`.
+    fn is_a_recording_time(value: &Value) -> bool {
+        let text = value.as_str().unwrap_or_default();
+        let digits = |range: std::ops::Range<usize>| {
+            text.get(range)
+                .is_some_and(|part| part.chars().all(|c| c.is_ascii_digit()))
+        };
+        text.len() == 27
+            && digits(0..4)
+            && digits(5..7)
+            && digits(8..10)
+            && digits(11..13)
+            && digits(14..16)
+            && digits(17..19)
+            && digits(20..26)
+            && text.get(19..20) == Some(".")
+            && text.ends_with('Z')
+    }
+
+    #[test]
+    fn a_recording_is_a_header_then_every_line_in_the_order_it_crossed() {
+        let mut history = History::default();
+        let start = Instant::now();
+        // Two calls in flight at once, the second answered first, and one never answered.
+        let mut first = record(1, Some(r#"{"jsonrpc":"2.0","id":1,"result":{}}"#));
+        let mut second = record(2, Some(r#"{"jsonrpc":"2.0","id":2,"result":{}}"#));
+        let mut third = record(3, None);
+        first.sent = start;
+        second.sent = start + Duration::from_micros(10);
+        third.sent = start + Duration::from_micros(40);
+        first.sent_wall = SystemTime::UNIX_EPOCH + Duration::from_secs(1_790_000_000);
+        second.sent_wall = first.sent_wall + Duration::from_micros(10);
+        third.sent_wall = first.sent_wall + Duration::from_micros(40);
+        if let Some(outcome) = first.outcome.as_mut() {
+            outcome.received = start + Duration::from_micros(30);
+            outcome.received_wall = first.sent_wall + Duration::from_micros(30);
+        }
+        if let Some(outcome) = second.outcome.as_mut() {
+            outcome.received = start + Duration::from_micros(20);
+            outcome.received_wall = first.sent_wall + Duration::from_micros(20);
+        }
+        history.calls.push(first);
+        history.calls.push(second);
+        history.calls.push(third);
+        let mut out = Vec::new();
+        let recorded = history.record(&mut out, 1, SystemTime::UNIX_EPOCH).unwrap();
+        assert_eq!(
+            recorded,
+            Recorded {
+                calls: 3,
+                ..Recorded::default()
+            }
+        );
+        let lines = lines_of(out);
+        assert_eq!(
+            lines[0],
+            json!({
+                "solar_recording": "1.0.0",
+                "at": "2026-09-21T14:13:20.000000Z",
+                "solar_version": format!("ZENITH {}", crate::VERSION),
+                "protocol": "solar/1",
+            })
+        );
+        let order: Vec<(String, u64)> = lines[1..]
+            .iter()
+            .map(|line| {
+                let crossed: Value = serde_json::from_str(line["line"].as_str().unwrap()).unwrap();
+                (
+                    line["direction"].as_str().unwrap().to_owned(),
+                    crossed["id"].as_u64().unwrap(),
+                )
+            })
+            .collect();
+        let expected = [("in", 1), ("in", 2), ("out", 2), ("out", 1), ("in", 3)];
+        assert_eq!(
+            order,
+            expected
+                .iter()
+                .map(|(direction, id)| ((*direction).to_owned(), *id))
+                .collect::<Vec<_>>()
+        );
+        for line in &lines[1..] {
+            let members: Vec<&str> = line
+                .as_object()
+                .unwrap()
+                .keys()
+                .map(String::as_str)
+                .collect();
+            assert_eq!(members, vec!["at", "direction", "line"]);
+            assert!(is_a_recording_time(&line["at"]), "{line}");
+        }
+        assert!(is_a_recording_time(&lines[0]["at"]));
+        assert_eq!(lines[4]["at"], json!("2026-09-21T14:13:20.000030Z"));
+    }
+
+    #[test]
+    fn a_line_is_recorded_exactly_as_it_crossed_even_when_it_is_not_json() {
+        let mut history = History::default();
+        let mut broken = record(1, Some("not json at all"));
+        broken.request = "{\"jsonrpc\": \"2.0\",   \"id\":1, \"method\":\"x\"".to_owned();
+        let request = broken.request.clone();
+        history.calls.push(broken);
+        let mut out = Vec::new();
+        history.record(&mut out, 1, SystemTime::UNIX_EPOCH).unwrap();
+        let lines = lines_of(out);
+        assert_eq!(lines[1]["line"], json!(request));
+        assert_eq!(lines[2]["line"], json!("not json at all"));
+    }
+
+    #[test]
+    fn a_recording_leaves_out_other_connections_and_answers_too_long_to_keep() {
+        let mut history = History::new(3, usize::MAX);
+        history.calls.push(record(1, Some("{}")));
+        let mut earlier = record(1, Some("{}"));
+        earlier.connection = 1;
+        history.calls.push(earlier);
+        let mut long = record(1, Some("{}"));
+        long.connection = 2;
+        if let Some(outcome) = long.outcome.as_mut() {
+            outcome.line = None;
+            outcome.summary = Summary::TooLong { bytes: 1 << 25 };
+        }
+        history.calls.push(long);
+        let mut kept = record(2, Some("{}"));
+        kept.connection = 2;
+        history.calls.push(kept);
+        let mut out = Vec::new();
+        let recorded = history
+            .record(&mut out, 2, SystemTime::UNIX_EPOCH + Duration::from_secs(9))
+            .unwrap();
+        assert_eq!(
+            recorded,
+            Recorded {
+                calls: 1,
+                earlier: 1,
+                too_long: 1,
+                dropped: 1,
+            }
+        );
+        let lines = lines_of(out);
+        assert_eq!(lines.len(), 3);
+        // A recording with nothing in it starts when it was written.
+        let mut out = Vec::new();
+        let recorded = History::default()
+            .record(&mut out, 1, SystemTime::UNIX_EPOCH + Duration::from_secs(9))
+            .unwrap();
+        assert_eq!(recorded, Recorded::default());
+        let lines = lines_of(out);
+        assert_eq!(lines.len(), 1);
+        assert_eq!(lines[0]["at"], json!("1970-01-01T00:00:09.000000Z"));
     }
 
     #[test]

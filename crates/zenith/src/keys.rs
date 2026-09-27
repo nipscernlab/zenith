@@ -771,7 +771,7 @@ pub const BINDINGS: &[Binding] = &[
         History,
         &[character('x')],
         Action::Export,
-        "export the History to a file",
+        "write this connection as a recording for solar replay",
     ),
     bind(
         Viewer,

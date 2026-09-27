@@ -68,8 +68,8 @@ pub fn draw(frame: &mut Frame<'_>, area: Rect, app: &App) {
         ));
     }
     let mut parts = Vec::new();
-    if tab.solar_is_quieter() {
-        parts.push(format!("SOLAR was started at {}", tab.solar_level));
+    if let Some(said) = tab.solar_said() {
+        parts.push(said);
     }
     parts.push(format!(
         "{} {}",

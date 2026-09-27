@@ -1,8 +1,9 @@
 //! The Log tab: SOLAR's standard error, kept in a ring buffer and filtered by level.
 //!
-//! SOLAR reads its level once, when it starts, and has no API to change it, so ZENITH
-//! starts it at `trace` with `SOLAR_LOG_FORMAT=json` and chooses the level here, by
-//! filtering. `docs/OPEN_QUESTIONS.md` records the missing API.
+//! ZENITH starts SOLAR at `trace`, unless told otherwise, with `SOLAR_LOG_FORMAT=json`.
+//! When SOLAR's manifest has `solar.set_log_level`, the level chosen here is also SOLAR's
+//! own from then on; a SOLAR without it reads its level once, when it starts, and the
+//! level chosen here only filters what it wrote.
 
 use std::time::SystemTime;
 
@@ -188,8 +189,16 @@ pub struct LogTab {
     pub selected: Option<u64>,
     /// Whether the selected line is shown whole.
     pub expanded: bool,
-    /// The level SOLAR was started with.
+    /// The level SOLAR logs at, as far as ZENITH knows: the one it was started with, then
+    /// the one `solar.set_log_level` last answered with.
     pub solar_level: String,
+    /// Whether SOLAR can change its level while it runs, because its manifest has
+    /// `solar.set_log_level`.
+    pub can_set: bool,
+    /// The level asked of SOLAR by a call that has not been answered yet.
+    pub setting: Option<LevelKey>,
+    /// Why the last change of SOLAR's level did not happen, when it did not.
+    pub note: Option<String>,
 }
 
 impl LogTab {
@@ -202,6 +211,9 @@ impl LogTab {
             selected: None,
             expanded: false,
             solar_level: solar_level.to_owned(),
+            can_set: false,
+            setting: None,
+            note: None,
         }
     }
 
@@ -223,12 +235,30 @@ impl LogTab {
             .or_else(|| visible.last().copied())
     }
 
-    /// Whether SOLAR was started at a level lower than the one chosen, so that some lines
-    /// the level asks for can never arrive.
+    /// Whether SOLAR logs at a level lower than the one chosen, so that some lines the
+    /// level asks for do not arrive.
     #[must_use]
     pub fn solar_is_quieter(&self) -> bool {
         LevelKey::parse(&self.solar_level).is_some_and(|started| started < self.minimum)
             || self.solar_level == "off"
+    }
+
+    /// What the header says of SOLAR's own level, when there is something to say: what it
+    /// logs at, when SOLAR can change it; that it was started quieter than the level
+    /// chosen, when it cannot.
+    #[must_use]
+    pub fn solar_said(&self) -> Option<String> {
+        if let Some(note) = &self.note {
+            return Some(note.clone());
+        }
+        if let Some(level) = self.setting {
+            return Some(format!("asking SOLAR for {}", level.name()));
+        }
+        if self.can_set {
+            return Some(format!("SOLAR logs at {}", self.solar_level));
+        }
+        self.solar_is_quieter()
+            .then(|| format!("SOLAR was started at {}", self.solar_level))
     }
 }
 
@@ -287,7 +317,30 @@ mod tests {
         let mut tab = LogTab::new("info");
         tab.minimum = LevelKey::Trace;
         assert!(tab.solar_is_quieter());
+        assert_eq!(
+            tab.solar_said().as_deref(),
+            Some("SOLAR was started at info")
+        );
         tab.minimum = LevelKey::Warn;
         assert!(!tab.solar_is_quieter());
+        assert_eq!(tab.solar_said(), None);
+        let mut silent = LogTab::new("off");
+        silent.minimum = LevelKey::Error;
+        assert!(silent.solar_is_quieter());
+    }
+
+    #[test]
+    fn a_solar_that_can_set_its_level_is_said_to_log_at_it() {
+        let mut tab = LogTab::new("trace");
+        tab.can_set = true;
+        assert_eq!(tab.solar_said().as_deref(), Some("SOLAR logs at trace"));
+        tab.setting = Some(LevelKey::Warn);
+        assert_eq!(tab.solar_said().as_deref(), Some("asking SOLAR for warn"));
+        tab.setting = None;
+        tab.note = Some("SOLAR kept its level: no".to_owned());
+        assert_eq!(
+            tab.solar_said().as_deref(),
+            Some("SOLAR kept its level: no")
+        );
     }
 }

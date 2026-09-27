@@ -12,6 +12,8 @@ use std::path::{Path, PathBuf};
 use std::thread;
 use std::time::Duration;
 
+use zenith_client::locate::{Found, Origin, Placement, prepare};
+
 use crate::pty::{Session, scratch_data_dir, solar};
 
 /// The guide whose table this walks.
@@ -175,7 +177,15 @@ const STEPS: &[Step] = &[
             walk.press(b"t")?;
             walk.see("[trace]")?;
             walk.press(b"i")?;
-            walk.see("[info]")
+            walk.see("[info]")?;
+            // A SOLAR with solar.set_log_level says the level it logs at in the header.
+            if walk.shows("SOLAR logs at") || walk.shows("asking SOLAR for") {
+                walk.see("SOLAR logs at info")?;
+                walk.said("SOLAR set its own level to info");
+            } else {
+                walk.said("this SOLAR cannot set its level, so the keys only filter");
+            }
+            Ok(())
         },
     },
     Step {
@@ -297,6 +307,21 @@ const STEPS: &[Step] = &[
             walk.press(UP)?;
             // The last line of the last session: every row starts by clearing the transcript.
             walk.see("\u{203a} /clear")
+        },
+    },
+    Step {
+        row: "`/export`",
+        run: |walk| {
+            walk.press(CTRL_U)?;
+            walk.line("/ping for the replay")?;
+            walk.see("pong in ")?;
+            let file = Path::new(&walk.data).join("walkthrough-recording.ndjson");
+            let _ = std::fs::remove_file(&file);
+            walk.line(&format!("/export {}", file.display()))?;
+            walk.see("Wrote the recording of this connection")?;
+            let said = replay(&walk.solar, &file)?;
+            walk.said(&said);
+            Ok(())
         },
     },
     Step {
@@ -537,6 +562,34 @@ pub(crate) fn run(root: &Path) -> Result<(), String> {
         STEPS.len()
     );
     Ok(())
+}
+
+/// Runs `solar replay` on a recording, from the copy ZENITH itself runs on Windows, and
+/// returns what it said last when it found every answer the same.
+fn replay(solar: &str, file: &Path) -> Result<String, String> {
+    let found = Found {
+        path: PathBuf::from(solar),
+        origin: Origin::Flag,
+    };
+    let prepared =
+        prepare(found, &Placement::for_this_system()).map_err(|error| error.to_string())?;
+    let output = std::process::Command::new(&prepared.runs)
+        .arg("replay")
+        .arg(file)
+        .output()
+        .map_err(|error| format!("solar replay could not be started: {error}"))?;
+    let said = format!(
+        "{}{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    if !output.status.success() {
+        return Err(format!(
+            "solar replay exited with {:?}:\n{said}",
+            output.status.code()
+        ));
+    }
+    Ok(said.lines().last().unwrap_or_default().trim().to_owned())
 }
 
 /// The `zenith` of the current code, built now. The walkthrough checks behaviour, not

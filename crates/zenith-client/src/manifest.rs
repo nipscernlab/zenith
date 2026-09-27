@@ -19,6 +19,10 @@ pub const LAYOUT_MAJOR: u64 = 2;
 /// The name of the API that cancels a call, section 9 of SOLAR's contract.
 pub const CANCEL_API: &str = "solar.cancel";
 
+/// The name of the API that changes SOLAR's log level while it runs, section 2 of SOLAR's
+/// contract.
+pub const SET_LOG_LEVEL_API: &str = "solar.set_log_level";
+
 /// Every API a SOLAR build answers to, as its manifest describes them.
 #[derive(Debug, Clone)]
 pub struct Catalogue {
@@ -34,8 +38,121 @@ pub struct Catalogue {
     pub definitions: Value,
     /// The APIs, in the order the manifest lists them.
     pub apis: Vec<Api>,
+    /// `capabilities`, what the protocol accepts, section 8.2 of SOLAR's contract. A
+    /// manifest from before layout 2.1.0 does not have it.
+    pub declared: Option<Declared>,
     /// Members of the manifest ZENITH does not know, kept to be shown.
     pub other: Vec<(String, Value)>,
+}
+
+/// What a manifest declares the protocol accepts, its `capabilities`, read as section 8.2
+/// of SOLAR's contract lays them out. A member ZENITH does not know, or one it knows in a
+/// shape it does not, is kept in `other` rather than dropped.
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct Declared {
+    /// `batch`.
+    pub batch: Option<BatchDeclared>,
+    /// `cancellation`.
+    pub cancellation: Option<CancellationDeclared>,
+    /// `notifications.accepted`.
+    pub notifications: Option<bool>,
+    /// `limits`, every number by its name, in the manifest's order.
+    pub limits: Vec<(String, u64)>,
+    /// Members ZENITH does not know, kept to be shown.
+    pub other: Vec<(String, Value)>,
+}
+
+/// `capabilities.batch`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct BatchDeclared {
+    /// Whether a line holding an array of requests is answered rather than refused.
+    pub accepted: bool,
+    /// The most elements one batch may hold.
+    pub max_elements: Option<u64>,
+    /// Whether the responses come back in the order of the requests.
+    pub ordered: Option<bool>,
+}
+
+/// `capabilities.cancellation`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CancellationDeclared {
+    /// Whether a call in flight can be asked to stop.
+    pub accepted: bool,
+    /// The API that does the asking, `None` when cancellation is not accepted.
+    pub method: Option<String>,
+}
+
+impl Declared {
+    /// Reads `capabilities`, or `None` when it is not an object.
+    #[must_use]
+    pub fn from_value(value: &Value) -> Option<Self> {
+        let Value::Object(map) = value else {
+            return None;
+        };
+        let mut declared = Self::default();
+        for (key, value) in map {
+            let read = match key.as_str() {
+                "batch" => BatchDeclared::from_value(value)
+                    .map(|batch| declared.batch = Some(batch))
+                    .is_some(),
+                "cancellation" => CancellationDeclared::from_value(value)
+                    .map(|cancellation| declared.cancellation = Some(cancellation))
+                    .is_some(),
+                "notifications" => value
+                    .get("accepted")
+                    .and_then(Value::as_bool)
+                    .map(|accepted| declared.notifications = Some(accepted))
+                    .is_some(),
+                "limits" => match value {
+                    Value::Object(limits) => {
+                        for (name, limit) in limits {
+                            match limit.as_u64() {
+                                Some(number) => declared.limits.push((name.clone(), number)),
+                                None => declared
+                                    .other
+                                    .push((format!("limits.{name}"), limit.clone())),
+                            }
+                        }
+                        true
+                    }
+                    _ => false,
+                },
+                _ => false,
+            };
+            if !read {
+                declared.other.push((key.clone(), value.clone()));
+            }
+        }
+        Some(declared)
+    }
+
+    /// The limit called `name`, such as `max_request_bytes`.
+    #[must_use]
+    pub fn limit(&self, name: &str) -> Option<u64> {
+        self.limits
+            .iter()
+            .find(|(limit, _)| limit == name)
+            .map(|(_, number)| *number)
+    }
+}
+
+impl BatchDeclared {
+    fn from_value(value: &Value) -> Option<Self> {
+        Some(Self {
+            accepted: value.get("accepted")?.as_bool()?,
+            max_elements: value.get("max_elements").and_then(Value::as_u64),
+            ordered: value.get("ordered").and_then(Value::as_bool),
+        })
+    }
+}
+
+impl CancellationDeclared {
+    fn from_value(value: &Value) -> Option<Self> {
+        Some(Self {
+            accepted: value.get("accepted")?.as_bool()?,
+            method: string(value.get("method")),
+        })
+    }
 }
 
 /// One API, as its manifest entry describes it.
@@ -202,6 +319,7 @@ impl Catalogue {
                 .ok_or(ManifestError::BadEntry { index })?;
             apis.push(api);
         }
+        let declared = root.get("capabilities").and_then(Declared::from_value);
         let known = [
             "$defs",
             "apis",
@@ -210,9 +328,12 @@ impl Catalogue {
             "schema_version",
             "solar_version",
         ];
+        // `capabilities` in a shape ZENITH cannot read is kept, as any unknown member is.
+        let read =
+            |key: &str| known.contains(&key) || (key == "capabilities" && declared.is_some());
         let other = root
             .iter()
-            .filter(|(key, _)| !known.contains(&key.as_str()))
+            .filter(|(key, _)| !read(key))
             .map(|(key, value)| (key.clone(), value.clone()))
             .collect();
         Ok(Self {
@@ -222,6 +343,7 @@ impl Catalogue {
             schema_dialect,
             definitions,
             apis,
+            declared,
             other,
         })
     }
@@ -237,30 +359,87 @@ impl Catalogue {
         self.apis.iter().map(|api| api.name.as_str())
     }
 
-    /// What this SOLAR offers beyond calls, as far as the manifest can say.
+    /// What this SOLAR offers beyond calls: what its manifest declares, and, for a manifest
+    /// that declares nothing, what its APIs show.
     #[must_use]
     pub fn capabilities(&self) -> Capabilities {
-        let cancel = self.api(CANCEL_API).filter(|api| {
-            let view = View::new(api.params());
-            view.properties(&view.at(&crate::pointer::Pointer::root()))
-                .iter()
-                .any(|property| property.name == "id")
-        });
+        let declared = self.declared.as_ref();
+        let cancel = match declared.and_then(|declared| declared.cancellation.as_ref()) {
+            Some(cancellation) if cancellation.accepted => Some(
+                cancellation
+                    .method
+                    .clone()
+                    .unwrap_or_else(|| CANCEL_API.to_owned()),
+            ),
+            Some(_) => None,
+            None => self
+                .api(CANCEL_API)
+                .filter(|api| takes(api, "id"))
+                .map(|api| api.name.clone()),
+        };
+        let batches = match declared.and_then(|declared| declared.batch) {
+            None => Batches::Unknown,
+            Some(batch) if !batch.accepted => Batches::Refused,
+            Some(batch) => Batches::Accepted {
+                max_elements: batch.max_elements,
+                ordered: batch.ordered,
+            },
+        };
         Capabilities {
-            cancel: cancel.is_some(),
+            cancel,
+            batches,
+            log_level: self
+                .api(SET_LOG_LEVEL_API)
+                .is_some_and(|api| takes(api, "level")),
+            max_request_bytes: declared.and_then(|declared| declared.limit("max_request_bytes")),
+            declared: declared.is_some(),
         }
     }
 }
 
-/// What a SOLAR build offers beyond calls, as its manifest declares it.
-///
-/// Batches are not here: the manifest does not say whether a build accepts them, which
-/// `docs/OPEN_QUESTIONS.md` records as something ZENITH needed and did not find.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+/// Whether an API's parameters have a member called `name`.
+fn takes(api: &Api, name: &str) -> bool {
+    let view = View::new(api.params());
+    view.properties(&view.at(&crate::pointer::Pointer::root()))
+        .iter()
+        .any(|property| property.name == name)
+}
+
+/// What a SOLAR build offers beyond calls. A manifest of layout 2.1.0 or later declares it
+/// in `capabilities`; for an older one, ZENITH reads what it can from the APIs and leaves
+/// the rest unknown.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct Capabilities {
-    /// `solar.cancel` is in the manifest and takes an `id`, as section 9 of SOLAR's
-    /// contract describes it.
-    pub cancel: bool,
+    /// The API that cancels a call in flight: the one the manifest declares, or, when it
+    /// declares nothing, `solar.cancel` if it is in the manifest and takes an `id`.
+    pub cancel: Option<String>,
+    /// Whether a line holding an array of requests is answered.
+    pub batches: Batches,
+    /// `solar.set_log_level` is in the manifest and takes a `level`, so SOLAR's log level
+    /// can change while it runs.
+    pub log_level: bool,
+    /// The longest request line SOLAR reads, in bytes, without its newline, when the
+    /// manifest declares it.
+    pub max_request_bytes: Option<u64>,
+    /// Whether the manifest declares its capabilities at all.
+    pub declared: bool,
+}
+
+/// Whether SOLAR answers a batch, section 3.2 of SOLAR's contract.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum Batches {
+    /// The manifest does not say, as one from before layout 2.1.0 does not.
+    #[default]
+    Unknown,
+    /// A batch is refused.
+    Refused,
+    /// A batch is answered.
+    Accepted {
+        /// The most elements one may hold, when the manifest says.
+        max_elements: Option<u64>,
+        /// Whether the responses come back in the order of the requests, when it says.
+        ordered: Option<bool>,
+    },
 }
 
 /// The members section 8 of SOLAR's contract requires of every API entry.
@@ -443,10 +622,164 @@ mod tests {
         assert!(ping.other.is_empty() && ping.missing.is_empty());
     }
 
+    fn fixture_0_3_0() -> Value {
+        serde_json::from_str(include_str!("../tests/fixtures/solar-0.3.0-manifest.json")).unwrap()
+    }
+
     #[test]
-    fn solar_0_1_0_offers_no_cancellation() {
+    fn solar_0_1_0_offers_no_cancellation_and_declares_nothing() {
         let catalogue = Catalogue::from_data(&fixture()).unwrap();
-        assert!(!catalogue.capabilities().cancel);
+        assert_eq!(catalogue.declared, None);
+        assert_eq!(
+            catalogue.capabilities(),
+            Capabilities {
+                cancel: None,
+                batches: Batches::Unknown,
+                log_level: false,
+                max_request_bytes: None,
+                declared: false,
+            }
+        );
+    }
+
+    #[test]
+    fn solar_0_3_0_declares_its_capabilities_and_they_are_read() {
+        let catalogue = Catalogue::from_data(&fixture_0_3_0()).unwrap();
+        assert_eq!(catalogue.schema_version, "2.1.0");
+        assert!(catalogue.other.is_empty(), "{:?}", catalogue.other);
+        let declared = catalogue.declared.clone().unwrap();
+        assert_eq!(
+            declared.batch,
+            Some(BatchDeclared {
+                accepted: true,
+                max_elements: Some(64),
+                ordered: Some(true),
+            })
+        );
+        assert_eq!(
+            declared.cancellation,
+            Some(CancellationDeclared {
+                accepted: true,
+                method: Some("solar.cancel".to_owned()),
+            })
+        );
+        assert_eq!(declared.notifications, Some(false));
+        assert_eq!(declared.limit("max_request_bytes"), Some(16_777_216));
+        assert_eq!(declared.limit("max_queued_requests"), Some(256));
+        assert_eq!(declared.limit("max_thoughts"), None);
+        assert_eq!(declared.limits.len(), 6);
+        assert!(declared.other.is_empty(), "{:?}", declared.other);
+        assert_eq!(
+            catalogue.capabilities(),
+            Capabilities {
+                cancel: Some("solar.cancel".to_owned()),
+                batches: Batches::Accepted {
+                    max_elements: Some(64),
+                    ordered: Some(true),
+                },
+                log_level: true,
+                max_request_bytes: Some(16_777_216),
+                declared: true,
+            }
+        );
+    }
+
+    #[test]
+    fn what_the_manifest_declares_wins_over_what_its_apis_suggest() {
+        let mut manifest = fixture_0_3_0();
+        manifest["capabilities"]["cancellation"] = json!({"accepted": false, "method": null});
+        manifest["capabilities"]["batch"] = json!({"accepted": false});
+        let capabilities = Catalogue::from_data(&manifest).unwrap().capabilities();
+        assert_eq!(capabilities.cancel, None);
+        assert_eq!(capabilities.batches, Batches::Refused);
+        manifest["capabilities"]["cancellation"] =
+            json!({"accepted": true, "method": "solar.stop"});
+        let capabilities = Catalogue::from_data(&manifest).unwrap().capabilities();
+        assert_eq!(capabilities.cancel.as_deref(), Some("solar.stop"));
+        manifest["capabilities"]["cancellation"] = json!({"accepted": true, "method": null});
+        let capabilities = Catalogue::from_data(&manifest).unwrap().capabilities();
+        assert_eq!(capabilities.cancel.as_deref(), Some("solar.cancel"));
+    }
+
+    #[test]
+    fn capabilities_that_leave_cancellation_out_fall_back_to_the_apis() {
+        let mut manifest = fixture_0_3_0();
+        manifest["capabilities"]
+            .as_object_mut()
+            .unwrap()
+            .remove("cancellation");
+        let capabilities = Catalogue::from_data(&manifest).unwrap().capabilities();
+        assert_eq!(capabilities.cancel.as_deref(), Some("solar.cancel"));
+        assert!(capabilities.declared);
+    }
+
+    #[test]
+    fn capabilities_in_a_shape_zenith_does_not_know_are_kept_and_not_guessed() {
+        let manifest = json!({
+            "schema_version": "2.3.0",
+            "apis": [],
+            "capabilities": {
+                "batch": {"max_elements": 64},
+                "cancellation": "yes",
+                "notifications": {},
+                "limits": {"max_request_bytes": 100, "max_thoughts": "many"},
+                "streaming": {"accepted": true}
+            }
+        });
+        let catalogue = Catalogue::from_data(&manifest).unwrap();
+        let declared = catalogue.declared.clone().unwrap();
+        assert_eq!(declared.batch, None);
+        assert_eq!(declared.cancellation, None);
+        assert_eq!(declared.notifications, None);
+        assert_eq!(declared.limits, vec![("max_request_bytes".to_owned(), 100)]);
+        let kept: Vec<&str> = declared.other.iter().map(|(key, _)| key.as_str()).collect();
+        assert_eq!(
+            kept,
+            vec![
+                "batch",
+                "cancellation",
+                "notifications",
+                "limits.max_thoughts",
+                "streaming"
+            ]
+        );
+        let capabilities = catalogue.capabilities();
+        assert_eq!(capabilities.batches, Batches::Unknown);
+        assert_eq!(capabilities.cancel, None);
+        assert_eq!(capabilities.max_request_bytes, Some(100));
+        // A capabilities member that is not an object is kept whole, as any unknown member.
+        let catalogue = Catalogue::from_data(&json!({
+            "schema_version": "2.1.0", "apis": [], "capabilities": true
+        }))
+        .unwrap();
+        assert_eq!(catalogue.declared, None);
+        assert_eq!(
+            catalogue.other,
+            vec![("capabilities".to_owned(), json!(true))]
+        );
+        assert!(!catalogue.capabilities().declared);
+    }
+
+    #[test]
+    fn the_log_level_can_be_set_only_through_an_api_that_takes_a_level() {
+        let mut manifest = fixture();
+        manifest["apis"].as_array_mut().unwrap().push(json!({
+            "name": "solar.set_log_level",
+            "params_schema": {"type": "object", "properties": {"verbosity": {}}},
+        }));
+        assert!(
+            !Catalogue::from_data(&manifest)
+                .unwrap()
+                .capabilities()
+                .log_level
+        );
+        manifest["apis"][5]["params_schema"]["properties"] = json!({"level": {}});
+        assert!(
+            Catalogue::from_data(&manifest)
+                .unwrap()
+                .capabilities()
+                .log_level
+        );
     }
 
     #[test]
@@ -457,7 +790,10 @@ mod tests {
             "params_schema": {"type": "object", "properties": {"id": {}}, "required": ["id"]},
         }));
         let catalogue = Catalogue::from_data(&manifest).unwrap();
-        assert!(catalogue.capabilities().cancel);
+        assert_eq!(
+            catalogue.capabilities().cancel.as_deref(),
+            Some("solar.cancel")
+        );
         let cancel = catalogue.api("solar.cancel").unwrap();
         assert!(cancel.missing.contains(&"timeout_ms"));
     }

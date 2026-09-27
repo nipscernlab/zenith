@@ -23,6 +23,7 @@ use ratatui::backend::Backend;
 use zenith_client::connection::{Connection, Sink, describe_exit};
 use zenith_client::locate::{Placement, Search, locate, prepare};
 
+use crate::app::history::Recorded;
 use crate::app::link::Failure;
 use crate::app::{App, Effect, Incoming, Options, StartSteps, Started, Written, report};
 use crate::clock::Utc;
@@ -353,9 +354,9 @@ impl<B: Backend> Runtime<B> {
                 Effect::Stop { generation } => self.stop(generation),
                 Effect::CheckExit { generation } => self.check_exit(generation),
                 Effect::Export { path } => {
-                    let result = self.write_file(path, "zenith-history", Written::History);
+                    let (recorded, result) = self.write_recording(path);
                     self.queue.push_back(Incoming::Wrote {
-                        what: Written::History,
+                        what: Written::Recording(recorded),
                         result,
                     });
                 }
@@ -444,24 +445,28 @@ impl<B: Backend> Runtime<B> {
         }
     }
 
-    fn write_file(
+    /// Writes the recording of the current connection, and says what it holds.
+    fn write_recording(
         &self,
         path: Option<PathBuf>,
-        stem: &str,
-        what: Written,
-    ) -> Result<(PathBuf, usize), String> {
-        let (file, path) =
-            create(path, stem, SystemTime::now()).map_err(|error| error.to_string())?;
+    ) -> (Recorded, Result<(PathBuf, usize), String>) {
+        let (file, path) = match create(path, "zenith-recording", SystemTime::now()) {
+            Ok(created) => created,
+            Err(error) => return (Recorded::default(), Err(error.to_string())),
+        };
         let mut out = BufWriter::new(file);
-        let written = match what {
-            Written::History => self.app.history.export(&mut out, SystemTime::now()),
-            // Written elsewhere: the report by `write_report`, the command line history by
-            // its thread.
-            Written::Report | Written::CommandHistory => Ok(0),
+        match self
+            .app
+            .history
+            .record(&mut out, self.app.link.generation, SystemTime::now())
+            .and_then(|recorded| out.flush().map(|()| recorded))
+        {
+            Ok(recorded) => (recorded, Ok((path, recorded.calls))),
+            Err(error) => (
+                Recorded::default(),
+                Err(format!("{}: {error}", path.display())),
+            ),
         }
-        .and_then(|count| out.flush().map(|()| count))
-        .map_err(|error| format!("{}: {error}", path.display()))?;
-        Ok((path, written))
     }
 
     fn write_report(

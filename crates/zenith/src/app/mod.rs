@@ -27,7 +27,7 @@ use zenith_client::example;
 use zenith_client::handshake;
 use zenith_client::json_text;
 use zenith_client::locate::Prepared;
-use zenith_client::manifest::Catalogue;
+use zenith_client::manifest::{Batches, Capabilities, Catalogue};
 use zenith_client::schema::{Failure as SchemaFailure, FailureKind};
 
 use crate::clock;
@@ -38,7 +38,7 @@ use crate::keys::{self, Action, LevelKey, Place};
 use crate::theme::{Depth, Theme, ThemeName};
 
 use apis::{ApisTab, ExampleResult, Form};
-use history::{CallRecord, History, Origin, Outcome, Summary};
+use history::{CallRecord, History, Origin, Outcome, RECORDING_FORMAT, Recorded, Summary};
 use link::{ExitSeen, Failure, Link, Phase};
 use log::{LogEntry, LogTab};
 use session::{Band, Entry, Layout, Session, Tone};
@@ -194,8 +194,8 @@ pub struct StartSteps {
 /// Which file was written.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Written {
-    /// The History, by `/export` or `x`.
-    History,
+    /// The recording of the current connection, by `/export` or `x`, and what it left out.
+    Recording(Recorded),
     /// A report, by `/report`.
     Report,
     /// The command line history, after each line and by `/forget`.
@@ -284,7 +284,7 @@ pub enum Effect {
         /// The connection.
         generation: u64,
     },
-    /// Write the History to a file.
+    /// Write the recording of the current connection, in SOLAR's recording format.
     Export {
         /// Where, or the default name in the current directory.
         path: Option<PathBuf>,
@@ -481,8 +481,9 @@ impl App {
         self.effects.push(Effect::Start {
             generation: self.link.generation,
             flag: self.options.solar.clone(),
+            // The level SOLAR logs at now, so that a restart keeps what the Log tab chose.
             settings: Settings {
-                log_level: self.options.solar_log.clone(),
+                log_level: self.log.solar_level.clone(),
                 environment: self.options.environment.clone(),
             },
         });
@@ -535,12 +536,14 @@ impl App {
                         why: why.to_owned(),
                     },
                 );
-                if let Origin::Report { path } = pending.origin {
-                    self.effects.push(Effect::Report {
+                match pending.origin {
+                    Origin::Report { path } => self.effects.push(Effect::Report {
                         path: Some(path),
                         system: None,
                         why: Some(why.to_owned()),
-                    });
+                    }),
+                    Origin::LogLevel => self.log.setting = None,
+                    _ => {}
                 }
             }
         }
@@ -925,6 +928,7 @@ impl App {
                     self.adopt_manifest(data, true);
                 }
             }
+            Origin::LogLevel => self.log_level_answer(message, data),
             Origin::Command | Origin::Form | Origin::Raw | Origin::Cancel | Origin::Again => {
                 if pending.layout == Layout::List
                     && let Some(data) = data
@@ -969,7 +973,7 @@ impl App {
         } else {
             match Catalogue::from_data(data) {
                 Ok(catalogue) => {
-                    self.link.capabilities = catalogue.capabilities();
+                    self.take_capabilities(&catalogue);
                     self.link.catalogue = Some(catalogue);
                     self.link.manifest_call = None;
                 }
@@ -1000,11 +1004,8 @@ impl App {
             self.session.push(Entry::Mark {
                 version: info.solar_version.clone(),
             });
-            let cancel = if self.link.capabilities.cancel {
-                "Ctrl+C cancels a call in flight."
-            } else {
-                "This SOLAR has no solar.cancel."
-            };
+            let mut said = capabilities_said(&self.link.capabilities);
+            said.push("Type / for the commands, or ? for every key.".to_owned());
             self.push_notice(
                 Tone::Info,
                 vec![
@@ -1016,17 +1017,30 @@ impl App {
                         info.manifest_schema_version,
                         if count == 1 { "API" } else { "APIs" },
                     ),
-                    format!("{cancel} Type / for the commands, or ? for every key."),
+                    said.join(" "),
                 ],
             );
         }
+    }
+
+    /// Takes what a manifest says SOLAR offers: the capabilities, the longest request line
+    /// SOLAR reads, and whether the Log tab can set SOLAR's level.
+    fn take_capabilities(&mut self, catalogue: &Catalogue) {
+        let capabilities = catalogue.capabilities();
+        self.link.tracker.refuse_lines_longer_than(
+            capabilities
+                .max_request_bytes
+                .and_then(|bytes| usize::try_from(bytes).ok()),
+        );
+        self.log.can_set = capabilities.log_level;
+        self.link.capabilities = capabilities;
     }
 
     fn adopt_manifest(&mut self, data: &Value, say: bool) {
         match Catalogue::from_data(data) {
             Ok(catalogue) => {
                 let count = catalogue.apis.len();
-                self.link.capabilities = catalogue.capabilities();
+                self.take_capabilities(&catalogue);
                 self.link.catalogue = Some(catalogue);
                 if say {
                     self.flash = Some((
@@ -1093,7 +1107,18 @@ impl App {
 
     fn on_wrote(&mut self, what: Written, result: Result<(PathBuf, usize), String>) {
         let noun = match what {
-            Written::History => "the History",
+            Written::Recording(recorded) => {
+                let (tone, text) = match result {
+                    Ok((path, _)) => (Tone::Info, recorded_said(&recorded, &path)),
+                    Err(error) => (
+                        Tone::Error,
+                        format!("Could not write the recording: {error}"),
+                    ),
+                };
+                self.flash = Some((tone, text.clone()));
+                self.push_notice(tone, vec![text]);
+                return;
+            }
             Written::Report => "the report",
             Written::CommandHistory => {
                 // Written after every line: only a failure is worth a word, and only the
@@ -1367,19 +1392,21 @@ impl App {
             return;
         }
         self.interrupt_armed = true;
+        let cancel = self.link.capabilities.cancel.clone();
+        let cancel_name = cancel
+            .clone()
+            .unwrap_or_else(|| zenith_client::manifest::CANCEL_API.to_owned());
         let latest = self
             .link
             .tracker
             .waiting()
-            .filter(|waiting| {
-                waiting.method.as_deref() != Some(zenith_client::manifest::CANCEL_API)
-            })
+            .filter(|waiting| waiting.method.as_deref() != Some(cancel_name.as_str()))
             .last()
             .map(|waiting| (waiting.call, waiting.method.clone()));
-        let message = match latest {
-            Some((call, method)) if self.link.capabilities.cancel => {
+        let message = match (latest, cancel) {
+            (Some((call, method)), Some(cancel)) => {
                 let sent = self.send_call(
-                    zenith_client::manifest::CANCEL_API,
+                    &cancel,
                     &json!({"id": call}),
                     Origin::Cancel,
                     Layout::Generic,
@@ -1393,19 +1420,24 @@ impl App {
                     Err(error) => format!("{error} Press Ctrl+C again to quit."),
                 }
             }
-            Some((call, method)) => {
+            (Some((call, method)), None) => {
                 let budget = method
                     .as_deref()
                     .and_then(|name| self.catalogue()?.api(name)?.timeout_ms)
                     .map_or_else(String::new, |budget| {
                         format!(" or reaches its budget of {budget} ms")
                     });
+                let offers = if self.link.capabilities.declared {
+                    "This SOLAR's manifest says it cancels nothing"
+                } else {
+                    "This SOLAR offers no solar.cancel"
+                };
                 format!(
-                    "This SOLAR offers no solar.cancel, so call {call} runs until it answers{budget}. \
+                    "{offers}, so call {call} runs until it answers{budget}. \
                      Press Ctrl+C again to quit."
                 )
             }
-            None => {
+            (None, _) => {
                 if self.tab == Tab::Session && !self.session.editor.is_empty() {
                     self.session.editor.clear();
                     self.refresh_completion();
@@ -2135,9 +2167,53 @@ impl App {
         }
     }
 
+    /// Chooses the lowest level the Log tab shows, and, when SOLAR can change its own level
+    /// while it runs, asks it to log at that level from now on.
     fn set_log_level(&mut self, level: LevelKey) {
         self.log.minimum = level;
         self.log.selected = None;
+        if !self.log.can_set || !self.link.connected() {
+            return;
+        }
+        match self.send_call(
+            zenith_client::manifest::SET_LOG_LEVEL_API,
+            &json!({"level": level.name()}),
+            Origin::LogLevel,
+            Layout::Generic,
+            false,
+        ) {
+            Ok(_) => {
+                self.log.setting = Some(level);
+                self.log.note = None;
+            }
+            Err(why) => self.log.note = Some(format!("SOLAR kept its level: {why}")),
+        }
+    }
+
+    /// What `solar.set_log_level` answered: the level SOLAR logs at now, or why it kept
+    /// the one it had.
+    fn log_level_answer(&mut self, message: &Message, data: Option<&Value>) {
+        self.log.setting = None;
+        if let Some(current) = data
+            .and_then(|data| data.get("current"))
+            .and_then(Value::as_str)
+        {
+            current.clone_into(&mut self.log.solar_level);
+            self.log.note = None;
+            return;
+        }
+        let why = match message {
+            Message::Single(Envelope {
+                body: Body::Failure(failure),
+                ..
+            }) => failure
+                .message
+                .clone()
+                .or_else(|| failure.reason.clone())
+                .unwrap_or_else(|| "it answered with an error".to_owned()),
+            _ => "its answer did not say which level it logs at".to_owned(),
+        };
+        self.log.note = Some(format!("SOLAR kept its level: {why}"));
     }
 
     fn act_on_history(&mut self, action: Action) {
@@ -2235,6 +2311,79 @@ impl App {
             Err(error) => self.flash = Some((Tone::Error, error)),
         }
     }
+}
+
+/// What the notice says of a recording written: where it is, in which format, and what it
+/// left out and why.
+fn recorded_said(recorded: &Recorded, path: &std::path::Path) -> String {
+    let calls = |count: usize| if count == 1 { "call" } else { "calls" };
+    let mut said = vec![format!(
+        "Wrote the recording of this connection, {} {}, to {}, in SOLAR's recording format \
+         {RECORDING_FORMAT}; solar replay sends its requests again.",
+        recorded.calls,
+        calls(recorded.calls),
+        path.display()
+    )];
+    let mut left_out = Vec::new();
+    if recorded.earlier > 0 {
+        left_out.push(format!(
+            "{} {} of earlier connections, each a session of its own",
+            recorded.earlier,
+            calls(recorded.earlier)
+        ));
+    }
+    if recorded.too_long > 0 {
+        left_out.push(format!(
+            "{} {} whose answer was too long to keep",
+            recorded.too_long,
+            calls(recorded.too_long)
+        ));
+    }
+    if !left_out.is_empty() {
+        said.push(format!("It leaves out {}.", left_out.join(", and ")));
+    }
+    if recorded.dropped > 0 {
+        said.push(format!(
+            "The History had already dropped {} {}.",
+            recorded.dropped,
+            if recorded.dropped == 1 {
+                "call"
+            } else {
+                "calls"
+            }
+        ));
+    }
+    said.join(" ")
+}
+
+/// What the connected notice says of what SOLAR offers beyond calls: cancellation always,
+/// and batches and the log level when the manifest says, one sentence each.
+fn capabilities_said(capabilities: &Capabilities) -> Vec<String> {
+    let mut said = vec![
+        if capabilities.cancel.is_some() {
+            "Ctrl+C cancels a call in flight."
+        } else if capabilities.declared {
+            "Its manifest says it cancels nothing."
+        } else {
+            "This SOLAR has no solar.cancel."
+        }
+        .to_owned(),
+    ];
+    match capabilities.batches {
+        Batches::Accepted {
+            max_elements: Some(max),
+            ..
+        } => said.push(format!("It answers batches of up to {max} requests.")),
+        Batches::Accepted {
+            max_elements: None, ..
+        } => said.push("It answers batches.".to_owned()),
+        Batches::Refused => said.push("It refuses batches.".to_owned()),
+        Batches::Unknown => {}
+    }
+    if capabilities.log_level {
+        said.push("The Log tab sets its log level.".to_owned());
+    }
+    said
 }
 
 fn ring_bytes(record: &CallRecord) -> usize {

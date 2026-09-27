@@ -109,6 +109,19 @@ fn session_after_calls(options: Options) -> Script {
     script
 }
 
+/// `/list` answered by a SOLAR whose manifest declares what the protocol accepts.
+fn session_list_capabilities(options: Options) -> Script {
+    let mut script = Script::connected(options);
+    script.later(Duration::from_secs(2));
+    script.run("/list");
+    let manifest: Value = serde_json::from_str(include_str!(
+        "../../zenith-client/tests/fixtures/solar-0.3.0-manifest.json"
+    ))
+    .unwrap();
+    script.answer("solar.manifest", &manifest, 900);
+    script
+}
+
 fn session_version(options: Options) -> Script {
     let mut script = Script::connected(options);
     script.later(Duration::from_secs(2));
@@ -238,12 +251,13 @@ fn envelope_viewer(options: Options) -> Script {
     script
 }
 
-const SCENES: [(&str, Scene); 15] = [
+const SCENES: [(&str, Scene); 16] = [
     ("opening_connecting", opening_connecting),
     ("opening_not_on_path", opening_not_on_path),
     ("session_just_connected", session_just_connected),
     ("session_after_calls", session_after_calls),
     ("session_version", session_version),
+    ("session_list_capabilities", session_list_capabilities),
     ("session_commands_menu", session_commands_menu),
     ("session_parameters_menu", session_parameters_menu),
     ("session_validation_error", session_validation_error),

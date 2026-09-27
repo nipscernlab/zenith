@@ -13,24 +13,24 @@ Everything the brief asks for, as `docs/DESIGN.md` describes it.
 | Part | What there is |
 | ---- | ------------- |
 | The connection | `solar` found by `--solar`, `ZENITH_SOLAR` or the `PATH`, and on Windows run from a copy under `%TEMP%\zenith\solar\<hash>\` so that SOLAR's build can always replace its binary. The handshake checks the protocol, `solar/1`, and the manifest layout, 2, and says both versions when they differ. Every failure, from a missing `solar` to one that exits or breaks the contract, is one sentence of what happened and one of what to do, with SOLAR's last lines of standard error, and `Ctrl+R` or `/reconnect` starts it again. |
-| The tabs | Session, with the command line, its history and completion, and every response laid out; APIs, the catalogue of the manifest, with each example run by a key and judged against what it declares, and a form for the parameters; Log, SOLAR's standard error by level; History, every call with its timing. |
+| The tabs | Session, with the command line, its history and completion, and every response laid out; APIs, the catalogue of the manifest, with each example run by a key and judged against what it declares, and a form for the parameters; Log, SOLAR's standard error by level, whose keys set SOLAR's own level when it has `solar.set_log_level`; History, every call with its timing. |
 | The commands | The eight of the brief, `/list`, `/describe`, `/call`, `/ping`, `/version`, `/theme`, `/help` and `/quit`, five more of the first stage, `/raw`, `/reconnect`, `/clear`, `/export` and `/report`, and `/forget`. |
 | Checking | Parameters checked against the API's schema before they are sent, with the wrong part of the line underlined, by a validator of ZENITH's own that property tests hold to the verdicts of the `jsonschema` crate. Every response checked against sections 5, 6 and 7 of SOLAR's contract, and a breach shown with its section. |
-| Cancelling | `Ctrl+C` sends `solar.cancel` for the call in flight when the manifest offers it, and pressed again quits. |
+| What SOLAR offers | Read from the manifest's `capabilities` when SOLAR declares them, and from its APIs when it does not: `Ctrl+C` cancels the call in flight with the method the manifest declares, and pressed again quits; the connected notice says whether SOLAR answers batches and whether the Log tab sets its level; a call longer than SOLAR reads is refused before it is sent; `/list` shows every capability and limit. |
 | The keys | One table that dispatches the keys and draws the help overlay. Every action has a plain key or a `Ctrl` key, for macOS Terminal, where Option is not Alt; a character typed with `AltGr` is text. |
 | The look | The five colours of SOLAR's brand in three themes, night, light and high-contrast, each at four depths down to none, with `NO_COLOR` obeyed; the contrast of every colour computed against WCAG 2.2; WGL4 characters, or 7-bit ASCII with `--ascii`; ZENITH's own mark in the opening, from `docs/brand`, and SOLAR's at the start of every connection and on the card of `/version`, from SOLAR's brand, byte for byte. Works at 80 × 24 and above, follows resizing, and gives the terminal back on exit, on a signal and after a panic. |
 | Memory | Every collection that grows with use is a ring buffer with a limit in entries and in bytes, and says how much it dropped. `/export` and `/report` are written as they go. |
-| Bug reports | `/report` writes one file with the versions of ZENITH and SOLAR, the system as `system.info` reports it, the recent log and the calls of the session. |
+| Bug reports | `/report` writes one file with the versions of ZENITH and SOLAR, the system as `system.info` reports it, the recent log and the calls of the session. `/export` writes the current connection in SOLAR's recording format 1.0.0, which `solar replay` sends again. |
 | The command line history | Kept between sessions in the per-user data directory of each system, written atomically after every line, in a documented format; `/forget` empties it and `--no-history` turns it off. |
 
 ## Tested
 
 | What | How many | Where |
 | ---- | -------- | ----- |
-| Tests | 325, all passing, against SOLAR 0.3.0 on this machine; 27 of them start a real program, the installed SOLAR or a double of it for the failures SOLAR cannot produce | `cargo nextest run --workspace` |
-| Snapshots | 128: every screen at 80 × 24 and 160 × 48 in each theme, without colour and in ASCII; the opening in each theme at 256 colours, 16 and none, and the Session tab at 256 and 16; the screen of a terminal too small; and the README's seven | `crates/zenith/tests/snapshots/` |
-| Line coverage | 89.25 % of the lines of `zenith-client` and `zenith` on Windows, with the tests against SOLAR 0.3.0, and 88.98 % on Linux in CI before the last change, against the head of SOLAR's main, counted from the job's lcov; the floor is 88 % | `cargo xtask coverage` |
-| The guide's table | 22 of 22 rows, typed into the real binary in a pseudo-terminal, on Windows 11 on this machine against SOLAR 0.3.0, and in CI on Linux, Windows and macOS | `cargo xtask walkthrough` |
+| Tests | 344, all passing, against SOLAR 0.3.0 on this machine; 29 of them start a real program, the installed SOLAR or a double of it for the failures SOLAR cannot produce | `cargo nextest run --workspace` |
+| Snapshots | 135: every screen at 80 × 24 and 160 × 48 in each theme, without colour and in ASCII; the opening in each theme at 256 colours, 16 and none, and the Session tab at 256 and 16; the screen of a terminal too small; and the README's seven | `crates/zenith/tests/snapshots/` |
+| Line coverage | 89.73 % of the lines of `zenith-client` and `zenith` on Windows, with the tests against SOLAR 0.3.0, and 88.98 % on Linux in CI two changes before, against the head of SOLAR's main, counted from the job's lcov; the floor is 88 % | `cargo xtask coverage` |
+| The guide's table | 23 of 23 rows, typed into the real binary in a pseudo-terminal, on Windows 11 on this machine against SOLAR 0.3.0, and in CI on Linux, Windows and macOS | `cargo xtask walkthrough` |
 
 **CI** builds SOLAR from the head of its main branch on every run, and ran three times on
 27 September 2026. The first run, on the push at 16:06, built `2497b3f`, SOLAR 0.1.0 from
@@ -126,7 +126,12 @@ what would change it. The ones with the most consequence:
   in the system's per-user data directory, the command `/forget` and the flag
   `--no-history`, and that two ZENITHs at once each write their own, the last one winning.
 - **ZENITH's mark**, drawn without a designer: the dome of an observatory with its slit
-  open at the zenith, in the opening, with SOLAR's mark moved to the card of `/version`.
+  open at the zenith, in the opening, with SOLAR's mark moved to the start of every
+  connection and the card of `/version`.
+- **The Log tab's keys set SOLAR's own level**, one level and not a filter beside it, and
+  a restart keeps it.
+- **`/export` writes the current connection** in SOLAR's recording format, unanswered
+  requests included and answers too long to keep left out whole.
 - **The theme is not remembered**: no configuration file.
 - **The limits on memory**, and the soak's rule for growth.
 - **Mutation testing that reports and does not gate yet**, and development builds with
@@ -137,25 +142,31 @@ what would change it. The ones with the most consequence:
 Each is in the first section of `docs/OPEN_QUESTIONS.md`, with what would close it. ZENITH
 works around none of them.
 
-1. **The manifest does not say whether batches are accepted.** SOLAR 0.1.0 refuses them
-   and SOLAR 0.2.0 answers them, both as `solar/1`. ZENITH sends no batches of its own;
-   `/raw` sends one by hand.
-2. **The log level cannot be changed while SOLAR runs.** ZENITH starts SOLAR at `trace`
-   and filters in the Log tab, which the measurement above says costs no time.
-3. **The recording format of `solar serve --record` is not documented.** `/export`
-   writes a format of ZENITH's own, specified in `docs/DESIGN.md`, section 12.
+1. **The exit codes of `solar replay` are not in the contract.** ZENITH's test of the
+   replay takes exit 0 as every answer being the same, which is what SOLAR 0.3.0 did.
+2. **`solar replay` reports a batch's answer as different when only its times differ**,
+   seen with SOLAR 0.3.0 built with uncommitted changes. ZENITH's test of the replay
+   records no batch.
+
+What the first stage needed and did not find, SOLAR now has: the manifest declares its
+capabilities, batches included, `solar.set_log_level` changes the level while SOLAR runs,
+and the recording format is documented and versioned. ZENITH uses all three, and keeps
+what it did before for a SOLAR that has none of them.
 
 ## Left
 
 - **The Mac.** Arthur's run of `docs/TESTING_BY_HAND.md` on the laboratory Mac, in macOS
   Terminal and in iTerm2 if it is there.
-- **Branch protection**, a setting of the repository for whoever administers
-  `nipscernlab/zenith`: require the checks `ubuntu-latest`, `windows-latest`,
-  `macos-latest` and `coverage` to pass before merging into `main`, and a review from the
-  code owners.
 - **The first mutation run**, on the first Monday: each survivor killed by a test or
   recorded as a mutation that changes nothing, after which the job can fail on new ones.
 - **The slow first start**, with the steps it now records.
+
+## How changes reach `main`
+
+A ruleset protects `main`, as the repository's settings showed on 27 September 2026: a
+change arrives by pull request, with the checks `ubuntu-latest`, `windows-latest`,
+`macos-latest` and `coverage` passing; force pushes and deletion are refused; no review is
+required.
 
 ## Versions
 

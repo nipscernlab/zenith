@@ -327,19 +327,25 @@ selected API on the right.
 SOLAR's standard error, at a level chosen here.
 
 ```text
- level  error  warn  [info]  debug  trace          1 204 lines · 0 dropped
+ level  error  warn  [info]  debug  trace    SOLAR logs at info · 1 204 lines · 0 dropped
  15:47:00.906  TRACE  --> {"jsonrpc":"2.0","id":3,"method":"solar.ping"}
  15:47:00.907  TRACE  <-- {"jsonrpc":"2.0","id":3,"result":{"data":{"echo":nu…
  15:47:02.114  INFO   the session ended after 3 calls
 ```
 
-SOLAR reads its level once, from `SOLAR_LOG`, when it starts, and it has no API to change
-it afterwards. ZENITH therefore starts SOLAR at `trace` with `SOLAR_LOG_FORMAT=json` and
-chooses the level itself, by filtering what arrives. Choosing a level is instant and
-never restarts SOLAR. `--solar-log <level>` starts SOLAR at a lower level for someone who
-wants SOLAR to do less work; the tab then says what SOLAR was started with, so a level
-that cannot show anything is not mistaken for silence. The missing API is recorded in
-`docs/OPEN_QUESTIONS.md`.
+ZENITH starts SOLAR at `trace`, or at the level `--solar-log <level>` gives, with
+`SOLAR_LOG_FORMAT=json`, and the tab shows what arrives from the chosen level up.
+
+- **When the manifest has `solar.set_log_level`**, the level chosen here is also SOLAR's
+  own: each level key calls it, and SOLAR writes from that level up for the rest of the
+  process. The header says `SOLAR logs at <level>`, `asking SOLAR for <level>` while the
+  call is out, or `SOLAR kept its level:` and why, when SOLAR refused. A restart starts the
+  next SOLAR at the level the last one logged at. The call is in the History, and not in
+  the transcript.
+- **A SOLAR without it** reads its level once, from `SOLAR_LOG`, when it starts. The keys
+  then only filter what arrives, which is instant and never restarts SOLAR, and the tab
+  says what SOLAR was started with when the chosen level asks for more, so that a level
+  that cannot show anything is not mistaken for silence.
 
 - `e`, `w`, `i`, `d` and `t` choose error, warn, info, debug and trace; `←` and `→`
   lower and raise it. The level of every line is written in words, so the level is never
@@ -365,17 +371,18 @@ their timing.
 - `Enter` opens the envelope viewer on the selected call.
 - `r` sends the selected request again, as a new call.
 - `e` puts it on the command line as `/call`.
-- `x` exports the tab to a file, the same as `/export`.
+- `x` writes the recording of the current connection, the same as `/export`.
 
-**The export** writes one JSON object per line, in the format of section 12, straight to
-the file as it walks the buffer: nothing is assembled in memory first.
-
-It is **not** a recording that `solar replay` accepts. SOLAR's README says a recording is
-NDJSON with every line in, every line out and the time each crossed, and documents nothing
-more: no member names, no version. Writing that format from what can be observed would be
-inventing a fact about SOLAR, so ZENITH writes a format of its own, documented here, and
-the missing documentation is an open question. When SOLAR documents its recording format,
-the exporter is one function.
+**The recording** is in SOLAR's recording format, version 1.0.0 of `docs/RECORDING.md` in
+SOLAR's repository, so that `solar replay` sends its requests again and says where the
+answers differ. It holds one connection, the current one, because each connection is a
+session of its own with its own ids: a header naming ZENITH as the writer, then every
+request and every answer of that connection, in the order they crossed, each line exactly
+as it crossed. A request that was never answered is written without its answer, which is
+what happened and what `solar replay` then reports; a call whose answer was too long for
+ZENITH to keep is left out whole, because its answer cannot be written as it crossed. The
+notice says how many calls were left out, and why. The lines are put in order and written
+straight from the History, without being copied. Section 12 gives the file.
 
 ## 9. The connection to SOLAR
 
@@ -429,15 +436,17 @@ The time connected starts when both checks pass.
 
 | Capability | How it is detected | When present | When absent |
 | ---------- | ------------------ | ------------ | ----------- |
-| Cancellation | An API named `solar.cancel` whose `params_schema` declares `id` | `Ctrl+C` sends `solar.cancel` with the id of the latest call in flight, and the transcript shows the `outcome` SOLAR reports | `Ctrl+C` says that this SOLAR offers no `solar.cancel`, and how long the call may still take by its `timeout_ms` |
-| Batches | Not detectable: the manifest does not say whether batches are accepted, or how many elements | | ZENITH sends one request per line, and `/raw` sends a batch by hand |
+| Cancellation | `capabilities.cancellation`; for a manifest that does not declare it, an API named `solar.cancel` whose `params_schema` declares `id` | `Ctrl+C` sends the declared method, `solar.cancel` today, with the id of the latest call in flight, and the transcript shows the `outcome` SOLAR reports | `Ctrl+C` says that this SOLAR offers no `solar.cancel`, or that its manifest says it cancels nothing, and how long the call may still take by its `timeout_ms` |
+| Batches | `capabilities.batch` | The connected notice says that SOLAR answers batches, and of up to how many requests, or that it refuses them | The notice says nothing of batches |
+| The longest request | `capabilities.limits.max_request_bytes` | A call ZENITH builds whose line is longer is not sent, and the band says why; a line sent with `/raw` is never held back, since SOLAR's own answer to it is the point | The line is sent, and SOLAR answers `MESSAGE_TOO_LARGE` |
+| The log level | An API named `solar.set_log_level` whose `params_schema` declares `level` | The Log tab's keys set SOLAR's own level (section 7), and the connected notice says so | The keys filter what arrives |
 
-Batches are in SOLAR's contract, section 3.2, which also fixes their limit at 64
-elements, but the manifest does not declare either, and the protocol stayed `solar/1`
-when they arrived. Learning it by sending a probe
-batch would be working around a missing declaration, which principle 2 rules out, so it
-is recorded in `docs/OPEN_QUESTIONS.md` and ZENITH uses no batches of its own. A batch
-sent with `/raw` is shown as one card per element, matched by position.
+`capabilities` arrived in layout 2.1.0 of the manifest, section 8.2 of SOLAR's contract,
+and a manifest of layout 2.0.0 has none: then ZENITH reads what the APIs show and leaves
+the rest unknown. The card of `/list` shows the whole of `capabilities`, member by member,
+so that a limit ZENITH does not use is seen all the same. ZENITH sends no batches of its
+own, since nothing it does needs one; a batch sent with `/raw` is shown as one card per
+element, matched by position.
 
 ### 9.4 Requests and responses
 
@@ -512,7 +521,7 @@ says a session ends, and waits up to half a second for SOLAR to exit before kill
 | `/reconnect` | Restarts SOLAR, as `Ctrl+R` | the handshake |
 | `/clear` | Empties the transcript | none |
 | `/forget` | Empties the command line history, here and in its file | none |
-| `/export [path]` | Writes the History to a file (section 12) | none |
+| `/export [path]` | Writes the recording of the current connection, in SOLAR's recording format (sections 8 and 12) | none |
 | `/report [path]` | Writes a bug report to a file (section 12) | `system.info` |
 
 The first eight are the ones the brief names. The other five exist because testing SOLAR
@@ -540,11 +549,11 @@ listed, and a test holds this document to that table.
 | `Ctrl+O` | The envelope viewer, on the latest call |
 | `Ctrl+R` | Restart SOLAR |
 | `Ctrl+L` | Draw the whole screen again |
-| `Ctrl+C` | Cancel the latest call in flight, when SOLAR offers `solar.cancel`; pressed again, quit |
+| `Ctrl+C` | Cancel the latest call in flight, when SOLAR offers cancellation; pressed again, quit |
 | `Esc` | Close the overlay, the menu or the form that is open |
 
 `Ctrl+C` in detail: the first press cancels the latest call in flight when there is one
-and SOLAR offers `solar.cancel`; says why it cannot when SOLAR does not; clears the command
+and SOLAR offers cancellation (section 9.3); says why it cannot when SOLAR does not; clears the command
 line when it has text; and in every case arms the second press, which quits. Any other
 key disarms it.
 
@@ -630,23 +639,29 @@ is treated the same way.
 When two ZENITHs run at once, each writes its own history whole, so the file holds the
 lines of whichever wrote last.
 
-### 12.2 The History and the report
+### 12.2 The recording and the report
 
-The History and the report are written only when asked, with `/export`, `/report` or
-`x`, into the current directory unless a path is given, under a name with the time in UTC:
-`zenith-history-2026-09-27T15-47-00Z.ndjson`, `zenith-report-2026-09-27T15-47-00Z.ndjson`.
-It never overwrites a file that exists.
+Both are written only when asked, `/export` or `x` for the recording and `/report` for
+the report, into the current directory unless a path is given, under a name with the time
+in UTC: `zenith-recording-2026-09-27T15-47-00Z.ndjson`,
+`zenith-report-2026-09-27T15-47-00Z.ndjson`. Neither overwrites a file that exists.
 
-Both files are NDJSON: one JSON object per line, each with a `kind`. The first line is
-always the header.
+**The recording** is SOLAR's format, as section 8 says: NDJSON whose first line is the
+header `{"solar_recording": "1.0.0", "at": ..., "solar_version": "ZENITH <version>",
+"protocol": "solar/1"}`, `at` being when the first line of the connection kept crossed,
+and whose every other line is `{"at": ..., "direction": "in" or "out", "line": ...}`, as
+`docs/RECORDING.md` in SOLAR's repository specifies.
+
+**The report** is NDJSON of ZENITH's own: one JSON object per line, each with a `kind`.
+The first line is always the header.
 
 | `kind` | Members |
 | ------ | ------- |
-| `header` | `format` (`zenith-history` or `zenith-report`), `format_version` (`1.0.0`), `zenith_version`, `written_at` |
-| `call` | `id`, `method`, `origin` (`handshake`, `command`, `example`, `form`, `raw`, `cancel`, `report`), `sent_at`, `received_at`, `round_trip_us`, `request` (the line as sent, as JSON when it was JSON, as a string otherwise), `response` (the same, or `null` when none arrived), `closed` (why a call ended without a response, or `null`) |
+| `header` | `format` (`zenith-report`), `format_version` (`1.0.0`), `zenith_version`, `written_at` |
+| `call` | `connection`, `id`, `method`, `origin` (`handshake`, `command`, `example`, `form`, `raw`, `cancel`, `again`, `report`, `reload`, `log_level`), `sent_at`, `received_at`, `round_trip_us`, `request` (the line as sent, as JSON when it was JSON, as a string otherwise), `response` (the same, or `null` when none arrived), `closed` (why a call ended without a response, or `null`) |
 | `dropped` | `calls`, `bytes`: what the History had already dropped when the file was written, so a reader knows the file is not the whole session |
 
-A report adds, in this order, after the header:
+After the header, a report has, in this order:
 
 | `kind` | Members |
 | ------ | ------- |

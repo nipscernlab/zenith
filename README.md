@@ -61,12 +61,13 @@ from the API's schema.
 
 ![The APIs tab, with both examples of solar.ping matching what they declare](docs/screenshots/apis.svg)
 
-**Log.** SOLAR's standard error, at the level chosen with `e`, `w`, `i`, `d` and `t`.
+**Log.** SOLAR's standard error, at the level chosen with `e`, `w`, `i`, `d` and `t`,
+which a SOLAR with `solar.set_log_level` takes as its own level.
 
 ![The Log tab at trace](docs/screenshots/log.svg)
 
-**History.** Every request and response with its timing, exportable with `x` or
-`/export`.
+**History.** Every request and response with its timing. `x` or `/export` writes the
+current connection in SOLAR's recording format, which `solar replay` sends again.
 
 ![The History tab](docs/screenshots/history.svg)
 
@@ -92,7 +93,7 @@ parameter names and values the schema allows at the cursor:
 | `/reconnect` | Restart SOLAR, and pick up a new build of it |
 | `/clear` | Empty the transcript; the History keeps everything |
 | `/forget` | Empty the command line history, here and in the file that keeps it |
-| `/export [path]` | Write the History to a file |
+| `/export [path]` | Write the current connection in SOLAR's recording format |
 | `/report [path]` | Write one file with everything a bug report needs |
 
 ## Keys
@@ -104,7 +105,7 @@ where Option is not Alt, and in the classic Windows console. `?` lists every key
 | --- | ------ |
 | `Tab`, `Shift+Tab` | The next and previous tab; on the command line with text, completion |
 | `Ctrl+O` | The whole envelope of the latest call |
-| `Ctrl+C` | Cancel the call in flight when SOLAR offers `solar.cancel`; pressed again, quit |
+| `Ctrl+C` | Cancel the call in flight when SOLAR offers cancellation; pressed again, quit |
 | `Ctrl+R` | Restart SOLAR |
 | `Ctrl+L` | Draw the screen again |
 | `?` | Every key, by where it works |
@@ -134,7 +135,7 @@ and colour never carries meaning alone.
 | `--color <depth>` | `ZENITH_COLOR` | `truecolor`, `256`, `16` or `none`; guessed from the terminal when not given |
 | | `NO_COLOR` | No colour at all ([no-color.org](https://no-color.org)); `--color` is the one thing that overrides it |
 | `--ascii` | `ZENITH_ASCII` | 7-bit ASCII only, for terminals without Unicode |
-| `--solar-log <level>` | | The level SOLAR is started at; the Log tab filters below it |
+| `--solar-log <level>` | | The level SOLAR is started at; the Log tab filters below it, or sets another when SOLAR has `solar.set_log_level` |
 | `--no-history` | `ZENITH_NO_HISTORY` | Keep the command line history for this session only |
 | | `ZENITH_DATA_DIR` | The directory the command line history is kept in, instead of the system's own |
 

@@ -578,6 +578,19 @@ fn list(app: &App, data: &Value, width: usize) -> Vec<Line<'static>> {
         ]);
         out.extend(wrap(&line, width, BODY + column + 10));
     }
+    // What the protocol accepts, as the manifest declares it, member by member and
+    // unread, so that a limit ZENITH does not know yet is shown all the same.
+    if let Some(capabilities) = data.get("capabilities") {
+        out.push(Line::from(""));
+        out.push(Line::from(Span::styled(
+            format!(
+                "{}capabilities, as the manifest declares them",
+                " ".repeat(BODY)
+            ),
+            theme.muted(),
+        )));
+        out.extend(json::human(capabilities, BODY + 2, width, theme));
+    }
     out
 }
 
