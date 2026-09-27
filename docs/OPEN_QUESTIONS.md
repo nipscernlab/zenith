@@ -183,6 +183,17 @@ three answers section 9.1 of its contract sends at once, to `solar.cancel`, to a
 that finds the queue full and to an `id` already in flight, all of which carry an `id`.
 So the oldest request still waiting is the one an `id: null` answers.
 
+### `max_output_bytes` is shown, and not required
+
+Section 8.3 of SOLAR's contract gives every API a `max_output_bytes`, and the manifest
+layout stayed `2.0.0` when it arrived, so the manifest of SOLAR 0.1.0, which has none, is
+as valid under that layout as one that has it. ZENITH shows the limit on the API's card
+when the API declares it, and does not count its absence against the contract, as it does
+for the members that were there from the start.
+
+**What would change it.** A minor bump of `schema_version` whenever an entry gains a
+member: ZENITH would then require it from the version that brought it.
+
 ### The Windows copy is named by the first sixteen hex digits of its SHA-256
 
 Sixty-four bits make an accidental collision a matter of one in eighteen quintillion,

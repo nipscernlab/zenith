@@ -618,16 +618,20 @@ pub fn api_entry(
         || "no budget stated".to_owned(),
         |budget| format!("budget {budget} ms"),
     );
-    out.extend(wrap(
-        &Line::from(vec![
-            Span::raw(lead.clone()),
+    let mut declared = vec![
+        vec![
             Span::styled("side effects ", theme.muted()),
             span(&effects, theme.text()),
-            Span::styled(format!("{dot}{idempotent}{dot}{budget}"), theme.muted()),
-        ]),
-        width,
-        indent,
-    ));
+        ],
+        vec![Span::styled(idempotent, theme.muted())],
+        vec![Span::styled(budget, theme.muted())],
+    ];
+    if let Some(bytes) = api.max_output_bytes {
+        let largest = format!("responses up to {}", size(bytes));
+        declared.push(vec![Span::styled(largest, theme.muted())]);
+    }
+    let separator = Span::styled(dot.clone(), theme.muted());
+    out.extend(text::facts(&lead, declared, &separator, width, indent));
 
     out.push(Line::from(""));
     out.push(heading("parameters"));
@@ -839,6 +843,18 @@ pub fn api_entry(
     out
 }
 
+/// A size in bytes as a person reads it: in whole mebibytes or kibibytes when it is one.
+fn size(bytes: u64) -> String {
+    const KIB: u64 = 1024;
+    const MIB: u64 = 1024 * KIB;
+    match bytes {
+        1 => "1 byte".to_owned(),
+        _ if bytes >= MIB && bytes.is_multiple_of(MIB) => format!("{} MiB", bytes / MIB),
+        _ if bytes >= KIB && bytes.is_multiple_of(KIB) => format!("{} KiB", bytes / KIB),
+        _ => format!("{bytes} bytes"),
+    }
+}
+
 /// The style of an outcome in the lists.
 #[must_use]
 pub fn outcome_style(theme: &Theme, summary: &Summary) -> Style {
@@ -846,5 +862,19 @@ pub fn outcome_style(theme: &Theme, summary: &Summary) -> Style {
         theme.text()
     } else {
         theme.error()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::size;
+
+    #[test]
+    fn a_size_is_said_in_the_largest_whole_unit() {
+        assert_eq!(size(8_388_608), "8 MiB");
+        assert_eq!(size(65_536), "64 KiB");
+        assert_eq!(size(1_000_000), "1000000 bytes");
+        assert_eq!(size(1), "1 byte");
+        assert_eq!(size(0), "0 bytes");
     }
 }

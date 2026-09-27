@@ -68,6 +68,9 @@ either is stated here in its own line.
 - `CANCELLED`, code `-32008`, among the statuses every response is checked against, now
   that section 6.1 of SOLAR's contract lists it; a cancelled call with any other code is
   a breach of the contract, shown as one.
+- The largest response an API may produce, `max_output_bytes`, on its card beside its
+  budget, when the API declares it; the facts of that line now break between one another
+  rather than inside one.
 
 ### Fixed
 

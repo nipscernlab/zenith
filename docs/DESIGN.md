@@ -269,7 +269,8 @@ selected API on the right.
 ```
 
 - **Every section comes from the manifest entry:** summary, version, stability, `since`,
-  side effects, idempotence, `timeout_ms`, the parameters from `params_schema`, the
+  side effects, idempotence, `timeout_ms`, `max_output_bytes` when the API declares it,
+  the parameters from `params_schema`, the
   declared errors as status and reason, the examples, the description, and the members of
   `output_schema`. A member of the entry that ZENITH does not know is listed at the end
   under its own name, so a field SOLAR adds later is visible before ZENITH learns it.

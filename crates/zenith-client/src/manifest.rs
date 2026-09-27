@@ -61,6 +61,10 @@ pub struct Api {
     pub since: Option<String>,
     /// `timeout_ms`, SOLAR's budget for one call.
     pub timeout_ms: Option<u64>,
+    /// `max_output_bytes`, the largest response the API may produce, section 8.3. A SOLAR
+    /// from before section 8.3 does not declare it, under the same manifest layout, so its
+    /// absence is not a breach of the contract.
+    pub max_output_bytes: Option<u64>,
     /// `params_schema`, as the manifest has it.
     pub params_schema: Value,
     /// `output_schema`, as the manifest has it.
@@ -259,31 +263,36 @@ pub struct Capabilities {
     pub cancel: bool,
 }
 
+/// The members section 8 of SOLAR's contract requires of every API entry.
+const REQUIRED: [&str; 12] = [
+    "version",
+    "summary",
+    "description",
+    "errors",
+    "side_effects",
+    "idempotent",
+    "stability",
+    "since",
+    "timeout_ms",
+    "params_schema",
+    "output_schema",
+    "examples",
+];
+
+/// The members ZENITH also knows: the name, and one that a SOLAR from before its section of
+/// the contract does not have.
+const ALSO_KNOWN: [&str; 2] = ["name", "max_output_bytes"];
+
 impl Api {
     fn from_entry(entry: &Value, definitions: &Value, dialect: Option<&str>) -> Option<Self> {
         let Value::Object(map) = entry else {
             return None;
         };
         let name = map.get("name")?.as_str()?.to_owned();
-        let mut missing = Vec::new();
-        for required in [
-            "version",
-            "summary",
-            "description",
-            "errors",
-            "side_effects",
-            "idempotent",
-            "stability",
-            "since",
-            "timeout_ms",
-            "params_schema",
-            "output_schema",
-            "examples",
-        ] {
-            if !map.contains_key(required) {
-                missing.push(required);
-            }
-        }
+        let missing = REQUIRED
+            .into_iter()
+            .filter(|required| !map.contains_key(*required))
+            .collect();
         let params_schema = map
             .get("params_schema")
             .cloned()
@@ -321,24 +330,11 @@ impl Api {
             .and_then(Value::as_array)
             .map(|examples| examples.iter().filter_map(Example::from_value).collect())
             .unwrap_or_default();
-        let known = [
-            "name",
-            "version",
-            "summary",
-            "description",
-            "errors",
-            "side_effects",
-            "idempotent",
-            "stability",
-            "since",
-            "timeout_ms",
-            "params_schema",
-            "output_schema",
-            "examples",
-        ];
         let other = map
             .iter()
-            .filter(|(key, _)| !known.contains(&key.as_str()))
+            .filter(|(key, _)| {
+                !REQUIRED.contains(&key.as_str()) && !ALSO_KNOWN.contains(&key.as_str())
+            })
             .map(|(key, value)| (key.clone(), value.clone()))
             .collect();
         Some(Self {
@@ -354,6 +350,7 @@ impl Api {
             stability: string(map.get("stability")),
             since: string(map.get("since")),
             timeout_ms: map.get("timeout_ms").and_then(Value::as_u64),
+            max_output_bytes: map.get("max_output_bytes").and_then(Value::as_u64),
             params_schema,
             output_schema,
             examples,
@@ -428,6 +425,7 @@ mod tests {
         );
         let ping = catalogue.api("solar.ping").unwrap();
         assert_eq!(ping.timeout_ms, Some(1000));
+        assert_eq!(ping.max_output_bytes, None);
         assert_eq!(ping.examples.len(), 2);
         assert_eq!(ping.examples[0].matching, Matching::Exact);
         assert!(ping.missing.is_empty());
@@ -436,7 +434,17 @@ mod tests {
     }
 
     #[test]
-    fn the_solar_of_this_stage_offers_no_cancellation() {
+    fn the_largest_response_is_read_where_an_api_declares_it() {
+        let mut manifest = fixture();
+        manifest["apis"][2]["max_output_bytes"] = json!(8_388_608);
+        let catalogue = Catalogue::from_data(&manifest).unwrap();
+        let ping = catalogue.api("solar.ping").unwrap();
+        assert_eq!(ping.max_output_bytes, Some(8_388_608));
+        assert!(ping.other.is_empty() && ping.missing.is_empty());
+    }
+
+    #[test]
+    fn solar_0_1_0_offers_no_cancellation() {
         let catalogue = Catalogue::from_data(&fixture()).unwrap();
         assert!(!catalogue.capabilities().cancel);
     }

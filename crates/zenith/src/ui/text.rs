@@ -127,6 +127,46 @@ pub fn wrap(line: &Line<'_>, max: usize, hanging: usize) -> Vec<Line<'static>> {
     out.into_iter().map(merge).collect()
 }
 
+/// Facts joined by `dot`, each kept whole: a fact that does not fit on the line starts
+/// the next one, after `hanging` spaces, so that a line breaks between facts rather than
+/// inside one. A fact longer than a whole line is wrapped like any text.
+#[must_use]
+pub fn facts(
+    lead: &str,
+    facts: Vec<Vec<Span<'static>>>,
+    dot: &Span<'static>,
+    max: usize,
+    hanging: usize,
+) -> Vec<Line<'static>> {
+    let dot_cells = width(&dot.content);
+    let mut out = Vec::new();
+    let mut current = vec![Span::raw(lead.to_owned())];
+    let mut used = width(lead);
+    let mut first = true;
+    for fact in facts {
+        let cells: usize = fact.iter().map(|span| width(&span.content)).sum();
+        if !first && used + dot_cells + cells > max {
+            out.extend(wrap(
+                &Line::from(std::mem::take(&mut current)),
+                max,
+                hanging,
+            ));
+            current.push(Span::raw(" ".repeat(hanging)));
+            used = hanging;
+            first = true;
+        }
+        if !first {
+            current.push(dot.clone());
+            used += dot_cells;
+        }
+        used += cells;
+        current.extend(fact);
+        first = false;
+    }
+    out.extend(wrap(&Line::from(current), max, hanging));
+    out
+}
+
 /// A span's text split into words and the spaces between them.
 fn pieces(text: &str) -> Vec<&str> {
     let mut pieces = Vec::new();
@@ -235,5 +275,41 @@ mod tests {
     #[test]
     fn an_empty_line_stays_one_line() {
         assert_eq!(wrap(&Line::from(""), 10, 0).len(), 1);
+    }
+
+    #[test]
+    fn facts_break_between_them_and_never_inside_one() {
+        let fact = |text: &str| vec![Span::raw(text.to_owned())];
+        let dot = Span::raw(" · ");
+        let facts_of = |max| {
+            texts(&facts(
+                " ",
+                vec![
+                    fact("idempotent"),
+                    fact("budget 1000 ms"),
+                    fact("responses up to 8 MiB"),
+                ],
+                &dot,
+                max,
+                1,
+            ))
+        };
+        assert_eq!(
+            facts_of(80),
+            vec![" idempotent · budget 1000 ms · responses up to 8 MiB"]
+        );
+        assert_eq!(
+            facts_of(40),
+            vec![" idempotent · budget 1000 ms", " responses up to 8 MiB"]
+        );
+        assert_eq!(
+            facts_of(16),
+            vec![
+                " idempotent",
+                " budget 1000 ms",
+                " responses up to",
+                " 8 MiB"
+            ]
+        );
     }
 }
