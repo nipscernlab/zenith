@@ -150,9 +150,9 @@ pseudo-terminal, and `STATUS.md` has every figure with how it was taken.
 
 | What | Figure |
 | ---- | ------ |
-| Start to connected, drawn | 24 ms, the median of ten starts; 47 ms until the terminal shows it |
-| A key to its redraw | 0.35 ms, the median of two hundred keys; 0.80 ms at the 99th percentile |
-| Idle | No processor time that can be measured in a minute, one wake-up, 8.5 MiB resident |
+| Start to connected, drawn | 20 to 25 ms, the median of ten starts, in four runs; 37 to 51 ms until the terminal shows it |
+| A key to its redraw | 0.3 to 0.5 ms, the median of two hundred keys, in four runs; at most 1.1 ms at the 99th percentile |
+| Idle | No processor time that can be measured in a minute, one wake-up, about 8.5 MiB resident |
 | Memory after 100 000 calls | 28.6 MiB, level from 20 000 calls on, when every ring buffer is full |
 
 ## How it is built and checked

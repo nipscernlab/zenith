@@ -171,9 +171,11 @@ tests SOLAR must never refuse what SOLAR would accept.
 ### The handshake waits fifteen seconds
 
 SOLAR answers the handshake in a few milliseconds on this machine, and fifteen seconds is
-far more than it needs. It is that long because the first run of a new `solar.exe` on
-Windows is scanned by the antivirus before it starts, which can take seconds, and a
-ZENITH that gave up during the scan would report a failure that is not one.
+far more than it needs. It is that long because on Windows the first run of `solar.exe`
+can take far longer than the next: the first of ten starts spent 475 ms reading SOLAR's
+binary and starting it, against about 5 ms for the others, which looks like the
+antivirus scanning the file, and a build seen for the first time may take longer still.
+A ZENITH that gave up during such a start would report a failure that is not one.
 
 ### A response with `id: null` belongs to the oldest request waiting
 
@@ -273,8 +275,8 @@ fifth is room for the allocator, which does not hand pages back at once.
 On 27 September 2026 the tests ran 88.46 % of the lines of `zenith-client` and `zenith`,
 measured on Windows with SOLAR 0.2.0 present, leaving out the test double, `main.rs` and
 `xtask`. CI measures the same on Linux, where the code for Windows is not compiled and the
-code for Unix is. The floor only rises: whoever raises the coverage may raise it, and
-nobody lowers it.
+code for Unix is, and its first run measured 88.15 %. The floor only rises: whoever raises
+the coverage may raise it, and nobody lowers it.
 
 ### Mutation testing reports, and does not gate
 

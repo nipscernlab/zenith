@@ -299,8 +299,8 @@ impl<B: Backend> Runtime<B> {
     }
 
     /// Finds, copies and starts SOLAR on a thread of its own, because hashing and copying
-    /// the binary, and the antivirus scan of a new copy on Windows, can take a while, and
-    /// the opening must keep drawing meanwhile.
+    /// the binary and starting its process can take a while, hundreds of milliseconds for
+    /// the first start of a run on Windows, and the opening must keep drawing meanwhile.
     fn start(
         &mut self,
         generation: u64,

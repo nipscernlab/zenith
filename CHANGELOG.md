@@ -99,8 +99,15 @@ either is stated here in its own line.
   imports; `CONTRIBUTING.md`; and `docs/ADDING_A_FEATURE.md`, the one path for adding a
   command, a key, a view or a tab.
 
+- `STATUS.md`: what is ready, what was measured and how, what was decided without asking,
+  what ZENITH needed from SOLAR and did not find, and what is left.
+
 ### Changed
 
+- The reason for the fifteen seconds the handshake waits is the one measured: the first
+  of ten starts on Windows spent 475 ms reading SOLAR's binary and starting it, against
+  about 5 ms for the others. It was given as the antivirus scanning `solar.exe`, which is
+  what that looks like and was never measured.
 - Development builds keep file and line for backtraces and no more, and the dependencies
   keep no debug information: full debug information made `target/debug` 3.6 GB.
 
