@@ -9,14 +9,14 @@ expression: screen(&buffer)
 
 
 
-
-
-
-
-
-
-
-
+      ..######..
+    .############.
+   .####              SOLAR
+   ################   The central API of the Constellation
+   ################   NIPS-CERN
+              ####'   0.1.0
+    '############'
+      ''######''
 
    - Connected to SOLAR 0.1.0 in 1.84 ms: protocol solar/1, manifest 2.0.0, 5
      APIs.
@@ -31,6 +31,7 @@ expression: screen(&buffer)
  0: 10-18  - on - bold underlined
  0: 45-72  - on - dim
  0: 73-73  - on - bold
+ 9: 22-26  - on - bold
 16:  3-3   - on - bold
 20:  0-79  - on - dim
 21:  0-0   - on - dim

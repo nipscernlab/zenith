@@ -3,11 +3,11 @@ source: crates/zenith/tests/screens.rs
 expression: screen(&buffer)
 ---
  ZENITH   1 Session  2 APIs  3 Log  4 History                .     .     ? keys
-
-
-
-
-
+   ################   The central API of the Constellation
+   ################   NIPS-CERN
+              ####'   0.1.0
+    '############'
+      ''######''
 
    - Connected to SOLAR 0.1.0 in 1.84 ms: protocol solar/1, manifest 2.0.0, 5
      APIs.

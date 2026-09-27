@@ -3,11 +3,11 @@ source: crates/zenith/tests/screens.rs
 expression: "screen(&draw(&script.app, width, height))"
 ---
  ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·     ? keys
-
-
-
-
-
+   ████████████████   The central API of the Constellation
+   ████████████████   NIPS-CERN
+              ████▀   0.1.0
+    ▀████████████▀
+      ▀▀██████▀▀
 
    · Connected to SOLAR 0.1.0 in 1.84 ms: protocol solar/1, manifest 2.0.0, 5
      APIs.
@@ -35,6 +35,13 @@ expression: "screen(&draw(&script.app, width, height))"
  0: 45-72  #868482 on #F5F1E8
  0: 73-73  #8C4907 on #F5F1E8 bold
  0: 74-79  #555355 on #F5F1E8
+ 1:  3-18  #B35A00 on #F5F1E8
+ 2:  3-18  #B35A00 on #F5F1E8
+ 2: 22-30  #555355 on #F5F1E8
+ 3:  3-18  #B35A00 on #F5F1E8
+ 3: 22-26  #555355 on #F5F1E8
+ 4:  3-18  #B35A00 on #F5F1E8
+ 5:  3-18  #B35A00 on #F5F1E8
  7:  3-3   #8C4907 on #F5F1E8
 11:  0-7   #8C4907 on #F5F1E8
 12:  3-10  #8C4907 on #F5F1E8 bold reversed

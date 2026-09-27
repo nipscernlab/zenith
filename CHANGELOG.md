@@ -27,14 +27,20 @@ either is stated here in its own line.
 
 - The opening shows ZENITH's mark, with the name, what ZENITH is, the laboratory and the
   version beside it, and the state of the connection on the line below. SOLAR's mark
-  moved to the card of `/version`, where ZENITH shows SOLAR itself, with the version of
-  the SOLAR that answered; its copies moved to `crates/zenith/assets/solar/`. The opening
-  is snapshotted in every theme at 256 colours, at 16 and with none, and the card of
-  `/version` in every theme at both sizes.
-
+  moved to where ZENITH shows SOLAR itself, the start of every connection and the card of
+  `/version`, with the version of the SOLAR that answered; its copies moved to
+  `crates/zenith/assets/solar/`. The opening is snapshotted in every theme at 256
+  colours, at 16 and with none, and the card of `/version` in every theme at both sizes.
 - The seven decisions the architect confirmed on 27 September 2026 are records in
   `docs/adr/`, 0007 to 0013, and every record is in the MADR 4.0.0 format;
   `docs/OPEN_QUESTIONS.md` keeps only what is still open.
+
+### Fixed
+
+- No mark was ever seen on a fast machine: the opening lasts as long as the connection,
+  32 ms on the architect's, as the design requires. Every connection now starts the
+  Session tab with SOLAR's mark and the version that answered, above the notice that it
+  connected, and the opening stays as short as the connection.
 
 ## [0.1.0] - 2026-09-27
 

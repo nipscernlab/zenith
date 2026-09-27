@@ -35,14 +35,14 @@ expression: "screen(&draw(&script.app, width, height))"
 
 
 
-
-
-
-
-
-
-
-
+      ▄▄██████▄▄
+    ▄████████████▄
+   ▄████              SOLAR
+   ████████████████   The central API of the Constellation
+   ████████████████   NIPS-CERN
+              ████▀   0.1.0
+    ▀████████████▀
+      ▀▀██████▀▀
  ┌────────────────────────────────────────────────────────────────────────────┐
  │› api  string, required. The method name to describe, for example `solar.p… │PIs.
  └ Tab inserts  ↑ ↓ choose  Esc closes ───────────────────────────────────────┘y.
@@ -59,6 +59,17 @@ expression: "screen(&draw(&script.app, width, height))"
  0: 45-152 #868482 on #F5F1E8
  0:153-153 #8C4907 on #F5F1E8 bold
  0:154-159 #555355 on #F5F1E8
+33:  3-18  #B35A00 on #F5F1E8
+34:  3-18  #B35A00 on #F5F1E8
+35:  3-18  #B35A00 on #F5F1E8
+35: 22-26  #8C4907 on #F5F1E8 bold
+36:  3-18  #B35A00 on #F5F1E8
+37:  3-18  #B35A00 on #F5F1E8
+37: 22-30  #555355 on #F5F1E8
+38:  3-18  #B35A00 on #F5F1E8
+38: 22-26  #555355 on #F5F1E8
+39:  3-18  #B35A00 on #F5F1E8
+40:  3-18  #B35A00 on #F5F1E8
 41:  1-78  #868482 on #F5F1E8
 42:  1-1   #868482 on #F5F1E8
 42:  2-6   #8C4907 on #F5F1E8

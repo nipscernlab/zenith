@@ -18,7 +18,7 @@ Everything the brief asks for, as `docs/DESIGN.md` describes it.
 | Checking | Parameters checked against the API's schema before they are sent, with the wrong part of the line underlined, by a validator of ZENITH's own that property tests hold to the verdicts of the `jsonschema` crate. Every response checked against sections 5, 6 and 7 of SOLAR's contract, and a breach shown with its section. |
 | Cancelling | `Ctrl+C` sends `solar.cancel` for the call in flight when the manifest offers it, and pressed again quits. |
 | The keys | One table that dispatches the keys and draws the help overlay. Every action has a plain key or a `Ctrl` key, for macOS Terminal, where Option is not Alt; a character typed with `AltGr` is text. |
-| The look | The five colours of SOLAR's brand in three themes, night, light and high-contrast, each at four depths down to none, with `NO_COLOR` obeyed; the contrast of every colour computed against WCAG 2.2; WGL4 characters, or 7-bit ASCII with `--ascii`; ZENITH's own mark in the opening, from `docs/brand`, and SOLAR's on the card of `/version`, from SOLAR's brand, byte for byte. Works at 80 × 24 and above, follows resizing, and gives the terminal back on exit, on a signal and after a panic. |
+| The look | The five colours of SOLAR's brand in three themes, night, light and high-contrast, each at four depths down to none, with `NO_COLOR` obeyed; the contrast of every colour computed against WCAG 2.2; WGL4 characters, or 7-bit ASCII with `--ascii`; ZENITH's own mark in the opening, from `docs/brand`, and SOLAR's at the start of every connection and on the card of `/version`, from SOLAR's brand, byte for byte. Works at 80 × 24 and above, follows resizing, and gives the terminal back on exit, on a signal and after a panic. |
 | Memory | Every collection that grows with use is a ring buffer with a limit in entries and in bytes, and says how much it dropped. `/export` and `/report` are written as they go. |
 | Bug reports | `/report` writes one file with the versions of ZENITH and SOLAR, the system as `system.info` reports it, the recent log and the calls of the session. |
 | The command line history | Kept between sessions in the per-user data directory of each system, written atomically after every line, in a documented format; `/forget` empties it and `--no-history` turns it off. |
@@ -27,9 +27,9 @@ Everything the brief asks for, as `docs/DESIGN.md` describes it.
 
 | What | How many | Where |
 | ---- | -------- | ----- |
-| Tests | 324, all passing, against SOLAR 0.3.0 on this machine; 27 of them start a real program, the installed SOLAR or a double of it for the failures SOLAR cannot produce | `cargo nextest run --workspace` |
+| Tests | 325, all passing, against SOLAR 0.3.0 on this machine; 27 of them start a real program, the installed SOLAR or a double of it for the failures SOLAR cannot produce | `cargo nextest run --workspace` |
 | Snapshots | 128: every screen at 80 × 24 and 160 × 48 in each theme, without colour and in ASCII; the opening in each theme at 256 colours, 16 and none, and the Session tab at 256 and 16; the screen of a terminal too small; and the README's seven | `crates/zenith/tests/snapshots/` |
-| Line coverage | 89.12 % of the lines of `zenith-client` and `zenith` on Windows, with the tests against SOLAR 0.3.0, and 88.98 % on Linux in CI, against the head of SOLAR's main, counted from the job's lcov; the floor is 88 % | `cargo xtask coverage` |
+| Line coverage | 89.25 % of the lines of `zenith-client` and `zenith` on Windows, with the tests against SOLAR 0.3.0, and 88.98 % on Linux in CI before the last change, against the head of SOLAR's main, counted from the job's lcov; the floor is 88 % | `cargo xtask coverage` |
 | The guide's table | 22 of 22 rows, typed into the real binary in a pseudo-terminal, on Windows 11 on this machine against SOLAR 0.3.0, and in CI on Linux, Windows and macOS | `cargo xtask walkthrough` |
 
 **CI** builds SOLAR from the head of its main branch on every run, and ran three times on

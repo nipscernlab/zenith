@@ -35,7 +35,7 @@ expression: "screen(&draw(&script.app, width, height))"
 
 
 
-
+      ▄▄██████▄▄
  ┌─────────────────────────────────────────────────────────────────── 1 of 14 ┐
  │› /list                               every API SOLAR answers to            │
  │  /describe <api>                     one API: parameters, errors, side ef… │
@@ -59,6 +59,7 @@ expression: "screen(&draw(&script.app, width, height))"
  0: 45-152 #646365 on #0B0C14
  0:153-153 #FFC23D on #0B0C14 bold
  0:154-159 #9C9A97 on #0B0C14
+33:  3-18  #FFC23D on #0B0C14
 34:  1-68  #646365 on #0B0C14
 34: 69-77  #9C9A97 on #0B0C14
 34: 78-78  #646365 on #0B0C14

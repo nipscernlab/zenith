@@ -115,7 +115,8 @@ below is the state of the connection.
 - **It lasts exactly as long as the connection.** The moment the handshake finishes,
   the opening gives way to the tabs. On a fast machine that is a few milliseconds and the
   opening is barely seen, which is the requirement: it is never longer than the
-  connection itself.
+  connection itself. So that a mark is seen all the same, every connection starts the
+  Session tab with SOLAR's (section 4).
 - **Any key skips it.** The connection carries on, and the status bar shows it.
 - **The stars twinkle** at twelve frames a second, and only during the opening. No star is
   drawn within two cells of the mark and its words, which is the clear space the brand
@@ -127,8 +128,8 @@ below is the state of the connection.
   made, and `Not connected to SOLAR`, in the error colour, when it failed.
 
 ZENITH's mark stands for ZENITH and SOLAR's for SOLAR, and neither is drawn in the other's
-place. SOLAR's mark is where ZENITH shows SOLAR itself, on the card of `/version`
-(section 4). Its two drawings are copied byte for byte from SOLAR's `docs/brand` into
+place. SOLAR's mark is where ZENITH shows SOLAR itself: at the start of every connection
+in the Session tab, and on the card of `/version` (section 4). Its two drawings are copied byte for byte from SOLAR's `docs/brand` into
 `crates/zenith/assets/solar/`, and a test compares them with SOLAR's when SOLAR's checkout
 is available, which it is in CI. ZENITH's own are read from `docs/brand` of this
 repository, and the tests of `crates/zenith/src/brand.rs` hold them to its rules.
@@ -140,6 +141,24 @@ place (section 9). The stars stay, still.
 
 The Session tab is a transcript above a command line. Every command typed, and every
 response to it, goes into the transcript, laid out for a person.
+
+**A connection** starts with SOLAR's mark, laid out as SOLAR's brand lays it out, with
+the version that answered the handshake where the brand puts the version, and then the
+notice `Connected to SOLAR <version> in <time>: ...`. The mark comes again with every
+connection, after `Ctrl+R`, so a SOLAR built again is seen to be a new one.
+
+```text
+      ▄▄██████▄▄
+    ▄████████████▄
+   ▄████              SOLAR
+   ████████████████   The central API of the Constellation
+   ████████████████   NIPS-CERN
+              ████▀   0.3.0
+    ▀████████████▀
+      ▀▀██████▀▀
+
+   · Connected to SOLAR 0.3.0 in 32.0 ms: protocol solar/1, manifest 2.1.0, 7 APIs.
+```
 
 **A command** is echoed as `› /ping`, in the accent colour.
 

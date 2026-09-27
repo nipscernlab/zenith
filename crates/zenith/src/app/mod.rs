@@ -995,6 +995,11 @@ impl App {
         let count = self.catalogue().map_or(0, |catalogue| catalogue.apis.len());
         let info = self.link.info.clone();
         if let Some(info) = info {
+            // The opening lasts as long as the connection, which on a fast machine is too
+            // short to see, so the connection starts with SOLAR's mark where it stays.
+            self.session.push(Entry::Mark {
+                version: info.solar_version.clone(),
+            });
             let cancel = if self.link.capabilities.cancel {
                 "Ctrl+C cancels a call in flight."
             } else {
