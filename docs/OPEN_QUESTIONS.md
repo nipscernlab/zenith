@@ -63,10 +63,28 @@ specifies the recording, with a version. The exporter is one function.
 
 ## Naming
 
-### ZENITH has no mark of its own
+### ZENITH's mark, drawn without a designer
 
-The brief says a mark will come later. ZENITH writes its name in text, and draws only the
-SOLAR mark, in the opening, exactly as SOLAR's brand rules say.
+The brief asked for a mark of ZENITH's own on the discipline of SOLAR's brand, meaning the
+zenith, and never to be taken for SOLAR's. What it did not say was decided here, and
+[`docs/brand/README.md`](brand/README.md) is the result:
+
+- **The drawing**: the dome of an observatory with its slit open straight up, at the
+  zenith, on SOLAR's module and in SOLAR's five colours. A first drawing, a disc with a
+  round opening, looked like an eye at 16 px and was dropped.
+- **The terminal form** is 16 × 4 cells, half the height of SOLAR's, and the four lines
+  beside it are the name, level with the top of the dome where the slit opens, then what
+  ZENITH is, the laboratory and the version, which is the order of SOLAR's example.
+- **The opening** shows ZENITH's mark, and its last line, the state of the connection,
+  moved below the mark, where the version of ZENITH was.
+- **SOLAR's mark is on the card of `/version`**, the one place where ZENITH shows SOLAR
+  itself, with the version of the SOLAR that answered where SOLAR's brand puts the
+  version. `/call solar.version` keeps the generic layout.
+- **The lockups** set the name in Martian Mono SemiBold, as SOLAR's do, with its cap
+  height from the apex to the horizon and at the same place as SOLAR's name.
+
+**Revisit when** a designer redraws it, or the architect wants a different drawing. No
+trademark search has been made.
 
 ## The interface
 

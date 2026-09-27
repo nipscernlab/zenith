@@ -2,55 +2,61 @@
 source: crates/zenith/tests/screens.rs
 expression: screen(&buffer)
 ---
+                                   *   *                            .
 
-               ..######..
-       '     .############.
-         *  .####              SOLAR
- +   '.     ################   The central API of the Constellation
-  .         ################   NIPS-CERN
-                       ####'   not connected                            '    *
-             '############'
-'              ''######''                                               +
-
-
-                   ZENITH 0.1.0, the terminal of Constellation
+       '
+         **        ..##  ##..      ZENITH
+ +   '.          .#####  #####.    The terminal of Constellation
+  .             .##############.   NIPS-CERN
+                ################   0.1.0                                '    *
+                                                                   .
+'                                                                       +
+                             Not connected to SOLAR
 
     +----------------------------------------------------------------------+
     | ZENITH could not find solar on the PATH, which has 23 directories.   |
     | Put the folder that holds solar on the PATH, SOLAR's target/release  |
-*   | when it was built from source, or give the path with --solar <path>  |
+    | when it was built from source, or give the path with --solar <path>  |
     | or the variable ZENITH_SOLAR.                                        |
-    |                                                                      |
+*   |                                                                      |
     | r try again   Enter go to the tabs   q quit                          |
     +----------------------------------------------------------------------+
 
+
+                       +                                           +
        *            +          +
                                  *        *.   '
 --- every cell not listed is - on -
+ 0: 39-39  - on - dim
+ 0: 68-68  - on - dim
  2:  7-7   - on - dim
- 3: 31-35  - on - bold
+ 3: 10-10  - on - dim
+ 3: 35-40  - on - bold
  4:  1-1   - on - dim
  4:  5-5   - on - dim
- 6: 31-43  - on - bold
+ 7: 67-67  - on - dim
  8:  0-0   - on - dim
-13:  4-75  - on - dim
+ 9: 29-50  - on - bold
+11:  4-75  - on - dim
+12:  4-4   - on - dim
+12:  6-71  - on - bold
+12: 75-75  - on - dim
+13:  4-4   - on - dim
+13: 75-75  - on - dim
 14:  4-4   - on - dim
-14:  6-71  - on - bold
 14: 75-75  - on - dim
 15:  4-4   - on - dim
 15: 75-75  - on - dim
 16:  4-4   - on - dim
 16: 75-75  - on - dim
 17:  4-4   - on - dim
+17:  6-6   - on - bold
+17: 20-24  - on - bold
+17: 43-43  - on - bold
 17: 75-75  - on - dim
-18:  4-4   - on - dim
-18: 75-75  - on - dim
-19:  4-4   - on - dim
-19:  6-6   - on - bold
-19: 20-24  - on - bold
-19: 43-43  - on - bold
-19: 75-75  - on - dim
-20:  4-75  - on - dim
+18:  4-75  - on - dim
+21: 23-23  - on - dim
+21: 67-67  - on - dim
 22:  7-7   - on - dim
 22: 20-20  - on - dim
 22: 31-31  - on - dim

@@ -17,8 +17,20 @@ either is stated here in its own line.
   a thread of its own, through a temporary file renamed over it, and in a documented,
   versioned format. `/forget` empties it, and `--no-history` or `ZENITH_NO_HISTORY` keep it
   for the session only. A file ZENITH cannot read is left as it is.
+- ZENITH's own mark, in `docs/brand`: the dome of an observatory with its slit open at the
+  zenith, on the module and in the five colours of SOLAR's brand. It comes as SVG in the
+  palette's colours and in one colour, a separate drawing for 16 px, lockups for dark and
+  light backgrounds, and terminal forms in half blocks and in ASCII, with the rules it is
+  drawn by in `docs/brand/README.md`. Tests hold every file to those rules.
 
 ### Changed
+
+- The opening shows ZENITH's mark, with the name, what ZENITH is, the laboratory and the
+  version beside it, and the state of the connection on the line below. SOLAR's mark
+  moved to the card of `/version`, where ZENITH shows SOLAR itself, with the version of
+  the SOLAR that answered; its copies moved to `crates/zenith/assets/solar/`. The opening
+  is snapshotted in every theme at 256 colours, at 16 and with none, and the card of
+  `/version` in every theme at both sizes.
 
 - The seven decisions the architect confirmed on 27 September 2026 are records in
   `docs/adr/`, 0007 to 0013, and every record is in the MADR 4.0.0 format;

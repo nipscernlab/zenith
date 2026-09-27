@@ -15,27 +15,27 @@ expression: "screen(&draw(&script.app, width, height))"
                                                                                                        •                                           •
        *            •          •                                                                                 *        *·   ∙
                   ∙      •                                                                                         •                                    •
-                                                       ▄▄██████▄▄                                                     ∙ •                                    ·
-    ·   ∙                        •   *               ▄████████████▄                                                                     ∙
-     •                               ·              ▄████              SOLAR                                                    •                    •
-  ·                          ·∙                     ████████████████   The central API of the Constellation                                      •    •
-                                                    ████████████████   NIPS-CERN                                                    *
-                 ∙                                             ████▀   not connected
-                    ∙    *             ·             ▀████████████▀
-              *                              •         ▀▀██████▀▀                                               ∙
-                                                                                                                                            ·
+                                                    •                                                                 ∙ •                                    ·
+    ·   ∙                        •   *                                                                                                  ∙
+     •                               ·                     ▄▄██  ██▄▄      ZENITH                                               •                    •
+  ·                          ·∙                          ▄█████  █████▄    The terminal of Constellation                                         •    •
+                                                        ▄██████████████▄   NIPS-CERN                       ·                        *
+                 ∙                                      ████████████████   0.1.0
+                    ∙    *             ·
+              *                              •                                                                  ∙
+                                                                     Not connected to SOLAR    *    *                                       ·
                        *                •                                                                                                              *•
-                             •                             ZENITH 0.1.0, the terminal of Constellation  ∙
-                                  ∙
-        ·  *                              ┌──────────────────────────────────────────────────────────────────────────┐   ·                ·          *
-                                     ·    │ ZENITH could not find solar on the PATH, which has 23 directories.       │
-                                          │ Put the folder that holds solar on the PATH, SOLAR's target/release when │                           *
-                   ∙                      │ it was built from source, or give the path with --solar <path> or the    │              *
-                                          │ variable ZENITH_SOLAR.                                                   │
-                   ·                      │                                                                          │               •         •         ·  ∙
-                                  •     · │ r try again   Enter go to the tabs   q quit                              │     •
-                 *                        └──────────────────────────────────────────────────────────────────────────┘               ·                       *
-                                                                                                                             ∙            ·          •
+                             •            ┌──────────────────────────────────────────────────────────────────────────┐
+                                  ∙       │ ZENITH could not find solar on the PATH, which has 23 directories.       │
+        ·  *                              │ Put the folder that holds solar on the PATH, SOLAR's target/release when │   ·                ·          *
+                                     ·    │ it was built from source, or give the path with --solar <path> or the    │
+                                          │ variable ZENITH_SOLAR.                                                   │                           *
+                   ∙                      │                                                                          │              *
+                                          │ r try again   Enter go to the tabs   q quit                              │
+                   ·                      └──────────────────────────────────────────────────────────────────────────┘               •         •         ·  ∙
+                                  •     ·                                                                                  •
+                 *                                      ∙   •                                       ∙                                ·                       *
+                                                                    ·                            ·                    •      ∙            ·          •
                                         ∙ •               ·            •                                             ∙          ·
                      •                    •                            •                                                           ∙
                                                ∙·                      ∙                                                           *                       •
@@ -51,17 +51,13 @@ expression: "screen(&draw(&script.app, width, height))"
                                                     *                                   •
       *             •                                                                            ·                                            ∙      *
 --- every cell not listed is #F5F1E8 on #0B0C14
-13: 52-67  #FFC23D on #0B0C14
-14: 52-67  #FFC23D on #0B0C14
-15: 52-67  #FFC23D on #0B0C14
-15: 71-75  #FFC23D on #0B0C14 bold
-16: 52-67  #FFC23D on #0B0C14
-17: 52-67  #FFC23D on #0B0C14
-18: 52-67  #FFC23D on #0B0C14
-18: 71-83  #FFC23D on #0B0C14 bold
-19: 52-67  #FFC23D on #0B0C14
-20: 52-67  #FFC23D on #0B0C14
-26: 44-109 #FFC23D on #0B0C14 bold
-31: 44-44  #FFC23D on #0B0C14 bold
-31: 58-62  #FFC23D on #0B0C14 bold
-31: 81-81  #FFC23D on #0B0C14 bold
+15: 56-71  #FFC23D on #0B0C14
+15: 75-80  #FFC23D on #0B0C14 bold
+16: 56-71  #FFC23D on #0B0C14
+17: 56-71  #FFC23D on #0B0C14
+18: 56-71  #FFC23D on #0B0C14
+21: 69-90  #FFC23D on #0B0C14 bold
+24: 44-109 #FFC23D on #0B0C14 bold
+29: 44-44  #FFC23D on #0B0C14 bold
+29: 58-62  #FFC23D on #0B0C14 bold
+29: 81-81  #FFC23D on #0B0C14 bold

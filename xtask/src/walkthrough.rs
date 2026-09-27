@@ -70,6 +70,7 @@ const STEPS: &[Step] = &[
         run: |walk| {
             walk.fresh()?;
             walk.line("/version")?;
+            walk.see("The central API of the Constellation")?;
             walk.see("solar_version")?;
             walk.see("solar/1")?;
             walk.see("manifest_schema_version")?;

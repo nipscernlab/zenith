@@ -1,0 +1,82 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, 80, 24))"
+---
+                                   *   *                            ·
+                                         •             ∙
+       ∙        ·                                       *
+         **        •               •       *
+ •   ∙·                                                      ∙
+  ·                                                         •
+                                                                        ∙    *
+                                                                   ·
+∙                  ▄▄██  ██▄▄      ZENITH                               •
+                 ▄█████  █████▄    The terminal of Constellation
+             •  ▄██████████████▄   NIPS-CERN
+                ████████████████   0.1.0
+
+
+          •                    Connecting to SOLAR  ·
+
+*
+    ∙       ·  ·                                         ·
+      ∙                                                ∙
+                *                        ·     ∙            *         ·
+
+                       •                                           •
+       *            •          •
+                                 *        *·   ∙
+--- every cell not listed is Black on White
+ 0: 35-35  DarkGray on White
+ 0: 39-39  DarkGray on White
+ 0: 68-68  DarkGray on White
+ 1: 41-41  DarkGray on White
+ 1: 55-55  DarkGray on White
+ 2:  7-7   DarkGray on White
+ 2: 16-16  DarkGray on White
+ 2: 56-56  DarkGray on White
+ 3:  9-10  DarkGray on White
+ 3: 19-19  DarkGray on White
+ 3: 35-35  DarkGray on White
+ 3: 43-43  DarkGray on White
+ 4:  1-1   DarkGray on White
+ 4:  5-6   DarkGray on White
+ 4: 61-61  DarkGray on White
+ 5:  2-2   DarkGray on White
+ 5: 60-60  DarkGray on White
+ 6: 72-72  DarkGray on White
+ 6: 77-77  DarkGray on White
+ 7: 67-67  DarkGray on White
+ 8:  0-0   DarkGray on White
+ 8: 16-31  Red on White
+ 8: 35-40  Red on White bold
+ 8: 72-72  DarkGray on White
+ 9: 16-31  Red on White
+10: 13-13  DarkGray on White
+10: 16-31  Red on White
+10: 35-43  DarkGray on White
+11: 16-31  Red on White
+11: 35-39  DarkGray on White
+14: 10-10  DarkGray on White
+14: 31-49  DarkGray on White
+14: 52-52  DarkGray on White
+16:  0-0   DarkGray on White
+17:  4-4   DarkGray on White
+17: 12-12  DarkGray on White
+17: 15-15  DarkGray on White
+17: 57-57  DarkGray on White
+18:  6-6   DarkGray on White
+18: 55-55  DarkGray on White
+19: 16-16  DarkGray on White
+19: 41-41  DarkGray on White
+19: 47-47  DarkGray on White
+19: 60-60  DarkGray on White
+19: 70-70  DarkGray on White
+21: 23-23  DarkGray on White
+21: 67-67  DarkGray on White
+22:  7-7   DarkGray on White
+22: 20-20  DarkGray on White
+22: 31-31  DarkGray on White
+23: 33-33  DarkGray on White
+23: 42-43  DarkGray on White
+23: 47-47  DarkGray on White

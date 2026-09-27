@@ -105,7 +105,7 @@ pub enum Overlay {
     },
 }
 
-/// The opening: the starfield with the SOLAR mark, while the connection is made.
+/// The opening: the starfield with ZENITH's mark, while the connection is made.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Opening {
     /// Which frame of the twinkle is showing.

@@ -2,56 +2,61 @@
 source: crates/zenith/tests/screens.rs
 expression: "screen(&draw(&script.app, width, height))"
 ---
+                                   *   *                            ·
 
-               ▄▄██████▄▄
-       ∙     ▄████████████▄
-         *  ▄████              SOLAR
- •   ∙·     ████████████████   The central API of the Constellation
-  ·         ████████████████   NIPS-CERN
-                       ████▀   not connected                            ∙    *
-             ▀████████████▀
-∙              ▀▀██████▀▀                                               •
-
-
-                   ZENITH 0.1.0, the terminal of Constellation
+       ∙
+         **        ▄▄██  ██▄▄      ZENITH
+ •   ∙·          ▄█████  █████▄    The terminal of Constellation
+  ·             ▄██████████████▄   NIPS-CERN
+                ████████████████   0.1.0                                ∙    *
+                                                                   ·
+∙                                                                       •
+                             Not connected to SOLAR
 
     ┌──────────────────────────────────────────────────────────────────────┐
     │ ZENITH could not find solar on the PATH, which has 23 directories.   │
     │ Put the folder that holds solar on the PATH, SOLAR's target/release  │
-*   │ when it was built from source, or give the path with --solar <path>  │
+    │ when it was built from source, or give the path with --solar <path>  │
     │ or the variable ZENITH_SOLAR.                                        │
-    │                                                                      │
+*   │                                                                      │
     │ r try again   Enter go to the tabs   q quit                          │
     └──────────────────────────────────────────────────────────────────────┘
 
+
+                       •                                           •
        *            •          •
                                  *        *·   ∙
 --- every cell not listed is #F5F1E8 on #0B0C14
- 1: 12-27  #FFC23D on #0B0C14
+ 0: 35-35  #9C9A97 on #0B0C14
+ 0: 39-39  #646365 on #0B0C14
+ 0: 68-68  #646365 on #0B0C14
  2:  7-7   #646365 on #0B0C14
- 2: 12-27  #FFC23D on #0B0C14
  3:  9-9   #9C9A97 on #0B0C14
- 3: 12-27  #FFC23D on #0B0C14
- 3: 31-35  #FFC23D on #0B0C14 bold
+ 3: 10-10  #646365 on #0B0C14
+ 3: 16-31  #FFC23D on #0B0C14
+ 3: 35-40  #FFC23D on #0B0C14 bold
  4:  1-1   #646365 on #0B0C14
  4:  5-5   #646365 on #0B0C14
  4:  6-6   #9C9A97 on #0B0C14
- 4: 12-27  #FFC23D on #0B0C14
+ 4: 16-31  #FFC23D on #0B0C14
  5:  2-2   #9C9A97 on #0B0C14
- 5: 12-27  #FFC23D on #0B0C14
- 5: 31-39  #9C9A97 on #0B0C14
- 6: 12-27  #FFC23D on #0B0C14
- 6: 31-43  #D98E1F on #0B0C14 bold
+ 5: 16-31  #FFC23D on #0B0C14
+ 5: 35-43  #9C9A97 on #0B0C14
+ 6: 16-31  #FFC23D on #0B0C14
+ 6: 35-39  #9C9A97 on #0B0C14
  6: 72-72  #9C9A97 on #0B0C14
  6: 77-77  #9C9A97 on #0B0C14
- 7: 12-27  #FFC23D on #0B0C14
+ 7: 67-67  #646365 on #0B0C14
  8:  0-0   #646365 on #0B0C14
- 8: 12-27  #FFC23D on #0B0C14
  8: 72-72  #9C9A97 on #0B0C14
-11: 19-61  #9C9A97 on #0B0C14
-13:  4-75  #646365 on #0B0C14
+ 9: 29-50  #D98E1F on #0B0C14 bold
+11:  4-75  #646365 on #0B0C14
+12:  4-4   #646365 on #0B0C14
+12:  6-71  #D98E1F on #0B0C14 bold
+12: 75-75  #646365 on #0B0C14
+13:  4-4   #646365 on #0B0C14
+13: 75-75  #646365 on #0B0C14
 14:  4-4   #646365 on #0B0C14
-14:  6-71  #D98E1F on #0B0C14 bold
 14: 75-75  #646365 on #0B0C14
 15:  4-4   #646365 on #0B0C14
 15: 75-75  #646365 on #0B0C14
@@ -59,18 +64,16 @@ expression: "screen(&draw(&script.app, width, height))"
 16:  4-4   #646365 on #0B0C14
 16: 75-75  #646365 on #0B0C14
 17:  4-4   #646365 on #0B0C14
+17:  6-6   #FFC23D on #0B0C14 bold
+17:  7-19  #9C9A97 on #0B0C14
+17: 20-24  #FFC23D on #0B0C14 bold
+17: 25-42  #9C9A97 on #0B0C14
+17: 43-43  #FFC23D on #0B0C14 bold
+17: 44-48  #9C9A97 on #0B0C14
 17: 75-75  #646365 on #0B0C14
-18:  4-4   #646365 on #0B0C14
-18: 75-75  #646365 on #0B0C14
-19:  4-4   #646365 on #0B0C14
-19:  6-6   #FFC23D on #0B0C14 bold
-19:  7-19  #9C9A97 on #0B0C14
-19: 20-24  #FFC23D on #0B0C14 bold
-19: 25-42  #9C9A97 on #0B0C14
-19: 43-43  #FFC23D on #0B0C14 bold
-19: 44-48  #9C9A97 on #0B0C14
-19: 75-75  #646365 on #0B0C14
-20:  4-75  #646365 on #0B0C14
+18:  4-75  #646365 on #0B0C14
+21: 23-23  #646365 on #0B0C14
+21: 67-67  #646365 on #0B0C14
 22:  7-7   #646365 on #0B0C14
 22: 20-20  #646365 on #0B0C14
 22: 31-31  #646365 on #0B0C14

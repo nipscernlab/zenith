@@ -11,12 +11,13 @@ use zenith_client::manifest::{Api, Catalogue, Matching};
 use zenith_client::pointer::Pointer;
 use zenith_client::schema_view::View;
 
-use super::json;
 use super::text::{self, clean, pad, span, truncate, wrap};
+use super::{json, lockup};
 use crate::app::App;
 use crate::app::apis::ExampleResult;
 use crate::app::history::{CallRecord, Summary};
 use crate::app::session::{Entry, Layout, Tone};
+use crate::brand;
 use crate::clock;
 use crate::commands::COMMANDS;
 use crate::theme::Theme;
@@ -369,9 +370,11 @@ fn single(
                 Layout::Ping => {}
                 Layout::List => out.extend(list(app, data, width)),
                 Layout::Describe => out.extend(describe(app, data, width)),
-                Layout::Version | Layout::Generic => {
+                Layout::Version => {
+                    out.extend(solar_mark(app, envelope));
                     out.extend(json::human(data, BODY, width, theme));
                 }
+                Layout::Generic => out.extend(json::human(data, BODY, width, theme)),
             }
             for warning in warnings {
                 out.extend(warning_lines(theme, warning, width));
@@ -438,6 +441,38 @@ fn single(
             theme.muted(),
         )));
     }
+    out
+}
+
+/// SOLAR's mark, where ZENITH shows SOLAR itself: laid out as SOLAR's `docs/brand`
+/// lays it out, with the version of the SOLAR that answered where the brand puts the
+/// version, and a blank line above and below.
+fn solar_mark(app: &App, envelope: &Envelope) -> Vec<Line<'static>> {
+    let theme = &app.theme;
+    let mut beside = vec![
+        ("SOLAR".to_owned(), theme.strong()),
+        (
+            "The central API of the Constellation".to_owned(),
+            theme.text(),
+        ),
+        ("NIPS-CERN".to_owned(), theme.muted()),
+    ];
+    if let Some(version) = envelope
+        .meta
+        .as_ref()
+        .and_then(|meta| meta.solar_version.as_deref())
+    {
+        beside.push((clean(version).into_owned(), theme.muted()));
+    }
+    let mut out = vec![Line::from("")];
+    out.extend(lockup::lines(
+        &brand::SOLAR,
+        app.glyphs.charset,
+        BODY,
+        &beside,
+        theme,
+    ));
+    out.push(Line::from(""));
     out
 }
 

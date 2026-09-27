@@ -104,7 +104,8 @@ cd ~\constellation\zenith
 .\target\release\zenith.exe --solar ..\solar\target\release\solar.exe
 ```
 
-A starfield with the SOLAR mark shows for a moment, then the Session tab says
+A starfield with ZENITH's mark, the dome of an observatory, shows for a moment, then the
+Session tab says
 `Connected to SOLAR <version> in <time>: protocol solar/1, manifest 2.0.0, <n> APIs.`
 
 ## 4. What to try
@@ -115,7 +116,7 @@ Type each line and press `Enter`. The right column is what should happen.
 | ------------- | ------------------ |
 | `/list` | A table of every API SOLAR has, with its version and summary |
 | `/ping hello` | A line starting `ok pong in`, the round trip, SOLAR's own time, and `echo hello` |
-| `/version` | SOLAR's version, `solar/1`, `2.0.0`, and how SOLAR was built |
+| `/version` | SOLAR's mark with `The central API of the Constellation` beside it, then SOLAR's version, `solar/1`, `2.0.0`, and how SOLAR was built |
 | `/describe solar.ping` | Everything about `solar.ping`: parameters, errors, examples, description |
 | `/call system.info` | The operating system, the processor and the process, as SOLAR sees them |
 | `/call solar.ping {"mesage": "hi"}` | Nothing is sent. A red band says `There is no parameter mesage. Did you mean message?`, and `"mesage"` is underlined on the line. Fix it and press `Enter` again |

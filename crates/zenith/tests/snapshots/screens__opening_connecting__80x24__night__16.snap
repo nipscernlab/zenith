@@ -1,0 +1,82 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, 80, 24))"
+---
+                                   *   *                            ·
+                                         •             ∙
+       ∙        ·                                       *
+         **        •               •       *
+ •   ∙·                                                      ∙
+  ·                                                         •
+                                                                        ∙    *
+                                                                   ·
+∙                  ▄▄██  ██▄▄      ZENITH                               •
+                 ▄█████  █████▄    The terminal of Constellation
+             •  ▄██████████████▄   NIPS-CERN
+                ████████████████   0.1.0
+
+
+          •                    Connecting to SOLAR  ·
+
+*
+    ∙       ·  ·                                         ·
+      ∙                                                ∙
+                *                        ·     ∙            *         ·
+
+                       •                                           •
+       *            •          •
+                                 *        *·   ∙
+--- every cell not listed is Gray on Black
+ 0: 35-35  DarkGray on Black
+ 0: 39-39  DarkGray on Black
+ 0: 68-68  DarkGray on Black
+ 1: 41-41  DarkGray on Black
+ 1: 55-55  DarkGray on Black
+ 2:  7-7   DarkGray on Black
+ 2: 16-16  DarkGray on Black
+ 2: 56-56  DarkGray on Black
+ 3:  9-10  DarkGray on Black
+ 3: 19-19  DarkGray on Black
+ 3: 35-35  DarkGray on Black
+ 3: 43-43  DarkGray on Black
+ 4:  1-1   DarkGray on Black
+ 4:  5-6   DarkGray on Black
+ 4: 61-61  DarkGray on Black
+ 5:  2-2   DarkGray on Black
+ 5: 60-60  DarkGray on Black
+ 6: 72-72  DarkGray on Black
+ 6: 77-77  DarkGray on Black
+ 7: 67-67  DarkGray on Black
+ 8:  0-0   DarkGray on Black
+ 8: 16-31  Yellow on Black
+ 8: 35-40  Yellow on Black bold
+ 8: 72-72  DarkGray on Black
+ 9: 16-31  Yellow on Black
+10: 13-13  DarkGray on Black
+10: 16-31  Yellow on Black
+10: 35-43  DarkGray on Black
+11: 16-31  Yellow on Black
+11: 35-39  DarkGray on Black
+14: 10-10  DarkGray on Black
+14: 31-49  DarkGray on Black
+14: 52-52  DarkGray on Black
+16:  0-0   DarkGray on Black
+17:  4-4   DarkGray on Black
+17: 12-12  DarkGray on Black
+17: 15-15  DarkGray on Black
+17: 57-57  DarkGray on Black
+18:  6-6   DarkGray on Black
+18: 55-55  DarkGray on Black
+19: 16-16  DarkGray on Black
+19: 41-41  DarkGray on Black
+19: 47-47  DarkGray on Black
+19: 60-60  DarkGray on Black
+19: 70-70  DarkGray on Black
+21: 23-23  DarkGray on Black
+21: 67-67  DarkGray on Black
+22:  7-7   DarkGray on Black
+22: 20-20  DarkGray on Black
+22: 31-31  DarkGray on Black
+23: 33-33  DarkGray on Black
+23: 42-43  DarkGray on Black
+23: 47-47  DarkGray on Black

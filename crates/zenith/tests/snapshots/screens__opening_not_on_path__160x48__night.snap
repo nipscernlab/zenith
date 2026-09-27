@@ -15,27 +15,27 @@ expression: "screen(&draw(&script.app, width, height))"
                                                                                                        •                                           •
        *            •          •                                                                                 *        *·   ∙
                   ∙      •                                                                                         •                                    •
-                                                       ▄▄██████▄▄                                                     ∙ •                                    ·
-    ·   ∙                        •   *               ▄████████████▄                                                                     ∙
-     •                               ·              ▄████              SOLAR                                                    •                    •
-  ·                          ·∙                     ████████████████   The central API of the Constellation                                      •    •
-                                                    ████████████████   NIPS-CERN                                                    *
-                 ∙                                             ████▀   not connected
-                    ∙    *             ·             ▀████████████▀
-              *                              •         ▀▀██████▀▀                                               ∙
-                                                                                                                                            ·
+                                                    •                                                                 ∙ •                                    ·
+    ·   ∙                        •   *                                                                                                  ∙
+     •                               ·                     ▄▄██  ██▄▄      ZENITH                                               •                    •
+  ·                          ·∙                          ▄█████  █████▄    The terminal of Constellation                                         •    •
+                                                        ▄██████████████▄   NIPS-CERN                       ·                        *
+                 ∙                                      ████████████████   0.1.0
+                    ∙    *             ·
+              *                              •                                                                  ∙
+                                                                     Not connected to SOLAR    *    *                                       ·
                        *                •                                                                                                              *•
-                             •                             ZENITH 0.1.0, the terminal of Constellation  ∙
-                                  ∙
-        ·  *                              ┌──────────────────────────────────────────────────────────────────────────┐   ·                ·          *
-                                     ·    │ ZENITH could not find solar on the PATH, which has 23 directories.       │
-                                          │ Put the folder that holds solar on the PATH, SOLAR's target/release when │                           *
-                   ∙                      │ it was built from source, or give the path with --solar <path> or the    │              *
-                                          │ variable ZENITH_SOLAR.                                                   │
-                   ·                      │                                                                          │               •         •         ·  ∙
-                                  •     · │ r try again   Enter go to the tabs   q quit                              │     •
-                 *                        └──────────────────────────────────────────────────────────────────────────┘               ·                       *
-                                                                                                                             ∙            ·          •
+                             •            ┌──────────────────────────────────────────────────────────────────────────┐
+                                  ∙       │ ZENITH could not find solar on the PATH, which has 23 directories.       │
+        ·  *                              │ Put the folder that holds solar on the PATH, SOLAR's target/release when │   ·                ·          *
+                                     ·    │ it was built from source, or give the path with --solar <path> or the    │
+                                          │ variable ZENITH_SOLAR.                                                   │                           *
+                   ∙                      │                                                                          │              *
+                                          │ r try again   Enter go to the tabs   q quit                              │
+                   ·                      └──────────────────────────────────────────────────────────────────────────┘               •         •         ·  ∙
+                                  •     ·                                                                                  •
+                 *                                      ∙   •                                       ∙                                ·                       *
+                                                                    ·                            ·                    •      ∙            ·          •
                                         ∙ •               ·            •                                             ∙          ·
                      •                    •                            •                                                           ∙
                                                ∙·                      ∙                                                           *                       •
@@ -123,7 +123,7 @@ expression: "screen(&draw(&script.app, width, height))"
 12: 25-25  #646365 on #0B0C14
 12:115-115 #9C9A97 on #0B0C14
 12:152-152 #646365 on #0B0C14
-13: 52-67  #FFC23D on #0B0C14
+13: 52-52  #9C9A97 on #0B0C14
 13:118-118 #9C9A97 on #0B0C14
 13:120-120 #646365 on #0B0C14
 13:157-157 #646365 on #0B0C14
@@ -131,52 +131,55 @@ expression: "screen(&draw(&script.app, width, height))"
 14:  8-8   #646365 on #0B0C14
 14: 33-33  #9C9A97 on #0B0C14
 14: 37-37  #646365 on #0B0C14
-14: 52-67  #FFC23D on #0B0C14
 14:136-136 #646365 on #0B0C14
 15:  5-5   #646365 on #0B0C14
 15: 37-37  #646365 on #0B0C14
-15: 52-67  #FFC23D on #0B0C14
-15: 71-75  #FFC23D on #0B0C14 bold
+15: 56-71  #FFC23D on #0B0C14
+15: 75-80  #FFC23D on #0B0C14 bold
 15:128-128 #9C9A97 on #0B0C14
 15:149-149 #9C9A97 on #0B0C14
 16:  2-2   #9C9A97 on #0B0C14
 16: 29-29  #646365 on #0B0C14
 16: 30-30  #9C9A97 on #0B0C14
-16: 52-67  #FFC23D on #0B0C14
+16: 56-71  #FFC23D on #0B0C14
 16:145-145 #646365 on #0B0C14
 16:150-150 #646365 on #0B0C14
-17: 52-67  #FFC23D on #0B0C14
-17: 71-79  #9C9A97 on #0B0C14
+17: 56-71  #FFC23D on #0B0C14
+17: 75-83  #9C9A97 on #0B0C14
+17:107-107 #9C9A97 on #0B0C14
 17:132-132 #646365 on #0B0C14
 18: 17-17  #646365 on #0B0C14
-18: 52-67  #FFC23D on #0B0C14
-18: 71-83  #D98E1F on #0B0C14 bold
+18: 56-71  #FFC23D on #0B0C14
+18: 75-79  #9C9A97 on #0B0C14
 19: 20-20  #646365 on #0B0C14
 19: 25-25  #646365 on #0B0C14
 19: 39-39  #646365 on #0B0C14
-19: 52-67  #FFC23D on #0B0C14
 20: 14-14  #646365 on #0B0C14
 20: 45-45  #9C9A97 on #0B0C14
-20: 52-67  #FFC23D on #0B0C14
 20:112-112 #646365 on #0B0C14
+21: 69-90  #D98E1F on #0B0C14 bold
+21: 95-95  #9C9A97 on #0B0C14
+21:100-100 #646365 on #0B0C14
 21:140-140 #646365 on #0B0C14
 22: 23-23  #646365 on #0B0C14
 22: 40-40  #646365 on #0B0C14
 22:151-151 #646365 on #0B0C14
 22:152-152 #9C9A97 on #0B0C14
 23: 29-29  #646365 on #0B0C14
-23: 59-101 #9C9A97 on #0B0C14
-23:104-104 #9C9A97 on #0B0C14
+23: 42-117 #646365 on #0B0C14
 24: 34-34  #646365 on #0B0C14
+24: 42-42  #646365 on #0B0C14
+24: 44-109 #D98E1F on #0B0C14 bold
+24:117-117 #646365 on #0B0C14
 25:  8-8   #9C9A97 on #0B0C14
 25: 11-11  #646365 on #0B0C14
-25: 42-117 #646365 on #0B0C14
+25: 42-42  #646365 on #0B0C14
+25:117-117 #646365 on #0B0C14
 25:121-121 #9C9A97 on #0B0C14
 25:138-138 #646365 on #0B0C14
 25:149-149 #646365 on #0B0C14
 26: 37-37  #646365 on #0B0C14
 26: 42-42  #646365 on #0B0C14
-26: 44-109 #D98E1F on #0B0C14 bold
 26:117-117 #646365 on #0B0C14
 27: 42-42  #646365 on #0B0C14
 27:117-117 #646365 on #0B0C14
@@ -186,29 +189,31 @@ expression: "screen(&draw(&script.app, width, height))"
 28:117-117 #646365 on #0B0C14
 28:132-132 #646365 on #0B0C14
 29: 42-42  #646365 on #0B0C14
+29: 44-44  #FFC23D on #0B0C14 bold
+29: 45-57  #9C9A97 on #0B0C14
+29: 58-62  #FFC23D on #0B0C14 bold
+29: 63-80  #9C9A97 on #0B0C14
+29: 81-81  #FFC23D on #0B0C14 bold
+29: 82-86  #9C9A97 on #0B0C14
 29:117-117 #646365 on #0B0C14
 30: 19-19  #9C9A97 on #0B0C14
-30: 42-42  #646365 on #0B0C14
-30:117-117 #646365 on #0B0C14
+30: 42-117 #646365 on #0B0C14
 30:133-133 #9C9A97 on #0B0C14
 30:143-143 #9C9A97 on #0B0C14
 30:153-153 #646365 on #0B0C14
 30:156-156 #646365 on #0B0C14
 31: 34-34  #646365 on #0B0C14
 31: 40-40  #646365 on #0B0C14
-31: 42-42  #646365 on #0B0C14
-31: 44-44  #FFC23D on #0B0C14 bold
-31: 45-57  #9C9A97 on #0B0C14
-31: 58-62  #FFC23D on #0B0C14 bold
-31: 63-80  #9C9A97 on #0B0C14
-31: 81-81  #FFC23D on #0B0C14 bold
-31: 82-86  #9C9A97 on #0B0C14
-31:117-117 #646365 on #0B0C14
 31:123-123 #9C9A97 on #0B0C14
 32: 17-17  #646365 on #0B0C14
-32: 42-117 #646365 on #0B0C14
+32: 56-56  #9C9A97 on #0B0C14
+32: 60-60  #646365 on #0B0C14
+32:100-100 #646365 on #0B0C14
 32:133-133 #646365 on #0B0C14
 32:157-157 #646365 on #0B0C14
+33: 68-68  #9C9A97 on #0B0C14
+33: 97-97  #646365 on #0B0C14
+33:118-118 #9C9A97 on #0B0C14
 33:125-125 #646365 on #0B0C14
 33:138-138 #646365 on #0B0C14
 33:149-149 #9C9A97 on #0B0C14

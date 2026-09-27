@@ -9,6 +9,7 @@ pub mod cards;
 pub mod chrome;
 pub mod history;
 pub mod json;
+pub mod lockup;
 pub mod log;
 pub mod opening;
 pub mod overlays;

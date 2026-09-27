@@ -15,27 +15,27 @@ expression: "screen(&draw(&script.app, width, height))"
                                                                                                        •                                           •
        *            •          •                                                                                 *        *·   ∙
                   ∙      •                                                                                         •                                    •
-                                                       ▄▄██████▄▄                                                     ∙ •                                    ·
-    ·   ∙                        •   *               ▄████████████▄                                                                     ∙
-     •                               ·              ▄████              SOLAR                                                    •                    •
-  ·                          ·∙                     ████████████████   The central API of the Constellation                                      •    •
-                                                    ████████████████   NIPS-CERN                                                    *
-                 ∙                                             ████▀   not connected
-                    ∙    *             ·             ▀████████████▀
-              *                              •         ▀▀██████▀▀                                               ∙
-                                                                                                                                            ·
+                                                    •                                                                 ∙ •                                    ·
+    ·   ∙                        •   *                                                                                                  ∙
+     •                               ·                     ▄▄██  ██▄▄      ZENITH                                               •                    •
+  ·                          ·∙                          ▄█████  █████▄    The terminal of Constellation                                         •    •
+                                                        ▄██████████████▄   NIPS-CERN                       ·                        *
+                 ∙                                      ████████████████   0.1.0
+                    ∙    *             ·
+              *                              •                                                                  ∙
+                                                                     Not connected to SOLAR    *    *                                       ·
                        *                •                                                                                                              *•
-                             •                             ZENITH 0.1.0, the terminal of Constellation  ∙
-                                  ∙
-        ·  *                              ┌──────────────────────────────────────────────────────────────────────────┐   ·                ·          *
-                                     ·    │ ZENITH could not find solar on the PATH, which has 23 directories.       │
-                                          │ Put the folder that holds solar on the PATH, SOLAR's target/release when │                           *
-                   ∙                      │ it was built from source, or give the path with --solar <path> or the    │              *
-                                          │ variable ZENITH_SOLAR.                                                   │
-                   ·                      │                                                                          │               •         •         ·  ∙
-                                  •     · │ r try again   Enter go to the tabs   q quit                              │     •
-                 *                        └──────────────────────────────────────────────────────────────────────────┘               ·                       *
-                                                                                                                             ∙            ·          •
+                             •            ┌──────────────────────────────────────────────────────────────────────────┐
+                                  ∙       │ ZENITH could not find solar on the PATH, which has 23 directories.       │
+        ·  *                              │ Put the folder that holds solar on the PATH, SOLAR's target/release when │   ·                ·          *
+                                     ·    │ it was built from source, or give the path with --solar <path> or the    │
+                                          │ variable ZENITH_SOLAR.                                                   │                           *
+                   ∙                      │                                                                          │              *
+                                          │ r try again   Enter go to the tabs   q quit                              │
+                   ·                      └──────────────────────────────────────────────────────────────────────────┘               •         •         ·  ∙
+                                  •     ·                                                                                  •
+                 *                                      ∙   •                                       ∙                                ·                       *
+                                                                    ·                            ·                    •      ∙            ·          •
                                         ∙ •               ·            •                                             ∙          ·
                      •                    •                            •                                                           ∙
                                                ∙·                      ∙                                                           *                       •
@@ -123,7 +123,7 @@ expression: "screen(&draw(&script.app, width, height))"
 12: 25-25  #868482 on #F5F1E8
 12:115-115 #555355 on #F5F1E8
 12:152-152 #868482 on #F5F1E8
-13: 52-67  #B35A00 on #F5F1E8
+13: 52-52  #555355 on #F5F1E8
 13:118-118 #555355 on #F5F1E8
 13:120-120 #868482 on #F5F1E8
 13:157-157 #868482 on #F5F1E8
@@ -131,52 +131,55 @@ expression: "screen(&draw(&script.app, width, height))"
 14:  8-8   #868482 on #F5F1E8
 14: 33-33  #555355 on #F5F1E8
 14: 37-37  #868482 on #F5F1E8
-14: 52-67  #B35A00 on #F5F1E8
 14:136-136 #868482 on #F5F1E8
 15:  5-5   #868482 on #F5F1E8
 15: 37-37  #868482 on #F5F1E8
-15: 52-67  #B35A00 on #F5F1E8
-15: 71-75  #8C4907 on #F5F1E8 bold
+15: 56-71  #B35A00 on #F5F1E8
+15: 75-80  #8C4907 on #F5F1E8 bold
 15:128-128 #555355 on #F5F1E8
 15:149-149 #555355 on #F5F1E8
 16:  2-2   #555355 on #F5F1E8
 16: 29-29  #868482 on #F5F1E8
 16: 30-30  #555355 on #F5F1E8
-16: 52-67  #B35A00 on #F5F1E8
+16: 56-71  #B35A00 on #F5F1E8
 16:145-145 #868482 on #F5F1E8
 16:150-150 #868482 on #F5F1E8
-17: 52-67  #B35A00 on #F5F1E8
-17: 71-79  #555355 on #F5F1E8
+17: 56-71  #B35A00 on #F5F1E8
+17: 75-83  #555355 on #F5F1E8
+17:107-107 #555355 on #F5F1E8
 17:132-132 #868482 on #F5F1E8
 18: 17-17  #868482 on #F5F1E8
-18: 52-67  #B35A00 on #F5F1E8
-18: 71-83  #8C4907 on #F5F1E8 bold
+18: 56-71  #B35A00 on #F5F1E8
+18: 75-79  #555355 on #F5F1E8
 19: 20-20  #868482 on #F5F1E8
 19: 25-25  #868482 on #F5F1E8
 19: 39-39  #868482 on #F5F1E8
-19: 52-67  #B35A00 on #F5F1E8
 20: 14-14  #868482 on #F5F1E8
 20: 45-45  #555355 on #F5F1E8
-20: 52-67  #B35A00 on #F5F1E8
 20:112-112 #868482 on #F5F1E8
+21: 69-90  #8C4907 on #F5F1E8 bold
+21: 95-95  #555355 on #F5F1E8
+21:100-100 #868482 on #F5F1E8
 21:140-140 #868482 on #F5F1E8
 22: 23-23  #868482 on #F5F1E8
 22: 40-40  #868482 on #F5F1E8
 22:151-151 #868482 on #F5F1E8
 22:152-152 #555355 on #F5F1E8
 23: 29-29  #868482 on #F5F1E8
-23: 59-101 #555355 on #F5F1E8
-23:104-104 #555355 on #F5F1E8
+23: 42-117 #868482 on #F5F1E8
 24: 34-34  #868482 on #F5F1E8
+24: 42-42  #868482 on #F5F1E8
+24: 44-109 #8C4907 on #F5F1E8 bold
+24:117-117 #868482 on #F5F1E8
 25:  8-8   #555355 on #F5F1E8
 25: 11-11  #868482 on #F5F1E8
-25: 42-117 #868482 on #F5F1E8
+25: 42-42  #868482 on #F5F1E8
+25:117-117 #868482 on #F5F1E8
 25:121-121 #555355 on #F5F1E8
 25:138-138 #868482 on #F5F1E8
 25:149-149 #868482 on #F5F1E8
 26: 37-37  #868482 on #F5F1E8
 26: 42-42  #868482 on #F5F1E8
-26: 44-109 #8C4907 on #F5F1E8 bold
 26:117-117 #868482 on #F5F1E8
 27: 42-42  #868482 on #F5F1E8
 27:117-117 #868482 on #F5F1E8
@@ -186,29 +189,31 @@ expression: "screen(&draw(&script.app, width, height))"
 28:117-117 #868482 on #F5F1E8
 28:132-132 #868482 on #F5F1E8
 29: 42-42  #868482 on #F5F1E8
+29: 44-44  #8C4907 on #F5F1E8 bold
+29: 45-57  #555355 on #F5F1E8
+29: 58-62  #8C4907 on #F5F1E8 bold
+29: 63-80  #555355 on #F5F1E8
+29: 81-81  #8C4907 on #F5F1E8 bold
+29: 82-86  #555355 on #F5F1E8
 29:117-117 #868482 on #F5F1E8
 30: 19-19  #555355 on #F5F1E8
-30: 42-42  #868482 on #F5F1E8
-30:117-117 #868482 on #F5F1E8
+30: 42-117 #868482 on #F5F1E8
 30:133-133 #555355 on #F5F1E8
 30:143-143 #555355 on #F5F1E8
 30:153-153 #868482 on #F5F1E8
 30:156-156 #868482 on #F5F1E8
 31: 34-34  #868482 on #F5F1E8
 31: 40-40  #868482 on #F5F1E8
-31: 42-42  #868482 on #F5F1E8
-31: 44-44  #8C4907 on #F5F1E8 bold
-31: 45-57  #555355 on #F5F1E8
-31: 58-62  #8C4907 on #F5F1E8 bold
-31: 63-80  #555355 on #F5F1E8
-31: 81-81  #8C4907 on #F5F1E8 bold
-31: 82-86  #555355 on #F5F1E8
-31:117-117 #868482 on #F5F1E8
 31:123-123 #555355 on #F5F1E8
 32: 17-17  #868482 on #F5F1E8
-32: 42-117 #868482 on #F5F1E8
+32: 56-56  #555355 on #F5F1E8
+32: 60-60  #868482 on #F5F1E8
+32:100-100 #868482 on #F5F1E8
 32:133-133 #868482 on #F5F1E8
 32:157-157 #868482 on #F5F1E8
+33: 68-68  #555355 on #F5F1E8
+33: 97-97  #868482 on #F5F1E8
+33:118-118 #555355 on #F5F1E8
 33:125-125 #868482 on #F5F1E8
 33:138-138 #868482 on #F5F1E8
 33:149-149 #555355 on #F5F1E8
