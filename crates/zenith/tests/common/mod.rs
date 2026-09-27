@@ -289,3 +289,115 @@ pub(crate) fn characters(buffer: &Buffer) -> String {
         .unwrap_or_default()
         .to_owned()
 }
+
+/// One thing a person does in the session the README shows.
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum Act {
+    /// A line typed and run.
+    Line(&'static str),
+    /// `Tab`, to the next tab.
+    NextTab,
+    /// The APIs tab's selection moved to this API, from the top.
+    Select(&'static str),
+    /// A plain key.
+    Key(char),
+}
+
+/// The session the README shows, recorded against a real SOLAR by
+/// `against_solar::record_the_session_the_readme_shows` and replayed by the screens.
+pub(crate) const README_SCENARIO: &[Act] = &[
+    Act::Line("/list"),
+    Act::Line("/ping hello"),
+    Act::Line("/call system.info"),
+    Act::Line("/describe solar.pign"),
+    Act::NextTab,
+    Act::Select("solar.ping"),
+    Act::Key('1'),
+    Act::Key('2'),
+];
+
+/// Where the recording lives.
+pub(crate) const README_RECORDING: &str = "tests/fixtures/readme-session.json";
+
+/// What a real SOLAR answered to the README's session, in the order of the calls.
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
+pub(crate) struct Recording {
+    /// When the session was recorded, in seconds since the epoch.
+    pub(crate) recorded_at: u64,
+    /// The SOLAR that answered.
+    pub(crate) solar_version: String,
+    /// Each call's response line and its round trip, by call number, the handshake first.
+    pub(crate) calls: Vec<RecordedCall>,
+    /// SOLAR's standard error over the whole session, as it wrote it.
+    pub(crate) stderr: Vec<String>,
+}
+
+/// One call of the recording.
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
+pub(crate) struct RecordedCall {
+    /// The response line, exactly as SOLAR wrote it.
+    pub(crate) response: String,
+    /// The round trip ZENITH measured, in microseconds.
+    pub(crate) round_trip_us: u64,
+}
+
+impl Script {
+    /// Answers every call that is waiting, in order, from the recording.
+    pub(crate) fn answer_from(&mut self, recording: &Recording, next: &mut usize) {
+        while self.app.link.tracker.waiting().next().is_some() {
+            let Some(call) = recording.calls.get(*next) else {
+                panic!("the recording has no answer for call {}", *next + 1);
+            };
+            *next += 1;
+            self.later(Duration::from_micros(call.round_trip_us));
+            self.line(&call.response);
+        }
+    }
+
+    /// Does one act of the README's session.
+    pub(crate) fn act(&mut self, act: Act) {
+        match act {
+            Act::Line(line) => self.run(line),
+            Act::NextTab => self.key(KeyCode::Tab, KeyModifiers::NONE),
+            Act::Select(name) => {
+                self.key(KeyCode::Char('g'), KeyModifiers::NONE);
+                let position = self
+                    .app
+                    .catalogue()
+                    .and_then(|catalogue| catalogue.apis.iter().position(|api| api.name == name))
+                    .expect("the API is in the manifest");
+                for _ in 0..position {
+                    self.key(KeyCode::Down, KeyModifiers::NONE);
+                }
+            }
+            Act::Key(character) => self.key(KeyCode::Char(character), KeyModifiers::NONE),
+        }
+    }
+
+    /// The README's session, replayed from the recording up to `acts` acts, with SOLAR's
+    /// standard error, at the moment and with the timings of the recording.
+    pub(crate) fn replayed(options: Options, acts: usize) -> Self {
+        let text = std::fs::read_to_string(
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(README_RECORDING),
+        )
+        .expect("the README's session is recorded; see README_SCENARIO");
+        let recording: Recording = serde_json::from_str(&text).unwrap();
+        let now = Instant::now();
+        let wall = SystemTime::UNIX_EPOCH + Duration::from_secs(recording.recorded_at);
+        let (app, effects) = App::new(options, now, wall);
+        let mut script = Self { app, now, effects };
+        script.started();
+        let mut next = 0;
+        script.answer_from(&recording, &mut next);
+        for act in README_SCENARIO.iter().take(acts) {
+            script.later(Duration::from_millis(900));
+            script.act(*act);
+            script.answer_from(&recording, &mut next);
+        }
+        for line in &recording.stderr {
+            script.stderr(line);
+        }
+        script.effects.clear();
+        script
+    }
+}

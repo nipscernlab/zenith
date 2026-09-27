@@ -376,3 +376,50 @@ fn nothing_solar_sends_can_put_an_escape_sequence_on_the_screen() {
         }
     }
 }
+
+/// The screens of the README: the session recorded against a real SOLAR, replayed at the
+/// moment and with the timings it was recorded with. `cargo xtask screenshots` draws the
+/// README's pictures from these snapshots, and CI checks that they are the same.
+#[test]
+fn the_screens_the_readme_shows() {
+    let night = || options(ThemeName::Night, Depth::TrueColor, Charset::Unicode);
+    let all = common::README_SCENARIO.len();
+    let mut scenes: Vec<(&str, Script)> = Vec::new();
+    scenes.push((
+        "readme_session__100x30__night",
+        Script::replayed(night(), 4),
+    ));
+    scenes.push((
+        "readme_session__100x30__light",
+        Script::replayed(
+            options(ThemeName::Light, Depth::TrueColor, Charset::Unicode),
+            4,
+        ),
+    ));
+    scenes.push(("readme_apis__100x30__night", Script::replayed(night(), all)));
+    let mut log = Script::replayed(night(), all);
+    log.key(KeyCode::Tab, KeyModifiers::NONE);
+    log.key(KeyCode::Char('t'), KeyModifiers::NONE);
+    scenes.push(("readme_log__100x30__night", log));
+    let mut history = Script::replayed(night(), all);
+    history.key(KeyCode::Tab, KeyModifiers::NONE);
+    history.key(KeyCode::Tab, KeyModifiers::NONE);
+    history.key(KeyCode::Up, KeyModifiers::NONE);
+    history.key(KeyCode::Up, KeyModifiers::NONE);
+    scenes.push(("readme_history__100x30__night", history));
+    let mut menu = Script::replayed(night(), 4);
+    menu.type_text("/call solar.describe {");
+    scenes.push(("readme_menu__100x30__night", menu));
+    let mut opening = Script::with(Options {
+        opening: true,
+        ..options(ThemeName::HighContrast, Depth::TrueColor, Charset::Unicode)
+    });
+    for _ in 0..3 {
+        opening.later(Duration::from_millis(90));
+        opening.feed(Incoming::Tick);
+    }
+    scenes.push(("readme_opening__100x30__high-contrast", opening));
+    for (name, script) in scenes {
+        insta::assert_snapshot!(name, screen(&draw(&script.app, 100, 30)));
+    }
+}

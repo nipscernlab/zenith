@@ -135,7 +135,6 @@ impl Driven {
     fn screen(&self) -> String {
         common::characters(self.runtime.terminal().backend().buffer())
     }
-
 }
 
 /// Whether no call is waiting.
@@ -161,13 +160,20 @@ fn every_api_of_the_installed_solar_is_usable_from_zenith_by_its_keys() {
             driven.key(KeyCode::Down, KeyModifiers::NONE);
         }
         let screen = driven.screen();
-        assert!(screen.contains(&api.name), "{} is not on the APIs tab:\n{screen}", api.name);
+        assert!(
+            screen.contains(&api.name),
+            "{} is not on the APIs tab:\n{screen}",
+            api.name
+        );
         for (index, _) in api.examples.iter().enumerate().take(9) {
             let digit = char::from_digit(u32::try_from(index + 1).unwrap(), 10).unwrap();
             driven.key(KeyCode::Char(digit), KeyModifiers::NONE);
             let key = (api.name.clone(), index);
             driven.until(&format!("example {} of {}", index + 1, api.name), |app| {
-                !matches!(app.apis.results.get(&key), None | Some(ExampleResult::Running))
+                !matches!(
+                    app.apis.results.get(&key),
+                    None | Some(ExampleResult::Running)
+                )
             });
             match driven.app().apis.results.get(&key) {
                 Some(ExampleResult::Matches { .. }) => ran += 1,
@@ -185,7 +191,11 @@ fn every_api_of_the_installed_solar_is_usable_from_zenith_by_its_keys() {
     // Every call the walk made kept the contract.
     for (_, record) in driven.app().history.calls.iter() {
         let outcome = record.outcome.as_ref().unwrap();
-        assert_eq!(outcome.violations, 0, "{:?} broke the contract", record.method);
+        assert_eq!(
+            outcome.violations, 0,
+            "{:?} broke the contract",
+            record.method
+        );
     }
 }
 
@@ -225,14 +235,21 @@ fn the_commands_of_the_brief_all_work_against_the_installed_solar() {
         driven.run(line);
         driven.until(line, idle);
         let (_, record) = driven.app().history.calls.last().unwrap();
-        assert_eq!(record.outcome.as_ref().unwrap().summary, Summary::Ok, "{line}");
+        assert_eq!(
+            record.outcome.as_ref().unwrap().summary,
+            Summary::Ok,
+            "{line}"
+        );
     }
     driven.run("/theme light");
     driven.run("/help");
     let screen = driven.screen();
     assert!(screen.contains("/describe <api>"), "{screen}");
     driven.run(r#"/call solar.ping {"mesage": "x"}"#);
-    assert!(driven.app().session.band.is_some(), "the unknown parameter was not caught");
+    assert!(
+        driven.app().session.band.is_some(),
+        "the unknown parameter was not caught"
+    );
     driven.key(KeyCode::Char('u'), KeyModifiers::CONTROL);
     driven.run("/quit");
     assert!(driven.app().quitting);
@@ -271,15 +288,25 @@ fn a_report_and_an_export_are_written_as_files_that_hold_the_session() {
     driven.run(&format!("/report {}", report.display()));
     driven.until("the report", |_| report.exists());
     driven.until("the report to be complete", |app| {
-        app.flash.as_ref().is_some_and(|(_, text)| text.starts_with("Wrote the report"))
+        app.flash
+            .as_ref()
+            .is_some_and(|(_, text)| text.starts_with("Wrote the report"))
     });
     let text = std::fs::read_to_string(&report).unwrap();
     let kinds: Vec<String> = text
         .lines()
-        .map(|line| serde_json::from_str::<serde_json::Value>(line).unwrap()["kind"].as_str().unwrap().to_owned())
+        .map(|line| {
+            serde_json::from_str::<serde_json::Value>(line).unwrap()["kind"]
+                .as_str()
+                .unwrap()
+                .to_owned()
+        })
         .collect();
     for kind in ["header", "zenith", "solar", "system", "dropped", "call"] {
-        assert!(kinds.iter().any(|k| k == kind), "the report has no {kind}: {kinds:?}");
+        assert!(
+            kinds.iter().any(|k| k == kind),
+            "the report has no {kind}: {kinds:?}"
+        );
     }
     assert!(text.contains("for the report"));
     let export = directory.join("history.ndjson");
@@ -288,7 +315,9 @@ fn a_report_and_an_export_are_written_as_files_that_hold_the_session() {
     // A file that exists is never overwritten.
     driven.run(&format!("/export {}", export.display()));
     driven.until("the refusal", |app| {
-        app.flash.as_ref().is_some_and(|(_, text)| text.starts_with("Could not write"))
+        app.flash
+            .as_ref()
+            .is_some_and(|(_, text)| text.starts_with("Could not write"))
     });
     let _ = std::fs::remove_dir_all(&directory);
 }
@@ -339,7 +368,12 @@ fn ctrl_c_cancels_a_call_in_flight_when_the_manifest_offers_solar_cancel() {
         .calls
         .iter()
         .skip(2)
-        .map(|(_, record)| (record.method.clone(), record.outcome.clone().unwrap().summary))
+        .map(|(_, record)| {
+            (
+                record.method.clone(),
+                record.outcome.clone().unwrap().summary,
+            )
+        })
         .collect();
     assert_eq!(summaries.len(), 2, "{summaries:?}");
     assert!(summaries.iter().any(|(method, summary)| {
@@ -362,7 +396,10 @@ fn a_solar_that_exits_at_once_is_reported_with_its_code_and_its_last_words() {
     });
     let failure = driven.app().link.failure.clone().unwrap();
     assert!(
-        failure.last_words().iter().any(|line| line.contains("exiting with 3")),
+        failure
+            .last_words()
+            .iter()
+            .any(|line| line.contains("exiting with 3")),
         "{failure:?}"
     );
 }
@@ -372,7 +409,10 @@ fn a_solar_that_speaks_another_protocol_is_refused_with_both_versions() {
     let mut driven = Driven::start(double(), &[("ZENITH_DOUBLE", "protocol:solar/2")]);
     driven.until("the refusal", |app| app.link.phase == Phase::Down);
     let what = driven.app().link.failure.as_ref().unwrap().what();
-    assert!(what.contains("speaks solar/2") && what.contains("speaks solar/1"), "{what}");
+    assert!(
+        what.contains("speaks solar/2") && what.contains("speaks solar/1"),
+        "{what}"
+    );
 }
 
 #[test]
@@ -381,4 +421,92 @@ fn a_solar_that_is_not_there_is_reported_with_the_path_that_was_given() {
     driven.until("the failure", |app| app.link.phase == Phase::Down);
     let what = driven.app().link.failure.as_ref().unwrap().what();
     assert!(what.contains("does not exist"), "{what}");
+}
+
+/// Records the session the README's screenshots show, against the installed SOLAR, when
+/// `ZENITH_RECORD_README` is set; otherwise does nothing. The screens replay the recording,
+/// so the screenshots are what a real SOLAR answered, drawn by ZENITH's own code.
+#[test]
+fn record_the_session_the_readme_shows() {
+    if std::env::var_os("ZENITH_RECORD_README").is_none() {
+        return;
+    }
+    let Some(solar) = solar_under_test() else {
+        return;
+    };
+    let mut driven = Driven::connected(solar);
+    let recorded_at = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_secs();
+    for act in common::README_SCENARIO {
+        match act {
+            common::Act::Line(line) => driven.run(line),
+            common::Act::NextTab => driven.key(KeyCode::Tab, KeyModifiers::NONE),
+            common::Act::Select(name) => {
+                driven.key(KeyCode::Char('g'), KeyModifiers::NONE);
+                let position = driven
+                    .app()
+                    .catalogue()
+                    .and_then(|catalogue| catalogue.apis.iter().position(|api| api.name == *name))
+                    .unwrap();
+                for _ in 0..position {
+                    driven.key(KeyCode::Down, KeyModifiers::NONE);
+                }
+            }
+            common::Act::Key(character) => {
+                driven.key(KeyCode::Char(*character), KeyModifiers::NONE)
+            }
+        }
+        driven.until("the calls of the act", idle);
+    }
+    driven.runtime.step(Duration::from_millis(200)).unwrap();
+    let app = driven.app();
+    let calls = app
+        .history
+        .calls
+        .iter()
+        .map(|(_, record)| {
+            let outcome = record.outcome.as_ref().unwrap();
+            common::RecordedCall {
+                response: outcome.line.clone().unwrap(),
+                round_trip_us: u64::try_from(record.round_trip().unwrap().as_micros()).unwrap(),
+            }
+        })
+        .collect();
+    let stderr = app
+        .log
+        .entries
+        .iter()
+        .map(|(_, entry)| match entry.level {
+            zenith::app::log::Level::Raw => entry.message.clone(),
+            zenith::app::log::Level::Known(level) => serde_json::json!({
+                "duration_us": entry.duration_us,
+                "level": level.name(),
+                "message": entry.message,
+                "method": entry.method,
+                "request_id": entry.request_id.as_ref().map(|id| id.parse::<u64>().map_or_else(|_| serde_json::json!(id), |number| serde_json::json!(number))),
+                "time": entry.time,
+            })
+            .to_string(),
+        })
+        .collect();
+    let recording = common::Recording {
+        recorded_at,
+        solar_version: app.link.info.as_ref().unwrap().solar_version.clone(),
+        calls,
+        stderr,
+    };
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(common::README_RECORDING);
+    std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+    std::fs::write(
+        &path,
+        serde_json::to_string_pretty(&recording).unwrap() + "\n",
+    )
+    .unwrap();
+    eprintln!(
+        "recorded {} calls to {}",
+        recording.calls.len(),
+        path.display()
+    );
 }

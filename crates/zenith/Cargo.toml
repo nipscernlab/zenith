@@ -25,6 +25,7 @@ zenith-client.workspace = true
 [dev-dependencies]
 insta.workspace = true
 proptest.workspace = true
+serde.workspace = true
 
 [lints]
 workspace = true

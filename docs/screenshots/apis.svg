@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="872" height="542" viewBox="0 0 872.0 542.0" font-family="'Cascadia Mono', Consolas, 'DejaVu Sans Mono', Menlo, monospace" font-size="14">
+<rect width="100%" height="100%" rx="10" fill="#0B0C14"/>
+<text x="16.0 24.4 32.8 41.2 49.6 58.0 66.4 74.8" y="29.0" xml:space="preserve" fill="#FFC23D" font-weight="700"> ZENITH </text>
+<text x="100.0 108.4 116.8 125.2 133.6 142.0 150.4 158.8 167.2" y="29.0" xml:space="preserve" fill="#9C9A97">1 Session</text>
+<text x="192.4 200.8 209.2 217.6 226.0 234.4" y="29.0" xml:space="preserve" fill="#FFC23D" font-weight="700" text-decoration="underline">2 APIs</text>
+<text x="259.6 268.0 276.4 284.8 293.2" y="29.0" xml:space="preserve" fill="#9C9A97">3 Log</text>
+<text x="318.4 326.8 335.2 343.6 352.0 360.4 368.8 377.2 385.6" y="29.0" xml:space="preserve" fill="#9C9A97">4 History</text>
+<text x="394.0 402.4 410.8 419.2 427.6 436.0 444.4 452.8 461.2 469.6 478.0 486.4 494.8 503.2 511.6 520.0 528.4 536.8 545.2 553.6 562.0 570.4 578.8 587.2 595.6 604.0 612.4 620.8 629.2 637.6 646.0 654.4 662.8 671.2 679.6 688.0 696.4 704.8 713.2 721.6 730.0 738.4 746.8 755.2 763.6 772.0 780.4 788.8" y="29.0" xml:space="preserve" fill="#646365">                ·     ·                         </text>
+<text x="797.2" y="29.0" xml:space="preserve" fill="#FFC23D" font-weight="700">?</text>
+<text x="805.6 814.0 822.4 830.8 839.2 847.6" y="29.0" xml:space="preserve" fill="#9C9A97"> keys </text>
+<text x="16.0 24.4 32.8 41.2 49.6 58.0 66.4 74.8 83.2 91.6 100.0 108.4 116.8 125.2 133.6 142.0 150.4 158.8 167.2 175.6 184.0 192.4 200.8 209.2" y="46.0" xml:space="preserve" fill="#9C9A97"> 6 APIs · manifest 2.0.0</text>
+<text x="293.2" y="46.0" xml:space="preserve" fill="#646365">│</text>
+<text x="310.0 318.4 326.8 335.2 343.6 352.0 360.4 368.8 377.2 385.6" y="46.0" xml:space="preserve" fill="#FFC23D" font-weight="700">solar.ping</text>
+<text x="394.0 402.4 410.8 419.2 427.6 436.0" y="46.0" xml:space="preserve" fill="#F5F1E8"> 1.0.0</text>
+<text x="444.4 452.8 461.2 469.6 478.0 486.4 494.8 503.2 511.6 520.0 528.4 536.8 545.2 553.6 562.0 570.4 578.8 587.2 595.6 604.0 612.4 620.8 629.2 637.6 646.0 654.4 662.8 671.2 679.6" y="46.0" xml:space="preserve" fill="#9C9A97"> · experimental · since 0.1.0</text>
+<text x="41.2 49.6 58.0 66.4 74.8 83.2 91.6 100.0 108.4 116.8 125.2 133.6 142.0 150.4 158.8 167.2 175.6 184.0 192.4 200.8 209.2" y="63.0" xml:space="preserve" fill="#F5F1E8">solar.cancel         </text>
+<text x="217.6 226.0 234.4 242.8 251.2 259.6 268.0 276.4 284.8" y="63.0" xml:space="preserve" fill="#9C9A97"> 1.0.0   </text>
+<text x="293.2" y="63.0" xml:space="preserve" fill="#646365">│</text>
+<text x="301.6 310.0 318.4 326.8 335.2 343.6 352.0 360.4 368.8 377.2 385.6 394.0 402.4 410.8 419.2 427.6 436.0 444.4 452.8 461.2 469.6 478.0 486.4 494.8 503.2 511.6 520.0 528.4 536.8 545.2 553.6 562.0 570.4 578.8 587.2 595.6 604.0 612.4 620.8 629.2 637.6 646.0 654.4 662.8 671.2 679.6 688.0 696.4 704.8 713.2 721.6 730.0 738.4 746.8 755.2 763.6 772.0 780.4 788.8 797.2 805.6 814.0 822.4 830.8 839.2 847.6" y="63.0" xml:space="preserve" fill="#F5F1E8"> Answers immediately, to prove SOLAR is there                     </text>
+<text x="41.2 49.6 58.0 66.4 74.8 83.2 91.6 100.0 108.4 116.8 125.2 133.6 142.0 150.4 158.8 167.2 175.6 184.0 192.4 200.8 209.2" y="80.0" xml:space="preserve" fill="#F5F1E8">solar.describe       </text>
+<text x="217.6 226.0 234.4 242.8 251.2 259.6 268.0 276.4 284.8" y="80.0" xml:space="preserve" fill="#9C9A97"> 1.0.0   </text>
+<text x="293.2" y="80.0" xml:space="preserve" fill="#646365">│</text>
+<text x="310.0 318.4 326.8 335.2 343.6 352.0 360.4 368.8 377.2 385.6 394.0 402.4 410.8" y="80.0" xml:space="preserve" fill="#9C9A97">side effects </text>
+<text x="419.2 427.6 436.0 444.4" y="80.0" xml:space="preserve" fill="#F5F1E8">none</text>
+<text x="452.8 461.2 469.6 478.0 486.4 494.8 503.2 511.6 520.0 528.4 536.8 545.2 553.6 562.0 570.4 578.8 587.2 595.6 604.0 612.4 620.8 629.2 637.6 646.0 654.4 662.8 671.2 679.6 688.0 696.4" y="80.0" xml:space="preserve" fill="#9C9A97"> · idempotent · budget 1000 ms</text>
+<text x="41.2 49.6 58.0 66.4 74.8 83.2 91.6 100.0 108.4 116.8 125.2 133.6 142.0 150.4 158.8 167.2 175.6 184.0 192.4 200.8 209.2" y="97.0" xml:space="preserve" fill="#F5F1E8">solar.manifest       </text>
+<text x="217.6 226.0 234.4 242.8 251.2 259.6 268.0 276.4 284.8" y="97.0" xml:space="preserve" fill="#9C9A97"> 1.1.0   </text>
+<text x="293.2" y="97.0" xml:space="preserve" fill="#646365">│</text>
+<text x="310.0 318.4 326.8 335.2 343.6 352.0 360.4 368.8 377.2 385.6 394.0 402.4 410.8 419.2 427.6 436.0 444.4 452.8 461.2 469.6 478.0" y="97.0" xml:space="preserve" fill="#9C9A97">responses up to 8 MiB</text>
+<text x="16.0 24.4 32.8" y="114.0" xml:space="preserve" fill="#FFC23D"> › </text>
+<text x="41.2 49.6 58.0 66.4 74.8 83.2 91.6 100.0 108.4 116.8 125.2 133.6 142.0 150.4 158.8 167.2 175.6 184.0 192.4 200.8 209.2" y="114.0" xml:space="preserve" fill="#FFC23D" font-weight="700">solar.ping           </text>
+<text x="217.6 226.0 234.4 242.8 251.2 259.6 268.0 276.4 284.8" y="114.0" xml:space="preserve" fill="#9C9A97"> 1.0.0   </text>
+<text x="293.2" y="114.0" xml:space="preserve" fill="#646365">│</text>
+<text x="41.2 49.6 58.0 66.4 74.8 83.2 91.6 100.0 108.4 116.8 125.2 133.6 142.0 150.4 158.8 167.2 175.6 184.0 192.4 200.8 209.2" y="131.0" xml:space="preserve" fill="#F5F1E8">solar.version        </text>
+<text x="217.6 226.0 234.4 242.8 251.2 259.6 268.0 276.4 284.8" y="131.0" xml:space="preserve" fill="#9C9A97"> 1.0.0   </text>
+<text x="293.2" y="131.0" xml:space="preserve" fill="#646365">│</text>
+<text x="310.0 318.4 326.8 335.2 343.6 352.0 360.4 368.8 377.2 385.6" y="131.0" xml:space="preserve" fill="#FFC23D" font-weight="700">parameters</text>
+<text x="41.2 49.6 58.0 66.4 74.8 83.2 91.6 100.0 108.4 116.8 125.2 133.6 142.0 150.4 158.8 167.2 175.6 184.0 192.4 200.8 209.2" y="148.0" xml:space="preserve" fill="#F5F1E8">system.info          </text>
+<text x="217.6 226.0 234.4 242.8 251.2 259.6 268.0 276.4 284.8" y="148.0" xml:space="preserve" fill="#9C9A97"> 1.2.0   </text>
+<text x="293.2" y="148.0" xml:space="preserve" fill="#646365">│</text>
+<text x="326.8 335.2 343.6 352.0 360.4 368.8 377.2" y="148.0" xml:space="preserve" fill="#FFC23D">message</text>
+<text x="385.6 394.0 402.4 410.8 419.2 427.6 436.0 444.4 452.8 461.2 469.6 478.0 486.4 494.8 503.2 511.6" y="148.0" xml:space="preserve" fill="#F5F1E8">  string or null</text>
+<text x="520.0 528.4 536.8 545.2 553.6 562.0 570.4 578.8 587.2 595.6" y="148.0" xml:space="preserve" fill="#9C9A97">  optional</text>
+<text x="293.2" y="165.0" xml:space="preserve" fill="#646365">│</text>
+<text x="402.4 410.8 419.2 427.6 436.0 444.4 452.8 461.2 469.6 478.0 486.4 494.8 503.2 511.6 520.0 528.4 536.8 545.2 553.6 562.0 570.4 578.8 587.2 595.6 604.0 612.4 620.8 629.2 637.6 646.0 654.4 662.8 671.2 679.6 688.0 696.4 704.8 713.2 721.6 730.0 738.4 746.8 755.2 763.6 772.0 780.4 788.8 797.2" y="165.0" xml:space="preserve" fill="#9C9A97">Anything the caller wants back, to tell one ping</text>
+<text x="293.2" y="182.0" xml:space="preserve" fill="#646365">│</text>
+<text x="402.4 410.8 419.2 427.6 436.0 444.4 452.8 461.2 469.6 478.0 486.4 494.8 503.2" y="182.0" xml:space="preserve" fill="#9C9A97">from another.</text>
+<text x="293.2" y="199.0" xml:space="preserve" fill="#646365">│</text>
+<text x="310.0 318.4 326.8 335.2 343.6 352.0" y="199.0" xml:space="preserve" fill="#FFC23D" font-weight="700">errors</text>
+<text x="293.2" y="216.0" xml:space="preserve" fill="#646365">│</text>
+<text x="301.6 310.0 318.4 326.8 335.2 343.6 352.0 360.4 368.8 377.2 385.6 394.0 402.4 410.8 419.2 427.6 436.0 444.4 452.8 461.2 469.6 478.0 486.4 494.8 503.2 511.6 520.0 528.4 536.8 545.2 553.6 562.0" y="216.0" xml:space="preserve" fill="#9C9A97">   none beyond those of dispatch</text>
+<text x="293.2" y="233.0" xml:space="preserve" fill="#646365">│</text>
+<text x="310.0 318.4 326.8 335.2 343.6 352.0 360.4 368.8" y="233.0" xml:space="preserve" fill="#FFC23D" font-weight="700">examples</text>
+<text x="293.2" y="250.0" xml:space="preserve" fill="#646365">│</text>
+<text x="326.8" y="250.0" xml:space="preserve" fill="#FFC23D" font-weight="700">1</text>
+<text x="343.6 352.0 360.4 368.8 377.2 385.6 394.0 402.4 410.8 419.2 427.6 436.0 444.4 452.8" y="250.0" xml:space="preserve" fill="#FFC23D">bare          </text>
+<text x="461.2 469.6 478.0 486.4 494.8 503.2 511.6 520.0 528.4 536.8 545.2 553.6 562.0 570.4 578.8 587.2 595.6 604.0 612.4 620.8 629.2 637.6 646.0 654.4 662.8 671.2 679.6 688.0 696.4 704.8 713.2 721.6 730.0 738.4 746.8 755.2 763.6 772.0 780.4 788.8 797.2 805.6 814.0 822.4 830.8 839.2 847.6" y="250.0" xml:space="preserve" fill="#F5F1E8">  {}                                           </text>
+<text x="293.2" y="267.0" xml:space="preserve" fill="#646365">│</text>
+<text x="478.0 486.4 494.8 503.2 511.6 520.0 528.4 536.8 545.2 553.6 562.0 570.4 578.8 587.2 595.6 604.0 612.4 620.8 629.2 637.6 646.0 654.4 662.8 671.2 679.6 688.0 696.4 704.8 713.2 721.6 730.0 738.4 746.8 755.2 763.6 772.0 780.4 788.8 797.2 805.6 814.0 822.4 830.8" y="267.0" xml:space="preserve" fill="#9C9A97">A ping with no message at all · compared by</text>
+<text x="293.2" y="284.0" xml:space="preserve" fill="#646365">│</text>
+<text x="478.0 486.4 494.8 503.2 511.6" y="284.0" xml:space="preserve" fill="#9C9A97">exact</text>
+<text x="293.2" y="301.0" xml:space="preserve" fill="#646365">│</text>
+<text x="478.0 486.4 494.8 503.2 511.6 520.0 528.4 536.8 545.2 553.6 562.0 570.4 578.8 587.2 595.6 604.0 612.4 620.8 629.2 637.6 646.0 654.4 662.8 671.2 679.6 688.0 696.4 704.8 713.2" y="301.0" xml:space="preserve" fill="#FFC23D">matches the example · 0.65 ms</text>
+<text x="293.2" y="318.0" xml:space="preserve" fill="#646365">│</text>
+<text x="326.8" y="318.0" xml:space="preserve" fill="#FFC23D" font-weight="700">2</text>
+<text x="343.6 352.0 360.4 368.8 377.2 385.6 394.0 402.4 410.8 419.2 427.6 436.0 444.4 452.8" y="318.0" xml:space="preserve" fill="#FFC23D">with_a_message</text>
+<text x="461.2 469.6 478.0 486.4 494.8 503.2 511.6 520.0 528.4 536.8 545.2 553.6 562.0 570.4 578.8 587.2 595.6 604.0 612.4 620.8 629.2 637.6 646.0 654.4 662.8 671.2 679.6 688.0 696.4 704.8 713.2 721.6 730.0 738.4 746.8 755.2 763.6 772.0 780.4 788.8 797.2 805.6 814.0 822.4 830.8 839.2 847.6" y="318.0" xml:space="preserve" fill="#F5F1E8">  {&quot;message&quot;:&quot;hi&quot;}                             </text>
+<text x="293.2" y="335.0" xml:space="preserve" fill="#646365">│</text>
+<text x="478.0 486.4 494.8 503.2 511.6 520.0 528.4 536.8 545.2 553.6 562.0 570.4 578.8 587.2 595.6 604.0 612.4 620.8 629.2 637.6 646.0 654.4 662.8 671.2 679.6 688.0 696.4 704.8 713.2 721.6 730.0 738.4 746.8 755.2 763.6 772.0 780.4 788.8 797.2" y="335.0" xml:space="preserve" fill="#9C9A97">A ping that carries something to echo ·</text>
+<text x="293.2" y="352.0" xml:space="preserve" fill="#646365">│</text>
+<text x="478.0 486.4 494.8 503.2 511.6 520.0 528.4 536.8 545.2 553.6 562.0 570.4 578.8 587.2 595.6 604.0 612.4" y="352.0" xml:space="preserve" fill="#9C9A97">compared by exact</text>
+<text x="293.2" y="369.0" xml:space="preserve" fill="#646365">│</text>
+<text x="478.0 486.4 494.8 503.2 511.6 520.0 528.4 536.8 545.2 553.6 562.0 570.4 578.8 587.2 595.6 604.0 612.4 620.8 629.2 637.6 646.0 654.4 662.8 671.2 679.6 688.0 696.4 704.8 713.2" y="369.0" xml:space="preserve" fill="#FFC23D">matches the example · 0.59 ms</text>
+<text x="293.2" y="386.0" xml:space="preserve" fill="#646365">│</text>
+<text x="310.0 318.4 326.8 335.2 343.6 352.0 360.4" y="386.0" xml:space="preserve" fill="#FFC23D" font-weight="700">returns</text>
+<text x="293.2" y="403.0" xml:space="preserve" fill="#646365">│</text>
+<text x="326.8 335.2 343.6 352.0 360.4 368.8 377.2 385.6 394.0 402.4 410.8" y="403.0" xml:space="preserve" fill="#FFC23D">echo       </text>
+<text x="419.2 427.6 436.0 444.4 452.8 461.2 469.6 478.0 486.4 494.8 503.2 511.6 520.0 528.4 536.8 545.2 553.6 562.0 570.4 578.8 587.2 595.6 604.0 612.4 620.8 629.2 637.6 646.0 654.4 662.8 671.2 679.6 688.0 696.4 704.8 713.2 721.6 730.0 738.4 746.8 755.2 763.6 772.0 780.4 788.8 797.2 805.6 814.0 822.4 830.8 839.2 847.6" y="403.0" xml:space="preserve" fill="#F5F1E8">  string or null                                    </text>
+<text x="293.2" y="420.0" xml:space="preserve" fill="#646365">│</text>
+<text x="326.8 335.2 343.6 352.0 360.4 368.8 377.2 385.6 394.0 402.4 410.8" y="420.0" xml:space="preserve" fill="#FFC23D">pong       </text>
+<text x="419.2 427.6 436.0 444.4 452.8 461.2 469.6 478.0 486.4 494.8 503.2 511.6 520.0 528.4 536.8 545.2 553.6 562.0 570.4 578.8 587.2 595.6 604.0 612.4 620.8 629.2 637.6 646.0 654.4 662.8 671.2 679.6 688.0 696.4 704.8 713.2 721.6 730.0 738.4 746.8 755.2 763.6 772.0 780.4 788.8 797.2 805.6 814.0 822.4 830.8 839.2 847.6" y="420.0" xml:space="preserve" fill="#F5F1E8">  boolean                                           </text>
+<text x="293.2" y="437.0" xml:space="preserve" fill="#646365">│</text>
+<text x="326.8 335.2 343.6 352.0 360.4 368.8 377.2 385.6 394.0 402.4 410.8" y="437.0" xml:space="preserve" fill="#FFC23D">received_at</text>
+<text x="419.2 427.6 436.0 444.4 452.8 461.2 469.6 478.0 486.4 494.8 503.2 511.6 520.0 528.4 536.8 545.2 553.6 562.0 570.4 578.8 587.2 595.6 604.0 612.4 620.8 629.2 637.6 646.0 654.4 662.8 671.2 679.6 688.0 696.4 704.8 713.2 721.6 730.0 738.4 746.8 755.2 763.6 772.0 780.4 788.8 797.2 805.6 814.0 822.4 830.8 839.2 847.6" y="437.0" xml:space="preserve" fill="#F5F1E8">  string                                            </text>
+<text x="293.2" y="454.0" xml:space="preserve" fill="#646365">│</text>
+<text x="310.0 318.4 326.8 335.2 343.6 352.0 360.4 368.8 377.2 385.6 394.0" y="454.0" xml:space="preserve" fill="#FFC23D" font-weight="700">description</text>
+<text x="293.2" y="471.0" xml:space="preserve" fill="#646365">│</text>
+<text x="301.6 310.0 318.4 326.8 335.2 343.6 352.0 360.4 368.8 377.2 385.6 394.0 402.4 410.8 419.2 427.6 436.0 444.4 452.8 461.2 469.6 478.0 486.4 494.8 503.2 511.6 520.0 528.4 536.8 545.2 553.6 562.0 570.4 578.8 587.2 595.6 604.0 612.4 620.8 629.2 637.6 646.0 654.4 662.8 671.2 679.6 688.0 696.4 704.8 713.2 721.6 730.0 738.4 746.8 755.2 763.6 772.0 780.4 788.8 797.2 805.6 814.0 822.4 830.8 839.2 847.6" y="471.0" xml:space="preserve" fill="#F5F1E8">   The cheapest call SOLAR has. It touches nothing, reads         </text>
+<text x="293.2" y="488.0" xml:space="preserve" fill="#646365">│</text>
+<text x="301.6 310.0 318.4 326.8 335.2 343.6 352.0 360.4 368.8 377.2 385.6 394.0 402.4 410.8 419.2 427.6 436.0 444.4 452.8 461.2 469.6 478.0 486.4 494.8 503.2 511.6 520.0 528.4 536.8 545.2 553.6 562.0 570.4 578.8 587.2 595.6 604.0 612.4 620.8 629.2 637.6 646.0 654.4 662.8 671.2 679.6 688.0 696.4 704.8 713.2 721.6 730.0 738.4 746.8 755.2 763.6 772.0 780.4 788.8 797.2 805.6 814.0 822.4 830.8 839.2 847.6" y="488.0" xml:space="preserve" fill="#F5F1E8">   nothing and starts nothing, so the time it takes is the time   </text>
+<text x="24.4 32.8 41.2 49.6 58.0 66.4" y="505.0" xml:space="preserve" fill="#FFC23D" font-weight="700">1 to 9</text>
+<text x="74.8 83.2 91.6 100.0 108.4 116.8 125.2 133.6 142.0 150.4 158.8 167.2 175.6 184.0 192.4 200.8 209.2 217.6" y="505.0" xml:space="preserve" fill="#9C9A97"> run an example   </text>
+<text x="226.0" y="505.0" xml:space="preserve" fill="#FFC23D" font-weight="700">a</text>
+<text x="234.4 242.8 251.2 259.6 268.0 276.4 284.8" y="505.0" xml:space="preserve" fill="#9C9A97"> all   </text>
+<text x="293.2 301.6 310.0 318.4 326.8" y="505.0" xml:space="preserve" fill="#FFC23D" font-weight="700">Enter</text>
+<text x="335.2 343.6 352.0 360.4 368.8 377.2 385.6 394.0" y="505.0" xml:space="preserve" fill="#9C9A97"> form   </text>
+<text x="402.4" y="505.0" xml:space="preserve" fill="#FFC23D" font-weight="700">e</text>
+<text x="410.8 419.2 427.6 436.0 444.4 452.8 461.2 469.6" y="505.0" xml:space="preserve" fill="#9C9A97"> edit   </text>
+<text x="478.0" y="505.0" xml:space="preserve" fill="#FFC23D" font-weight="700">f</text>
+<text x="486.4 494.8 503.2 511.6 520.0 528.4 536.8 545.2 553.6 562.0" y="505.0" xml:space="preserve" fill="#9C9A97"> filter   </text>
+<text x="570.4" y="505.0" xml:space="preserve" fill="#FFC23D" font-weight="700">R</text>
+<text x="578.8 587.2 595.6 604.0 612.4 620.8 629.2 637.6 646.0 654.4" y="505.0" xml:space="preserve" fill="#9C9A97"> reload   </text>
+<text x="16.0 24.4 32.8" y="522.0" xml:space="preserve" fill="#646365"> ──</text>
+<text x="41.2" y="522.0" xml:space="preserve" fill="#FFC23D">●</text>
+<text x="49.6 58.0 66.4" y="522.0" xml:space="preserve" fill="#646365">── </text>
+<text x="74.8 83.2 91.6 100.0 108.4 116.8 125.2 133.6 142.0 150.4 158.8" y="522.0" xml:space="preserve" fill="#FFC23D" font-weight="700">SOLAR 0.2.0</text>
+<text x="167.2 175.6 184.0" y="522.0" xml:space="preserve" fill="#9C9A97"> · </text>
+<text x="192.4 200.8 209.2 217.6 226.0 234.4 242.8" y="522.0" xml:space="preserve" fill="#F5F1E8">solar/1</text>
+<text x="251.2 259.6 268.0 276.4 284.8" y="522.0" xml:space="preserve" fill="#646365"> ─── </text>
+<text x="293.2 301.6 310.0 318.4 326.8 335.2 343.6 352.0 360.4 368.8" y="522.0" xml:space="preserve" fill="#9C9A97">last call </text>
+<text x="377.2 385.6 394.0 402.4 410.8 419.2 427.6" y="522.0" xml:space="preserve" fill="#F5F1E8">0.59 ms</text>
+<text x="436.0 444.4 452.8 461.2 469.6" y="522.0" xml:space="preserve" fill="#646365"> ─── </text>
+<text x="478.0 486.4 494.8 503.2 511.6 520.0 528.4 536.8 545.2" y="522.0" xml:space="preserve" fill="#9C9A97">in orbit </text>
+<text x="553.6 562.0" y="522.0" xml:space="preserve" fill="#F5F1E8">7s</text>
+<text x="570.4 578.8 587.2 595.6 604.0 612.4 620.8 629.2 637.6 646.0 654.4 662.8 671.2 679.6 688.0 696.4 704.8 713.2 721.6 730.0 738.4 746.8 755.2 763.6 772.0 780.4 788.8 797.2 805.6 814.0 822.4 830.8 839.2 847.6" y="522.0" xml:space="preserve" fill="#646365"> ──────────────────────────────── </text>
+</svg>

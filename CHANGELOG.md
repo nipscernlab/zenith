@@ -80,6 +80,9 @@ either is stated here in its own line.
 - `docs/TESTING_BY_HAND.md`, the guide for testing SOLAR through ZENITH on a Mac, on
   Linux and on Windows, for someone who has never used Rust: installing, building both
   programs, what to try, and what to send back when something is not right.
+- The README, with pictures drawn from snapshots of a session recorded against SOLAR 0.2.0
+  and replayed through ZENITH's own drawing code, by `cargo xtask screenshots`, which with
+  `--check` fails when a picture is not its snapshot.
 
 ### Changed
 

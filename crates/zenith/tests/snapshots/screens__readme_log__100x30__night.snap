@@ -1,0 +1,82 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, 100, 30))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·                         ? keys
+ level  error  warn  info  debug [trace]       16 lines · 0 dropped · keeps 20 000 lines or 16 MiB
+ 17:59:00.961 TRACE --> {"jsonrpc":"2.0","id":1,"method":"solar.version","params":{}}
+ 17:59:00.963 TRACE --> {"jsonrpc":"2.0","id":2,"method":"solar.manifest","params":{}}
+ 17:59:00.965 TRACE <-- {"jsonrpc":"2.0","id":1,"result":{"data":{"build":{"git_commit":"90dbfb476c…
+ 17:59:00.971 TRACE <-- {"jsonrpc":"2.0","id":2,"result":{"data":{"$defs":{"BuildInfo":{"descriptio…
+ 17:59:00.986 TRACE --> {"jsonrpc":"2.0","id":3,"method":"solar.manifest","params":{}}
+ 17:59:00.987 TRACE <-- {"jsonrpc":"2.0","id":3,"result":{"data":{"$defs":{"BuildInfo":{"descriptio…
+ 17:59:01.076 TRACE --> {"jsonrpc":"2.0","id":4,"method":"solar.ping","params":{"message":"hello"}}
+ 17:59:01.076 TRACE <-- {"jsonrpc":"2.0","id":4,"result":{"data":{"echo":"hello","pong":true,"recei…
+ 17:59:01.217 TRACE --> {"jsonrpc":"2.0","id":5,"method":"system.info","params":{}}
+ 17:59:01.217 TRACE <-- {"jsonrpc":"2.0","id":5,"result":{"data":{"abandoned_workers":0,"arch":"x86…
+ 17:59:01.409 TRACE --> {"jsonrpc":"2.0","id":6,"method":"solar.describe","params":{"api":"solar.pi…
+ 17:59:01.410 TRACE <-- {"jsonrpc":"2.0","id":6,"error":{"code":-32601,"message":"No API is registe…
+ 17:59:01.450 TRACE --> {"jsonrpc":"2.0","id":7,"method":"solar.ping","params":{}}
+ 17:59:01.450 TRACE <-- {"jsonrpc":"2.0","id":7,"result":{"data":{"echo":null,"pong":true,"received…
+ 17:59:01.466 TRACE --> {"jsonrpc":"2.0","id":8,"method":"solar.ping","params":{"message":"hi"}}
+ 17:59:01.466 TRACE <-- {"jsonrpc":"2.0","id":8,"result":{"data":{"echo":"hi","pong":true,"received…
+
+
+
+
+
+
+
+
+
+
+ e w i d t level   ← → fewer, more   Enter whole line   G follow   c clear
+ ──●── SOLAR 0.2.0 · solar/1 ─── last call 0.59 ms ─── in orbit 7s ────────────────────────────────
+--- every cell not listed is #F5F1E8 on #0B0C14
+ 0:  0-7   #FFC23D on #0B0C14 bold
+ 0: 10-18  #9C9A97 on #0B0C14
+ 0: 21-26  #9C9A97 on #0B0C14
+ 0: 29-33  #FFC23D on #0B0C14 bold underlined
+ 0: 36-44  #9C9A97 on #0B0C14
+ 0: 45-92  #646365 on #0B0C14
+ 0: 93-93  #FFC23D on #0B0C14 bold
+ 0: 94-99  #9C9A97 on #0B0C14
+ 1:  0-32  #9C9A97 on #0B0C14
+ 1: 33-39  #FFC23D on #0B0C14 bold underlined
+ 1: 40-98  #9C9A97 on #0B0C14
+ 2:  0-19  #9C9A97 on #0B0C14
+ 3:  0-19  #9C9A97 on #0B0C14
+ 4:  0-19  #9C9A97 on #0B0C14
+ 5:  0-19  #9C9A97 on #0B0C14
+ 6:  0-19  #9C9A97 on #0B0C14
+ 7:  0-19  #9C9A97 on #0B0C14
+ 8:  0-19  #9C9A97 on #0B0C14
+ 9:  0-19  #9C9A97 on #0B0C14
+10:  0-19  #9C9A97 on #0B0C14
+11:  0-19  #9C9A97 on #0B0C14
+12:  0-19  #9C9A97 on #0B0C14
+13:  0-19  #9C9A97 on #0B0C14
+14:  0-19  #9C9A97 on #0B0C14
+15:  0-19  #9C9A97 on #0B0C14
+16:  0-19  #9C9A97 on #0B0C14
+17:  0-19  #9C9A97 on #0B0C14
+28:  1-9   #FFC23D on #0B0C14 bold
+28: 10-18  #9C9A97 on #0B0C14
+28: 19-21  #FFC23D on #0B0C14 bold
+28: 22-36  #9C9A97 on #0B0C14
+28: 37-41  #FFC23D on #0B0C14 bold
+28: 42-55  #9C9A97 on #0B0C14
+28: 56-56  #FFC23D on #0B0C14 bold
+28: 57-66  #9C9A97 on #0B0C14
+28: 67-67  #FFC23D on #0B0C14 bold
+28: 68-76  #9C9A97 on #0B0C14
+29:  0-2   #646365 on #0B0C14
+29:  3-3   #FFC23D on #0B0C14
+29:  4-6   #646365 on #0B0C14
+29:  7-17  #FFC23D on #0B0C14 bold
+29: 18-20  #9C9A97 on #0B0C14
+29: 28-32  #646365 on #0B0C14
+29: 33-42  #9C9A97 on #0B0C14
+29: 50-54  #646365 on #0B0C14
+29: 55-63  #9C9A97 on #0B0C14
+29: 66-99  #646365 on #0B0C14

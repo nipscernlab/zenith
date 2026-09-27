@@ -267,3 +267,11 @@ Full debug information made `target/debug` 3.6 GB on the machine ZENITH was writ
 whose disk filled once. Development builds keep file and line for backtraces and the
 dependencies keep no debug information at all; nobody steps through them. `[profile.dev]`
 in `Cargo.toml` says so beside the setting.
+
+### The README's session was recorded with the user name replaced
+
+The pictures in the README are drawn from a session recorded against a real SOLAR, and
+`system.info` reports paths that hold the user name of whoever recorded it. The
+recording has `lab` in its place, the one change made to it by hand, so that nobody's home
+directory is published. `crates/zenith/tests/fixtures/README.md` says how to record it
+again.

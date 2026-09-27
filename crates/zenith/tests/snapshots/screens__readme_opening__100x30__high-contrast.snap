@@ -1,0 +1,44 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, 100, 30))"
+---
+                                   *   *                            ·
+                     •             ∙                               ∙        ·
+                *                                **        •               •       *
+                     •   ∙·                                                      ∙
+  ·                                                         •
+ ∙                   ·              *               ∙    *                  ∙                   ·
+                           ·            ∙
+            •
+             •
+         ∙               ▄▄██████▄▄                                            ∙
+           ∙           ▄████████████▄
+                      ▄████              SOLAR
+                      ████████████████   The central API of the Constellation   *
+                ∙ ∙   ████████████████   NIPS-CERN
+                 ·               ████▀   connecting                                            ∙
+                       ▀████████████▀                                           *         ·
+                         ▀▀██████▀▀
+   •                                                                            •          •
+                                                                                  *·   ∙
+                             ZENITH 0.1.0, the terminal of Constellation
+
+                                                                                                  ∙
+•                                    ·      ·   ∙                        •   *
+           •                          ·                                     ∙
+     •                               ·                   •                                       •
+∙                           •                    •            ·                          ·∙
+                                                               •
+     •    •
+  *                        ·                        *                                            ∙
+                                                      ·
+--- every cell not listed is #F5F1E8 on #0B0C14
+ 9: 22-37  #FFC23D on #0B0C14
+10: 22-37  #FFC23D on #0B0C14
+11: 22-37  #FFC23D on #0B0C14
+11: 41-45  #FFC23D on #0B0C14 bold
+12: 22-37  #FFC23D on #0B0C14
+13: 22-37  #FFC23D on #0B0C14
+14: 22-37  #FFC23D on #0B0C14
+15: 22-37  #FFC23D on #0B0C14
+16: 22-37  #FFC23D on #0B0C14

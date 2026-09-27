@@ -2377,6 +2377,7 @@ dependencies = [
  "insta",
  "proptest",
  "ratatui",
+ "serde",
  "serde_json",
  "unicode-width",
  "zenith-client",
