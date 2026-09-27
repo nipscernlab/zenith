@@ -26,17 +26,21 @@ Everything the brief asks for, as `docs/DESIGN.md` describes it.
 
 | What | How many | Where |
 | ---- | -------- | ----- |
-| Tests | 293, all passing; 27 of them start a real program, the installed SOLAR or a double of it for the failures SOLAR cannot produce | `cargo nextest run --workspace` |
+| Tests | 297, all passing; 27 of them start a real program, the installed SOLAR or a double of it for the failures SOLAR cannot produce | `cargo nextest run --workspace` |
 | Snapshots | 112: every screen at 80 × 24 and 160 × 48 in each theme, without colour and in ASCII, and the README's seven | `crates/zenith/tests/snapshots/` |
-| Line coverage | 88.37 % of the lines of `zenith-client` and `zenith` on Windows, 88.15 % on Linux in CI; the floor is 88 % | `cargo xtask coverage` |
-| The guide's table | 20 of 20 rows, typed into the real binary in a pseudo-terminal, on Windows 11 and in AlmaLinux 9 | `cargo xtask walkthrough` |
+| Line coverage | 88.90 % of the lines of `zenith-client` and `zenith` on Windows, 88.71 % on Linux in CI; the floor is 88 % | `cargo xtask coverage` |
+| The guide's table | 20 of 20 rows, typed into the real binary in a pseudo-terminal, on Windows 11 and in AlmaLinux 9 on this machine, and in CI on Linux, Windows and macOS | `cargo xtask walkthrough` |
 
-**CI**, run 36343099884, on the push of 27 September 2026 at 16:06: all four jobs pass,
-every step on Linux, Windows and macOS, the tests against SOLAR and the walkthrough
-included. CI builds SOLAR from the head of its main branch, which at that moment was
-commit `2497b3f`, SOLAR 0.1.0, from before batches and `solar.cancel`: CI walked the
-table with a SOLAR that refuses batches, and the row for `solar.cancel` did not apply.
-SOLAR pushed its batches and `solar.cancel` minutes later.
+**CI** builds SOLAR from the head of its main branch on every run, and ran three times on
+27 September 2026. The first run, on the push at 16:06, built `2497b3f`, SOLAR 0.1.0 from
+before batches and `solar.cancel`, which SOLAR pushed minutes later; the second and third
+built `b14ec3b`, SOLAR 0.2.0 with both. In all three, every step passed on Linux, Windows
+and macOS, the tests and the walkthrough included, and with SOLAR 0.2.0 the walkthrough
+saw a batch answered with an array and `solar.cancel {"id": 1}` answered on all three
+systems. The coverage job failed once, in the second run, at 87.87 % of lines on Linux
+against the floor: some interaction code was reached only by the random cases of the
+property tests. That code has tests of its own now, a coverage run seeds the random
+cases, and the third run measured 88.71 %.
 
 One test was flaky on Linux in that run: a SOLAR that dies at once could have its exit
 reported before its last words had been read, so the card lost the line that says why it
@@ -81,7 +85,7 @@ connected frame was 20.5 to 24.7 ms, and the median key to its frame 0.31 to 0.4
 | Memory over 100 000 `/ping` | 8.7 MiB at the start, 24.6 MiB at 10 000, 27.9 MiB at 20 000, and 28.6 MiB at 100 000; the highest sample was 29.6 MiB, at 60 000 |
 | Drawing a frame, at 80 × 24 | Session 0.23 ms, APIs 0.13 ms, Log 0.14 ms, History 0.11 ms, the help overlay 0.64 ms |
 | Drawing a frame, at 200 × 60 | Session 1.03 ms, APIs 0.91 ms, Log 0.38 ms, History 0.54 ms, the help overlay 2.48 ms |
-| The release binary, `zenith.exe` | 2 285 568 bytes, with fat LTO and one codegen unit |
+| The release binary, `zenith.exe` | 2 285 056 bytes, with fat LTO and one codegen unit |
 
 What the figures say:
 
@@ -157,4 +161,4 @@ works around none of them.
 ZENITH 0.1.0, tagged `v0.1.0`. Rust 1.97.1, the toolchain SOLAR pins. Tested against
 SOLAR 0.1.0, whose manifest is the fixture of the unit tests and which CI built at
 `2497b3f`, and SOLAR 0.2.0, which the tests against SOLAR, the measurements and the
-walkthrough ran against on this machine.
+walkthrough ran against on this machine, and CI at `b14ec3b`.

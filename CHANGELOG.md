@@ -9,6 +9,11 @@ either is stated here in its own line.
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-09-27
+
+The first version, for SOLAR's protocol `solar/1` and manifests of layout 2, tested
+against SOLAR 0.1.0 and 0.2.0.
+
 ### Added
 
 - The design, `docs/DESIGN.md`, written before the code: the screens, the keys, the theme,
@@ -129,4 +134,5 @@ either is stated here in its own line.
   exit could be reported before the thread reading standard error had delivered them. It
   is now reported once that pipe is read to its end, or half a second after the exit.
 
-[Unreleased]: https://github.com/nipscernlab/zenith/commits/main
+[Unreleased]: https://github.com/nipscernlab/zenith/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/nipscernlab/zenith/tree/v0.1.0
