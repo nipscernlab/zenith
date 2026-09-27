@@ -77,5 +77,8 @@ either is stated here in its own line.
 - A backslash before a character outside ASCII inside a JSON string, such as `"\é"`, no
   longer brings ZENITH down: the scanner of the command line cut the character in half.
   The property tests found it.
+- No member of a response is shown with its name cut short: `/version` showed
+  `manifest_schema_versio`. The column of names grows to a third of the line, and a longer
+  name has a line of its own.
 
 [Unreleased]: https://github.com/nipscernlab/zenith/commits/main
