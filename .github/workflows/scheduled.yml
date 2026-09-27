@@ -51,12 +51,14 @@ jobs:
     name: mutants ${{ matrix.shard }} of 20
     runs-on: ubuntu-latest
     # Every line of the two shipped crates is mutated and the whole workspace's tests run
-    # against each mutant: about 2 600 mutants at a minute or more each, so twenty shards,
-    # each well inside the six hours a job may take. It runs here and nowhere else, never on
-    # a laptop (AGENTS.md).
+    # against each mutant: about 2 600 mutants at a minute or so each, so twenty shards,
+    # each well inside the six hours a job may take, twelve at a time, which leaves runners
+    # for the checks of pull requests. It runs here and nowhere else, never on a laptop
+    # (AGENTS.md).
     timeout-minutes: 340
     strategy:
       fail-fast: false
+      max-parallel: 12
       matrix:
         shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
     env:
@@ -88,12 +90,16 @@ jobs:
           tool: cargo-mutants,cargo-nextest
 
       # In place, because this checkout is thrown away after the job, and with a fixed
-      # timeout, because cargo-mutants cannot scale one from the baseline in place. The
+      # timeout, because cargo-mutants cannot scale one from the baseline in place. Every
+      # mutant is tested by the whole workspace, which is also what builds the test double
+      # the tests against SOLAR need, and incrementally, which rust-cache turns off. The
       # exit code says whether mutants survived; the summary below judges the whole run.
       - name: Mutate one shard of the shipped crates
+        env:
+          CARGO_INCREMENTAL: "1"
         run: |
-          cargo mutants --workspace --no-shuffle --in-place --timeout 180 \
-            --shard ${{ matrix.shard }}/20 \
+          cargo mutants --workspace --test-workspace=true --no-shuffle --in-place \
+            --timeout 180 --shard ${{ matrix.shard }}/20 \
             || echo "cargo-mutants exited with $?, which the summary judges"
 
       - name: Keep the shard's results
