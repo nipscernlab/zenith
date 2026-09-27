@@ -73,6 +73,9 @@ either is stated here in its own line.
   rather than inside one.
 - The file `ZENITH_TRACE_TIMINGS` names records every wake-up of the loop, and how long
   finding SOLAR, making its copy and starting its process took.
+- A test that holds the tables of limits in `docs/DESIGN.md` and `docs/OPEN_QUESTIONS.md`
+  to the constants of `limits.rs`, so that the documents cannot say one size and the code
+  keep another.
 
 ### Fixed
 

@@ -44,3 +44,52 @@ pub const REPORT_LOG_LINES: usize = 1_000;
 /// The bookkeeping an entry costs beyond the text it holds, counted in its size so that a
 /// flood of empty entries still meets the byte limit.
 pub const ENTRY_OVERHEAD: usize = 64;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::ui::log::group;
+
+    #[test]
+    fn the_design_and_the_open_questions_give_the_limits_the_code_keeps() {
+        let design = include_str!("../../../docs/DESIGN.md");
+        let open = include_str!("../../../docs/OPEN_QUESTIONS.md");
+        let mib = |bytes: usize| format!("{} MiB", bytes / MIB);
+        let command_line = format!(
+            "{} lines | {} KiB |",
+            group(COMMAND_HISTORY_ENTRIES),
+            COMMAND_HISTORY_BYTES / 1024
+        );
+        let rows = [
+            format!(
+                "| History | {} calls | {} |",
+                group(HISTORY_ENTRIES),
+                mib(HISTORY_BYTES)
+            ),
+            format!(
+                "| Log | {} lines | {} |",
+                group(LOG_ENTRIES),
+                mib(LOG_BYTES)
+            ),
+            format!("| Command line history | {command_line}"),
+            format!("| Calls in flight | {CALLS_IN_FLIGHT} |"),
+        ];
+        for row in &rows {
+            assert!(
+                design.contains(row.as_str()),
+                "docs/DESIGN.md does not have {row}"
+            );
+            assert!(
+                open.contains(row.as_str()),
+                "docs/OPEN_QUESTIONS.md does not have {row}"
+            );
+        }
+        let transcript = format!(
+            "{} entries | {} |",
+            group(TRANSCRIPT_ENTRIES),
+            mib(TRANSCRIPT_BYTES)
+        );
+        assert!(design.contains(&format!("| Session transcript | {transcript}")));
+        assert!(open.contains(&format!("| Transcript | {transcript}")));
+    }
+}
