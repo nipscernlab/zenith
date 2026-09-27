@@ -35,14 +35,14 @@ expression: "screen(&draw(&script.app, width, height))"
 
 
 
-
-
-
-
-
-
-
-
+      ▄▄██████▄▄
+    ▄████████████▄
+   ▄████              SOLAR
+   ████████████████   The central API of the Constellation
+   ████████████████   NIPS-CERN
+              ████▀   0.1.0
+    ▀████████████▀
+      ▀▀██████▀▀
  ┌────────────────────────────────────────────────────────────────────────────┐
  │› api  string, required. The method name to describe, for example `solar.p… │PIs.
  └ Tab inserts  ↑ ↓ choose  Esc closes ───────────────────────────────────────┘y.
@@ -54,6 +54,15 @@ expression: "screen(&draw(&script.app, width, height))"
  0:  0-7   #FFC23D on #0B0C14 bold
  0: 10-18  #FFC23D on #0B0C14 bold underlined
  0:153-153 #FFC23D on #0B0C14 bold
+33:  3-18  #FFC23D on #0B0C14
+34:  3-18  #FFC23D on #0B0C14
+35:  3-18  #FFC23D on #0B0C14
+35: 22-26  #FFC23D on #0B0C14 bold
+36:  3-18  #FFC23D on #0B0C14
+37:  3-18  #FFC23D on #0B0C14
+38:  3-18  #FFC23D on #0B0C14
+39:  3-18  #FFC23D on #0B0C14
+40:  3-18  #FFC23D on #0B0C14
 42:  2-6   #FFC23D on #0B0C14 reversed
 42:  7-76  #F5F1E8 on #0B0C14 reversed
 43:  2-5   #FFC23D on #0B0C14 bold

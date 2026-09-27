@@ -41,8 +41,9 @@ Then start ZENITH, telling it where SOLAR is, or putting SOLAR's `target/release
 ```
 
 The opening, a starfield with ZENITH's mark, lasts as long as the connection takes,
-about twenty milliseconds on the machine it was written on, and any key skips it. Type `/` for the commands and `?` for
-every key.
+about twenty milliseconds on the machine it was written on, and any key skips it; every
+connection then starts the Session tab with SOLAR's mark. Type `/` for the commands and
+`?` for every key.
 
 ![The opening, in the high-contrast theme](docs/screenshots/opening.svg)
 

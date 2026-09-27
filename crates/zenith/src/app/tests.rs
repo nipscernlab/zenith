@@ -227,6 +227,52 @@ fn a_good_handshake_connects_and_says_what_answered() {
 }
 
 #[test]
+fn every_connection_starts_with_solars_mark_and_the_version_that_answered() {
+    let mut harness = Harness::connected();
+    let entries = |harness: &Harness| -> Vec<Entry> {
+        harness
+            .app
+            .session
+            .transcript
+            .iter()
+            .map(|(_, entry)| entry.clone())
+            .collect()
+    };
+    let first = entries(&harness);
+    assert_eq!(
+        first[0],
+        Entry::Mark {
+            version: "0.1.0".to_owned()
+        }
+    );
+    assert!(
+        matches!(&first[1], Entry::Notice { lines, .. } if lines[0].starts_with("Connected to SOLAR"))
+    );
+    // The mark is not drawn while the handshake is under way, only once SOLAR answered.
+    let mut starting = Harness::new();
+    starting.start();
+    assert!(entries(&starting).is_empty());
+    // A new connection, after Ctrl+R, starts with the mark again.
+    harness.key(KeyCode::Char('r'), KeyModifiers::CONTROL);
+    harness.start();
+    let generation = harness.app.link.generation;
+    assert_eq!(generation, 2);
+    // Each connection numbers its calls from one.
+    harness.answer(
+        1,
+        &success(1, "solar.version", &version_data("solar/1", "2.0.0")),
+    );
+    let manifest: Value = serde_json::from_str(MANIFEST).unwrap();
+    harness.answer(2, &success(2, "solar.manifest", &manifest));
+    assert!(harness.app.link.connected());
+    let marks = entries(&harness)
+        .iter()
+        .filter(|entry| matches!(entry, Entry::Mark { .. }))
+        .count();
+    assert_eq!(marks, 2);
+}
+
+#[test]
 fn another_protocol_stops_the_handshake_with_both_versions() {
     let mut harness = Harness::new();
     harness.start();

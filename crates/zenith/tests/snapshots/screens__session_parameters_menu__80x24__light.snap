@@ -9,14 +9,14 @@ expression: "screen(&draw(&script.app, width, height))"
 
 
 
-
-
-
-
-
-
-
-
+      ▄▄██████▄▄
+    ▄████████████▄
+   ▄████              SOLAR
+   ████████████████   The central API of the Constellation
+   ████████████████   NIPS-CERN
+              ████▀   0.1.0
+    ▀████████████▀
+      ▀▀██████▀▀
 
    · Connected to SOLAR 0.1.0 in 1.84 ms: protocol solar/1, manifest 2.0.0, 5
  ┌────────────────────────────────────────────────────────────────────────────┐
@@ -35,6 +35,17 @@ expression: "screen(&draw(&script.app, width, height))"
  0: 45-72  #868482 on #F5F1E8
  0: 73-73  #8C4907 on #F5F1E8 bold
  0: 74-79  #555355 on #F5F1E8
+ 7:  3-18  #B35A00 on #F5F1E8
+ 8:  3-18  #B35A00 on #F5F1E8
+ 9:  3-18  #B35A00 on #F5F1E8
+ 9: 22-26  #8C4907 on #F5F1E8 bold
+10:  3-18  #B35A00 on #F5F1E8
+11:  3-18  #B35A00 on #F5F1E8
+11: 22-30  #555355 on #F5F1E8
+12:  3-18  #B35A00 on #F5F1E8
+12: 22-26  #555355 on #F5F1E8
+13:  3-18  #B35A00 on #F5F1E8
+14:  3-18  #B35A00 on #F5F1E8
 16:  3-3   #8C4907 on #F5F1E8
 17:  1-78  #868482 on #F5F1E8
 18:  1-1   #868482 on #F5F1E8

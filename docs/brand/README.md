@@ -124,7 +124,8 @@ Rules for the terminal:
 | Where | Mark |
 | --- | --- |
 | The opening, while SOLAR starts | ZENITH's, with the four lines of section 3, in a starfield that keeps two cells clear around it |
-| The card of `/version`, where ZENITH shows SOLAR itself | SOLAR's, laid out as SOLAR's `docs/brand/README.md` lays it out, with the version of the SOLAR that answered |
+| The start of every connection, in the Session tab, where ZENITH shows SOLAR itself | SOLAR's, laid out as SOLAR's `docs/brand/README.md` lays it out, with the version that answered the handshake |
+| The card of `/version`, where ZENITH shows SOLAR itself | SOLAR's, laid out the same way, with the version of the SOLAR that answered |
 
 ## 5. How the files were made, and what checks them
 

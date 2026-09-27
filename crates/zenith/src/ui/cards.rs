@@ -61,6 +61,7 @@ pub fn entry_lines(app: &App, entry: &Entry, width: usize) -> Vec<Line<'static>>
             ]));
             out
         }
+        Entry::Mark { version } => solar_lockup(app, Some(version)),
         Entry::Call { record, layout } => match app.history.calls.get(*record) {
             Some(record) => call(app, record, *layout, width),
             None => vec![Line::from(Span::styled(
@@ -371,7 +372,11 @@ fn single(
                 Layout::List => out.extend(list(app, data, width)),
                 Layout::Describe => out.extend(describe(app, data, width)),
                 Layout::Version => {
-                    out.extend(solar_mark(app, envelope));
+                    let version = envelope
+                        .meta
+                        .as_ref()
+                        .and_then(|meta| meta.solar_version.as_deref());
+                    out.extend(solar_lockup(app, version));
                     out.extend(json::human(data, BODY, width, theme));
                 }
                 Layout::Generic => out.extend(json::human(data, BODY, width, theme)),
@@ -447,7 +452,7 @@ fn single(
 /// SOLAR's mark, where ZENITH shows SOLAR itself: laid out as SOLAR's `docs/brand`
 /// lays it out, with the version of the SOLAR that answered where the brand puts the
 /// version, and a blank line above and below.
-fn solar_mark(app: &App, envelope: &Envelope) -> Vec<Line<'static>> {
+fn solar_lockup(app: &App, version: Option<&str>) -> Vec<Line<'static>> {
     let theme = &app.theme;
     let mut beside = vec![
         ("SOLAR".to_owned(), theme.strong()),
@@ -457,11 +462,7 @@ fn solar_mark(app: &App, envelope: &Envelope) -> Vec<Line<'static>> {
         ),
         ("NIPS-CERN".to_owned(), theme.muted()),
     ];
-    if let Some(version) = envelope
-        .meta
-        .as_ref()
-        .and_then(|meta| meta.solar_version.as_deref())
-    {
+    if let Some(version) = version {
         beside.push((clean(version).into_owned(), theme.muted()));
     }
     let mut out = vec![Line::from("")];

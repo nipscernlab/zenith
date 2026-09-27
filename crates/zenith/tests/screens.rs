@@ -319,8 +319,8 @@ fn the_opening_in_every_theme_at_every_depth() {
 }
 
 /// ZENITH's mark stands for ZENITH and SOLAR's for SOLAR: the opening draws ZENITH's and
-/// not SOLAR's, and the card of `/version`, where ZENITH shows SOLAR itself, draws SOLAR's
-/// and not ZENITH's.
+/// not SOLAR's, and where ZENITH shows SOLAR itself, the start of a connection and the
+/// card of `/version`, it draws SOLAR's and not ZENITH's.
 #[test]
 fn each_mark_is_drawn_where_it_stands_for_its_own() {
     use zenith::brand::{SOLAR, ZENITH};
@@ -338,6 +338,12 @@ fn each_mark_is_drawn_where_it_stands_for_its_own() {
         let text = characters(&draw(&opening.app, 160, 48));
         assert!(has(&text, &ZENITH), "{text}");
         assert!(!has(&text, &SOLAR), "{text}");
+        // The first screen after connecting, even at the smallest size, when the opening
+        // was too quick to be seen.
+        let connected = session_just_connected(options(ThemeName::Night, Depth::None, charset));
+        let text = characters(&draw(&connected.app, 80, 24));
+        assert!(has(&text, &SOLAR), "{text}");
+        assert!(!has(&text, &ZENITH), "{text}");
         let version = session_version(options(ThemeName::Night, Depth::None, charset));
         let text = characters(&draw(&version.app, 160, 48));
         assert!(has(&text, &SOLAR), "{text}");

@@ -9,9 +9,9 @@ expression: screen(&buffer)
 
 
 
-
-
-
+      ..######..
+    .############.
+   .####              SOLAR
  +------------------------------------------------------------------- 1 of 14 +
  |> /list                               every API SOLAR answers to            |
  |  /describe <api>                     one API: parameters, errors, side ... |
@@ -31,6 +31,7 @@ expression: screen(&buffer)
  0: 10-18  - on - bold underlined
  0: 45-72  - on - dim
  0: 73-73  - on - bold
+ 9: 22-26  - on - bold
 10:  1-78  - on - dim
 11:  1-1   - on - dim
 11:  2-37  - on - bold reversed

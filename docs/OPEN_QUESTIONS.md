@@ -77,9 +77,13 @@ zenith, and never to be taken for SOLAR's. What it did not say was decided here,
   ZENITH is, the laboratory and the version, which is the order of SOLAR's example.
 - **The opening** shows ZENITH's mark, and its last line, the state of the connection,
   moved below the mark, where the version of ZENITH was.
-- **SOLAR's mark is on the card of `/version`**, the one place where ZENITH shows SOLAR
-  itself, with the version of the SOLAR that answered where SOLAR's brand puts the
-  version. `/call solar.version` keeps the generic layout.
+- **SOLAR's mark starts every connection in the Session tab and is on the card of
+  `/version`**, the places where ZENITH shows SOLAR itself, each with the version of the
+  SOLAR that answered where SOLAR's brand puts the version. `/call solar.version` keeps
+  the generic layout. The mark starts every connection because the opening lasts as long
+  as the connection, 32 ms on the architect's machine, and the architect saw no mark at
+  all; the opening stays as short as the connection, as section 3 of `docs/DESIGN.md`
+  requires.
 - **The lockups** set the name in Martian Mono SemiBold, as SOLAR's do, with its cap
   height from the apex to the horizon and at the same place as SOLAR's name.
 

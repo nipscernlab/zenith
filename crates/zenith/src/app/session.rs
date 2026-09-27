@@ -63,6 +63,11 @@ pub enum Entry {
         /// The line.
         line: String,
     },
+    /// SOLAR's mark, at the start of every connection, with the version that answered.
+    Mark {
+        /// `solar_version`, as the handshake read it.
+        version: String,
+    },
 }
 
 impl Measured for Entry {
@@ -72,6 +77,7 @@ impl Measured for Entry {
                 Self::Command { text } => text.len(),
                 Self::Notice { lines, .. } => lines.iter().map(String::len).sum(),
                 Self::Unexpected { line } => line.len(),
+                Self::Mark { version } => version.len(),
                 Self::Call { .. } | Self::Help { .. } => 0,
             }
     }
