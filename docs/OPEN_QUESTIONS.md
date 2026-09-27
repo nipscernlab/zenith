@@ -14,12 +14,12 @@ find. Those are not ZENITH's to decide.
 
 ### The manifest does not say whether batches are accepted
 
-SOLAR's contract, in the draft of its third stage on this machine, adds batches to
-`solar/1` in section 3.2 and limits them to 64 elements. The manifest says neither: there
-is no member that tells a client this build answers batches, nor what its limit is, and
-the protocol stays `solar/1` whether or not a build has them. The `solar` 0.1.0 on this
-machine answers a batch with `UNIMPLEMENTED` / `BATCH_NOT_SUPPORTED`, and a build of the
-third stage will answer it with an array, under the same protocol name.
+SOLAR's contract adds batches to `solar/1` in section 3.2 and limits them to 64
+elements. The manifest says neither: there is no member that tells a client this build
+answers batches, nor what its limit is, and the protocol stayed `solar/1` when they
+arrived. SOLAR 0.1.0 answers a batch with `UNIMPLEMENTED` / `BATCH_NOT_SUPPORTED`, and
+SOLAR 0.2.0 with an array, which `cargo xtask walkthrough` saw on 27 September 2026,
+both under the same protocol name.
 
 **Chosen.** ZENITH sends no batches of its own. Finding out by sending a probe batch
 would be working around a missing declaration, which ADR 0001 rules out. A person can
@@ -178,8 +178,10 @@ ZENITH that gave up during the scan would report a failure that is not one.
 ### A response with `id: null` belongs to the oldest request waiting
 
 The contract answers with `id: null` only when a request was too broken to have an id.
-ZENITH never sends one except through `/raw`, and SOLAR answers in order apart from
-`solar.cancel`, so the oldest request still waiting is the one it answers.
+ZENITH never sends one except through `/raw`, and SOLAR answers in order apart from the
+three answers section 9.1 of its contract sends at once, to `solar.cancel`, to a request
+that finds the queue full and to an `id` already in flight, all of which carry an `id`.
+So the oldest request still waiting is the one an `id: null` answers.
 
 ### The Windows copy is named by the first sixteen hex digits of its SHA-256
 

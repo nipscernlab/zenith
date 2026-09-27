@@ -65,6 +65,9 @@ either is stated here in its own line.
   the whole application any sequence of keys, pastes, responses, lines of standard error,
   resizes, exits and reconnections: nothing panics, and nothing they return points outside
   the line.
+- `CANCELLED`, code `-32008`, among the statuses every response is checked against, now
+  that section 6.1 of SOLAR's contract lists it; a cancelled call with any other code is
+  a breach of the contract, shown as one.
 
 ### Fixed
 

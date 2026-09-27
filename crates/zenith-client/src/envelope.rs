@@ -8,7 +8,7 @@
 //!
 //! The checks are of what the contract states for `solar/1`. A status the contract does
 //! not list is not a violation, because a later SOLAR may add one without changing the
-//! protocol, and SOLAR's draft of its third stage does exactly that with `CANCELLED`.
+//! protocol, as `CANCELLED` was added to section 6.1 when `solar.cancel` arrived.
 
 use serde_json::{Map, Number, Value};
 
@@ -68,7 +68,7 @@ impl Id {
 pub enum Message {
     /// A single response.
     Single(Envelope),
-    /// A batch of responses, section 3.2 of SOLAR's draft contract.
+    /// A batch of responses, section 3.2 of SOLAR's contract.
     Batch(Vec<Envelope>),
     /// A line that is not JSON at all.
     NotJson {
@@ -178,7 +178,7 @@ pub struct Violation {
 }
 
 /// The canonical statuses of `solar/1` and their JSON-RPC codes, section 6.1.
-pub const STATUS_CODES: [(&str, i64); 11] = [
+pub const STATUS_CODES: [(&str, i64); 12] = [
     ("INVALID_ARGUMENT", -32602),
     ("NOT_FOUND", -32601),
     ("ALREADY_EXISTS", -32001),
@@ -189,6 +189,7 @@ pub const STATUS_CODES: [(&str, i64); 11] = [
     ("UNAVAILABLE", -32006),
     ("UNIMPLEMENTED", -32007),
     ("INTERNAL", -32603),
+    ("CANCELLED", -32008),
     ("UNKNOWN", -32099),
 ];
 
@@ -631,11 +632,28 @@ mod tests {
     }
 
     #[test]
-    fn a_status_the_contract_does_not_list_is_not_a_violation() {
+    fn a_cancelled_call_keeps_the_contract_and_a_wrong_code_for_it_does_not() {
         let mut value: Value = serde_json::from_str(UNKNOWN_FIELD).unwrap();
         value["error"]["code"] = json!(-32008);
         value["error"]["data"]["status"] = json!("CANCELLED");
+        value["error"]["data"]["reason"] = json!("CALL_CANCELLED");
         value["error"]["data"]["details"][0]["docs"] = json!("docs/ERRORS.md#cancelled");
+        assert!(Envelope::of(&value).violations.is_empty());
+        value["error"]["code"] = json!(-32099);
+        let sections: Vec<&str> = Envelope::of(&value)
+            .violations
+            .iter()
+            .map(|violation| violation.section)
+            .collect();
+        assert_eq!(sections, vec!["6.1"]);
+    }
+
+    #[test]
+    fn a_status_the_contract_does_not_list_is_not_a_violation() {
+        let mut value: Value = serde_json::from_str(UNKNOWN_FIELD).unwrap();
+        value["error"]["code"] = json!(-32042);
+        value["error"]["data"]["status"] = json!("SUPERSEDED");
+        value["error"]["data"]["details"][0]["docs"] = json!("docs/ERRORS.md#superseded");
         assert!(Envelope::of(&value).violations.is_empty());
     }
 

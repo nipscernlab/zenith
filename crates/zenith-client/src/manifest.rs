@@ -16,7 +16,7 @@ use crate::schema_view::View;
 /// The major version of the manifest layout this ZENITH reads.
 pub const LAYOUT_MAJOR: u64 = 2;
 
-/// The name of the API that cancels a call, section 9 of SOLAR's draft contract.
+/// The name of the API that cancels a call, section 9 of SOLAR's contract.
 pub const CANCEL_API: &str = "solar.cancel";
 
 /// Every API a SOLAR build answers to, as its manifest describes them.
@@ -254,7 +254,7 @@ impl Catalogue {
 /// `docs/OPEN_QUESTIONS.md` records as something ZENITH needed and did not find.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct Capabilities {
-    /// `solar.cancel` is in the manifest and takes an `id`, as section 9 of SOLAR's draft
+    /// `solar.cancel` is in the manifest and takes an `id`, as section 9 of SOLAR's
     /// contract describes it.
     pub cancel: bool,
 }

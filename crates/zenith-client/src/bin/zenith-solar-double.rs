@@ -7,7 +7,7 @@
 //! | Value | What it does |
 //! | ----- | ------------ |
 //! | unset, `healthy` | answers `solar.version`, `solar.manifest`, `solar.ping` and `double.slow` |
-//! | `cancel` | the same, plus `solar.cancel` with the queue section 9 of SOLAR's draft contract describes |
+//! | `cancel` | the same, plus `solar.cancel` with the queue section 9 of SOLAR's contract describes |
 //! | `exit:<code>` | writes one line to standard error and exits with that code at once |
 //! | `protocol:<name>` | reports that protocol in `solar.version` |
 //! | `layout:<version>` | reports that manifest layout |
@@ -259,7 +259,7 @@ struct Queue {
     finished: Vec<Value>,
 }
 
-/// The session of section 9.1 of SOLAR's draft contract: requests are read on a thread
+/// The session of section 9.1 of SOLAR's contract: requests are read on a thread
 /// of their own into a queue, calls run one at a time in order, and only `solar.cancel`
 /// is answered as soon as it is read.
 fn serve_with_cancellation(output: &Arc<Mutex<io::Stdout>>) {

@@ -1,9 +1,9 @@
 //! The calls that are waiting for SOLAR, and which one each response answers.
 //!
 //! Responses are matched by `id`, never by order: once SOLAR answers `solar.cancel` ahead
-//! of the call it cancels, order is no longer a promise, section 9.1 of SOLAR's draft
-//! contract. ZENITH numbers its requests from one in each connection and never reuses an
-//! id while its call is waiting, which section 9.5 asks of a caller that cancels.
+//! of the call it cancels, order is no longer a promise, section 9.1 of SOLAR's contract.
+//! ZENITH numbers its requests from one in each connection and never reuses an id while
+//! its call is waiting, which section 9.5 asks of a caller that cancels.
 
 use std::collections::VecDeque;
 use std::time::Instant;

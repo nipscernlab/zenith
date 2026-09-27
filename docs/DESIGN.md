@@ -404,8 +404,9 @@ The time connected starts when both checks pass.
 | Cancellation | An API named `solar.cancel` whose `params_schema` declares `id` | `Ctrl+C` sends `solar.cancel` with the id of the latest call in flight, and the transcript shows the `outcome` SOLAR reports | `Ctrl+C` says that this SOLAR offers no `solar.cancel`, and how long the call may still take by its `timeout_ms` |
 | Batches | Not detectable: the manifest does not say whether batches are accepted, or how many elements | | ZENITH sends one request per line, and `/raw` sends a batch by hand |
 
-Batches are in the draft of SOLAR's contract, section 3.2, which also fixes their limit
-at 64 elements, but the manifest does not declare either. Learning it by sending a probe
+Batches are in SOLAR's contract, section 3.2, which also fixes their limit at 64
+elements, but the manifest does not declare either, and the protocol stayed `solar/1`
+when they arrived. Learning it by sending a probe
 batch would be working around a missing declaration, which principle 2 rules out, so it
 is recorded in `docs/OPEN_QUESTIONS.md` and ZENITH uses no batches of its own. A batch
 sent with `/raw` is shown as one card per element, matched by position.
@@ -413,7 +414,7 @@ sent with `/raw` is shown as one card per element, matched by position.
 ### 9.4 Requests and responses
 
 - Requests carry integer ids, from `1` in each connection, never reused, which is what
-  section 9.5 of SOLAR's draft contract asks of a caller that cancels.
+  section 9.5 of SOLAR's contract asks of a caller that cancels.
 - Responses are matched by `id`, never by order: once SOLAR answers `solar.cancel` ahead
   of the call it cancels, order is no longer a promise.
 - A response with `id: null` belongs to the oldest request still waiting. It only happens
