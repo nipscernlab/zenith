@@ -1,0 +1,22 @@
+# The test runner. `cargo nextest run` runs every test in its own process, which makes a
+# test that corrupts global state unable to take its neighbours with it, and reports the
+# slow ones by name.
+#
+# Doctests are not run by nextest and are not forgotten: `cargo xtask ci` and the workflow
+# both run `cargo test --doc` beside it.
+
+[profile.default]
+# A test of this repository is milliseconds; the ones that drive the real SOLAR take a
+# second or two. One that takes thirty seconds is either the soak test or a mistake.
+slow-timeout = { period = "30s", terminate-after = 4 }
+failure-output = "immediate-final"
+fail-fast = false
+
+[profile.ci]
+# In CI the same rules, plus a retry for the tests that measure wall clock time against a
+# child process and can lose a race on a loaded shared runner. A test that only passes on
+# the retry is reported as flaky rather than as passing.
+retries = 2
+failure-output = "immediate-final"
+status-level = "fail"
+final-status-level = "slow"

@@ -1,0 +1,9 @@
+/target
+**/*.rs.bk
+*.pdb
+*.snap.new
+*.pending-snap
+.idea/
+.vscode/
+# Written by `x` in the History tab or by /export, in whatever directory ZENITH ran from.
+zenith-history-*.ndjson

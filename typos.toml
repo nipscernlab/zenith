@@ -1,0 +1,48 @@
+# The spelling check, run by `cargo xtask ci` and by CI itself.
+#
+# The repository is written in British English: colour, catalogue, behaviour. That is
+# recorded in docs/STYLE.md; this file makes `typos` agree. What is exempted below is
+# never prose: it is identifiers the ecosystem, the terminal or the wire contract fixes.
+
+[default]
+locale = "en-gb"
+
+[default.extend-identifiers]
+# serde's API is spelt the American way, and SOLAR's wire constant SERIALIZATION_FAILED is
+# published in its catalogue of errors: contract spelling, not prose.
+Serialize = "Serialize"
+Deserialize = "Deserialize"
+DeserializeOwned = "DeserializeOwned"
+serialize = "serialize"
+deserialize = "deserialize"
+skip_serializing_if = "skip_serializing_if"
+SERIALIZATION_FAILED = "SERIALIZATION_FAILED"
+# ratatui and crossterm name their types the American way.
+Color = "Color"
+ColorDepth = "ColorDepth"
+Colors = "Colors"
+SetForegroundColor = "SetForegroundColor"
+SetBackgroundColor = "SetBackgroundColor"
+Center = "Center"
+center = "center"
+centered = "centered"
+
+[default.extend-words]
+# NO_COLOR (no-color.org), COLORTERM, the --color flag and ZENITH_COLOR are the names of
+# real variables and flags, spelt the way every command line tool spells them; the prose
+# word is colour.
+color = "color"
+# The crate that draws the interface, named after a dish on purpose.
+ratatui = "ratatui"
+# The demonstration of a misspelt parameter, which is the point of the demonstration.
+mesage = "mesage"
+
+[files]
+extend-exclude = [
+  # Copied byte for byte from nipscernlab/aurora; its text is not ours to fix.
+  "LICENSE",
+  "Cargo.lock",
+  # Screens recorded from SOLAR's answers, which quote SOLAR's own words.
+  "crates/*/tests/snapshots/*.snap",
+  "crates/*/tests/fixtures/*",
+]

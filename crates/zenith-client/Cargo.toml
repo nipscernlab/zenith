@@ -1,0 +1,24 @@
+[package]
+name = "zenith-client"
+description = "The SOLAR client of ZENITH: the child process, the protocol, the manifest"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+publish = false
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+
+[dev-dependencies]
+# The reference validator, which the tests compare ZENITH's own against. It never ships.
+jsonschema.workspace = true
+proptest.workspace = true
+
+[lints]
+workspace = true

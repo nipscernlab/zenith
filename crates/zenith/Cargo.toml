@@ -1,0 +1,30 @@
+[package]
+name = "zenith"
+description = "ZENITH, the terminal of Constellation: a full-screen client of SOLAR"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+publish = false
+
+[[bin]]
+name = "zenith"
+path = "src/main.rs"
+
+[dependencies]
+clap.workspace = true
+ctrlc.workspace = true
+ratatui.workspace = true
+serde_json.workspace = true
+unicode-width.workspace = true
+zenith-client.workspace = true
+
+[dev-dependencies]
+insta.workspace = true
+proptest.workspace = true
+
+[lints]
+workspace = true
