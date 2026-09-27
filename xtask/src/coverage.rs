@@ -16,6 +16,12 @@ use std::process::Command;
 /// the tests ran 88.46 % of the lines with SOLAR 0.2.0 present, rounded down.
 pub(crate) const FLOOR: u32 = 88;
 
+/// The seed of the property tests' random cases in a coverage run. Their cases reach code
+/// that no other test reaches, so with a new seed each run the figure moved with chance:
+/// 88.15 % and 87.87 % on two runs of CI with the same tests. Every other run of the tests
+/// draws new cases.
+const PROPTEST_SEED: &str = "20260927";
+
 /// The crates that ship, and therefore the crates that are measured.
 const MEASURED: [&str; 2] = ["zenith-client", "zenith"];
 
@@ -53,6 +59,7 @@ pub(crate) fn run(root: &Path, write_reports: bool) -> Result<(), String> {
     let status = Command::new("cargo")
         .args(&arguments)
         .current_dir(root)
+        .env("PROPTEST_RNG_SEED", PROPTEST_SEED)
         .status()
         .map_err(|error| {
             format!(

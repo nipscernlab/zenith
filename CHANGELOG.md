@@ -121,6 +121,10 @@ either is stated here in its own line.
   of the line, and a longer name has a line of its own.
 - The documentation builds with warnings denied, as CI builds it: a link to the `pointer`
   module of `zenith-client` could also have meant the primitive type of that name.
+- The coverage no longer moves with chance: the random cases of the property tests were
+  the only tests that reached the Log's paging, expansion and clearing, the History's
+  sending again and editing, the form's movement, and sending while SOLAR is down. Each
+  now has a test of its own, and a coverage run seeds the random cases.
 - When SOLAR exits, its last lines of standard error are in the card that says so: the
   exit could be reported before the thread reading standard error had delivered them. It
   is now reported once that pipe is read to its end, or half a second after the exit.

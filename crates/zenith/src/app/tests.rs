@@ -848,3 +848,211 @@ fn twenty_thousand_calls_never_hold_more_than_the_declared_limits() {
     assert!(harness.app.history.calls.dropped() > 0);
     assert_eq!(harness.app.link.tracker.waiting().len(), 0);
 }
+
+/// Draws the application at 80 × 24 and returns the characters of the screen.
+fn screen_text(app: &App) -> String {
+    let mut terminal = ratatui::Terminal::new(ratatui::backend::TestBackend::new(80, 24)).unwrap();
+    terminal.draw(|frame| crate::ui::draw(frame, app)).unwrap();
+    let buffer = terminal.backend().buffer().clone();
+    buffer
+        .content()
+        .chunks(80)
+        .map(|row| {
+            row.iter()
+                .map(ratatui::buffer::Cell::symbol)
+                .collect::<String>()
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+/// `Tab` on an empty command line, until `tab` is the one on screen.
+fn go_to_tab(harness: &mut Harness, tab: Tab) {
+    for _ in 0..4 {
+        if harness.app.tab == tab {
+            return;
+        }
+        harness.key(KeyCode::Tab, KeyModifiers::NONE);
+    }
+    assert_eq!(harness.app.tab, tab);
+}
+
+/// Moves the selection of the APIs tab to `name`, from the top.
+fn select_api(harness: &mut Harness, name: &str) {
+    for _ in 0..64 {
+        if harness.app.selected_api().map(|api| api.name.as_str()) == Some(name) {
+            return;
+        }
+        harness.key(KeyCode::Down, KeyModifiers::NONE);
+    }
+    panic!(
+        "{name} is not in the APIs tab: tab {:?}, selected {}, catalogue {}, filter {:?}",
+        harness.app.tab,
+        harness.app.apis.selected,
+        harness.app.catalogue().is_some(),
+        harness.app.apis.filter.text()
+    );
+}
+
+/// SOLAR's output and standard error close, and it exits.
+fn solar_goes_down(harness: &mut Harness) {
+    for event in [
+        ConnectionEvent::OutputClosed {
+            error: None,
+            at: harness.now,
+        },
+        ConnectionEvent::StderrClosed,
+    ] {
+        harness.feed(Incoming::Connection {
+            generation: 1,
+            event,
+        });
+    }
+    harness.feed(Incoming::Exited {
+        generation: 1,
+        how: "exited with code 0".to_owned(),
+    });
+    assert_eq!(harness.app.link.phase, Phase::Down);
+    harness.effects.clear();
+}
+
+#[test]
+fn the_log_moves_by_the_page_shows_a_line_whole_and_clears() {
+    let mut harness = Harness::connected();
+    harness.feed(Incoming::Resize {
+        width: 80,
+        height: 24,
+    });
+    for index in 0..40 {
+        harness.feed(Incoming::Connection {
+            generation: 1,
+            event: ConnectionEvent::Stderr {
+                text: format!(
+                    r#"{{"level":"info","message":"line {index} of the log","time":"t"}}"#
+                ),
+                cut: 0,
+                at: harness.now,
+            },
+        });
+    }
+    go_to_tab(&mut harness, Tab::Log);
+    let visible = harness.app.log.visible();
+    harness.key(KeyCode::Char('g'), KeyModifiers::NONE);
+    assert_eq!(harness.app.log.selected, visible.first().copied());
+    harness.key(KeyCode::PageDown, KeyModifiers::NONE);
+    let paged = harness.app.log.selected.unwrap();
+    assert!(paged > visible[0], "PageDown stayed at {paged}");
+    harness.key(KeyCode::Up, KeyModifiers::NONE);
+    assert!(harness.app.log.selected.unwrap() < paged);
+    harness.key(KeyCode::Enter, KeyModifiers::NONE);
+    assert!(harness.app.log.expanded);
+    let screen = screen_text(&harness.app);
+    assert!(screen.contains("of the log"), "{screen}");
+    harness.key(KeyCode::Esc, KeyModifiers::NONE);
+    assert!(!harness.app.log.expanded);
+    harness.key(KeyCode::PageDown, KeyModifiers::NONE);
+    harness.key(KeyCode::PageDown, KeyModifiers::NONE);
+    assert_eq!(
+        harness.app.log.selected, None,
+        "the end of the Log follows it again"
+    );
+    harness.key(KeyCode::Char('c'), KeyModifiers::NONE);
+    assert!(harness.app.log.visible().is_empty());
+}
+
+#[test]
+fn a_call_of_the_history_is_sent_again_or_put_back_on_the_command_line() {
+    let mut harness = Harness::connected();
+    harness.run(r#"/call solar.ping {"message": "again"}"#);
+    let sent = harness.written()[0]["id"].as_u64().unwrap();
+    harness.answer(
+        sent,
+        &success(sent, "solar.ping", &json!({"pong": true, "echo": "again"})),
+    );
+    harness.run(r#"/raw {"jsonrpc":"2.0","id":"by hand","method":"solar.version"}"#);
+    harness.answer(
+        0,
+        &success(0, "solar.version", &json!({})).replace("0,", "\"by hand\","),
+    );
+    harness.effects.clear();
+
+    go_to_tab(&mut harness, Tab::History);
+    // The newest call is the raw one, which goes back as it was typed.
+    harness.key(KeyCode::Char('e'), KeyModifiers::NONE);
+    assert_eq!(harness.app.tab, Tab::Session);
+    assert_eq!(
+        harness.app.session.editor.text(),
+        r#"/raw {"jsonrpc":"2.0","id":"by hand","method":"solar.version"}"#
+    );
+    harness.app.session.editor.clear();
+
+    // The call before it is sent again, with the same parameters.
+    go_to_tab(&mut harness, Tab::History);
+    harness.key(KeyCode::Up, KeyModifiers::NONE);
+    harness.key(KeyCode::Char('r'), KeyModifiers::NONE);
+    let written = harness.written();
+    assert_eq!(written.len(), 1);
+    assert_eq!(written[0]["method"], json!("solar.ping"));
+    assert_eq!(written[0]["params"], json!({"message": "again"}));
+    harness.key(KeyCode::Char('e'), KeyModifiers::NONE);
+    assert_eq!(
+        harness.app.session.editor.text(),
+        r#"/call solar.ping {"message":"again"}"#
+    );
+}
+
+#[test]
+fn the_form_moves_between_its_fields_and_along_the_text_of_one() {
+    let mut harness = Harness::connected();
+    go_to_tab(&mut harness, Tab::Apis);
+    harness.key(KeyCode::Char('g'), KeyModifiers::NONE);
+    select_api(&mut harness, "solar.ping");
+    harness.key(KeyCode::Enter, KeyModifiers::NONE);
+    let fields = harness.app.apis.form.as_ref().unwrap().fields.len();
+    assert_eq!(fields, 1, "solar.ping takes one parameter");
+    harness.key(KeyCode::Down, KeyModifiers::NONE);
+    harness.key(KeyCode::Up, KeyModifiers::NONE);
+    assert_eq!(harness.app.apis.form.as_ref().unwrap().focus, 0);
+    harness.type_text("ac");
+    harness.key(KeyCode::Left, KeyModifiers::NONE);
+    harness.type_text("b");
+    harness.key(KeyCode::Right, KeyModifiers::NONE);
+    harness.type_text("d");
+    let form = harness.app.apis.form.as_ref().unwrap();
+    assert_eq!(form.fields[0].editor.text(), "abcd");
+}
+
+#[test]
+fn nothing_is_sent_while_solar_is_down_and_both_places_say_so() {
+    let mut harness = Harness::connected();
+    solar_goes_down(&mut harness);
+    let sentence = "SOLAR is not connected, so nothing was sent. Ctrl+R starts it.";
+
+    harness.run("/ping");
+    assert!(harness.written().is_empty());
+    assert!(
+        harness
+            .band()
+            .is_some_and(|band| band.lines.iter().any(|line| line == sentence)),
+        "{:?}",
+        harness.band()
+    );
+    assert_eq!(
+        harness.app.session.editor.text(),
+        "/ping",
+        "kept, to be run again"
+    );
+
+    harness.key(KeyCode::Char('u'), KeyModifiers::CONTROL);
+    go_to_tab(&mut harness, Tab::Apis);
+    harness.key(KeyCode::Char('g'), KeyModifiers::NONE);
+    select_api(&mut harness, "solar.ping");
+    harness.key(KeyCode::Enter, KeyModifiers::NONE);
+    harness.key(KeyCode::Enter, KeyModifiers::NONE);
+    assert!(harness.written().is_empty());
+    let errors = &harness.app.apis.form.as_ref().unwrap().errors;
+    assert!(
+        errors.iter().any(|(_, error)| error == sentence),
+        "{errors:?}"
+    );
+}

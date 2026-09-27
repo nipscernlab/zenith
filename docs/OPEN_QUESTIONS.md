@@ -275,8 +275,13 @@ fifth is room for the allocator, which does not hand pages back at once.
 On 27 September 2026 the tests ran 88.46 % of the lines of `zenith-client` and `zenith`,
 measured on Windows with SOLAR 0.2.0 present, leaving out the test double, `main.rs` and
 `xtask`. CI measures the same on Linux, where the code for Windows is not compiled and the
-code for Unix is, and its first run measured 88.15 %. The floor only rises: whoever raises
-the coverage may raise it, and nobody lowers it.
+code for Unix is. The floor only rises: whoever raises the coverage may raise it, and
+nobody lowers it.
+
+A coverage run draws the random cases of the property tests from one fixed seed. With a
+new seed each run, the figure moved with chance, because those cases were the only tests
+that reached some of the interaction code: CI measured 88.15 % and then 87.87 % with the
+same tests. The code they had reached by chance now has tests of its own.
 
 ### Mutation testing reports, and does not gate
 
