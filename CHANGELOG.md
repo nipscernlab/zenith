@@ -53,6 +53,15 @@ either is stated here in its own line.
 
 ### Fixed
 
+- The stars were never seen on a fast machine, where the opening lasts as long as the
+  connection. The rows above a transcript too short to fill the Session tab are now the
+  sky, with the opening's stars in the same cells, still, so that an idle ZENITH stays
+  idle.
+- The terminal's margin, and the scrollbar of Windows Terminal, showed the terminal's own
+  background beside ZENITH's, a black border on the right. At true colour and at 256
+  colours ZENITH sets the terminal's background to its own while it runs, with OSC 11, and
+  puts the terminal's own back when it exits, with OSC 111.
+
 - The property test that holds ZENITH's schema validator to the `jsonschema` crate failed
   on a schema ZENITH judges rightly: `jsonschema` 0.58.1 ignores what `then` and `else`
   evaluate when `if` is `true` or `false`, which the Python `jsonschema` 4.26.0 does not.

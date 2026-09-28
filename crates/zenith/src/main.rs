@@ -161,6 +161,7 @@ fn main() -> ExitCode {
     };
     let timings = Timings::from_environment(process_start);
     let mut runtime = Runtime::new(backend_terminal, options, timings);
+    runtime.paint_margin_with(terminal::paint_background);
     let sender = runtime.sender();
 
     // Keys, pastes and resizes, from a thread of their own that blocks on the terminal.

@@ -12,14 +12,11 @@ use ratatui::style::Style;
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Paragraph};
 
-use super::chrome::scatter;
+use super::chrome::sky;
 use super::{lockup, text};
 use crate::app::App;
 use crate::app::link::Phase;
 use crate::brand;
-
-/// One star in how many cells.
-const DENSITY: u64 = 29;
 
 /// What ZENITH is, on the row under its name.
 const WHAT: &str = "The terminal of Constellation";
@@ -107,29 +104,14 @@ pub fn draw(frame: &mut Frame<'_>, area: Rect, app: &App) {
         grow(card, 1),
     ];
     let frame_number = app.opening.map_or(0, |opening| opening.frame);
-    let buffer = frame.buffer_mut();
-    for y in area.y..area.y + area.height {
-        for x in area.x..area.x + area.width {
-            if keep_out
-                .iter()
-                .any(|rect| rect.height > 0 && contains(*rect, x, y))
-            {
-                continue;
-            }
-            let position = u64::from(y) * u64::from(area.width) + u64::from(x);
-            let value = scatter(position, 0x00C0_FFEE);
-            if !value.is_multiple_of(DENSITY) {
-                continue;
-            }
-            let twinkles = (value >> 24).is_multiple_of(3);
-            let phase = (value >> 16).wrapping_add(if twinkles { frame_number } else { 0 });
-            let bright = phase % 6 < 2;
-            let glyph = app.glyphs.stars[usize::try_from((value >> 8) % 4).unwrap_or(0)];
-            if let Some(cell) = buffer.cell_mut((x, y)) {
-                cell.set_symbol(glyph).set_style(theme.star(bright));
-            }
-        }
-    }
+    sky(
+        frame.buffer_mut(),
+        area.width,
+        area,
+        &keep_out,
+        frame_number,
+        app,
+    );
 
     // The mark, then the words beside it.
     let lines = lockup::lines(&brand::ZENITH, app.glyphs.charset, 0, &beside, theme);
@@ -181,8 +163,4 @@ fn grow(rect: Rect, by: u16) -> Rect {
         rect.width + 2 * by,
         rect.height + 2 * by,
     )
-}
-
-fn contains(rect: Rect, x: u16, y: u16) -> bool {
-    x >= rect.x && x < rect.x + rect.width && y >= rect.y && y < rect.y + rect.height
 }

@@ -2,7 +2,8 @@
 //! orbit.
 
 use ratatui::Frame;
-use ratatui::layout::Rect;
+use ratatui::buffer::Buffer;
+use ratatui::layout::{Position, Rect};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::Paragraph;
 
@@ -23,6 +24,45 @@ pub fn scatter(position: u64, seed: u64) -> u64 {
     z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
     z = (z ^ (z >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
     z ^ (z >> 31)
+}
+
+/// One star in how many cells of the sky.
+const DENSITY: u64 = 29;
+
+/// The sky: stars in the cells of `area` that no rect of `keep_out` covers. Where each star
+/// is depends only on its cell and on the screen's width, so the Session tab's sky has the
+/// stars the opening had, in the same cells. The stars twinkle with `frame`, which only the
+/// opening advances; everywhere else they are still, and an idle ZENITH stays idle.
+pub fn sky(
+    buffer: &mut Buffer,
+    screen_width: u16,
+    area: Rect,
+    keep_out: &[Rect],
+    frame: u64,
+    app: &App,
+) {
+    for y in area.y..area.y + area.height {
+        for x in area.x..area.x + area.width {
+            if keep_out
+                .iter()
+                .any(|rect| rect.height > 0 && rect.contains(Position::new(x, y)))
+            {
+                continue;
+            }
+            let position = u64::from(y) * u64::from(screen_width) + u64::from(x);
+            let value = scatter(position, 0x00C0_FFEE);
+            if !value.is_multiple_of(DENSITY) {
+                continue;
+            }
+            let twinkles = (value >> 24).is_multiple_of(3);
+            let phase = (value >> 16).wrapping_add(if twinkles { frame } else { 0 });
+            let bright = phase % 6 < 2;
+            let glyph = app.glyphs.stars[usize::try_from((value >> 8) % 4).unwrap_or(0)];
+            if let Some(cell) = buffer.cell_mut((x, y)) {
+                cell.set_symbol(glyph).set_style(app.theme.star(bright));
+            }
+        }
+    }
 }
 
 /// The header: the name, the tabs with their numbers, stars in the space left, `? keys`.

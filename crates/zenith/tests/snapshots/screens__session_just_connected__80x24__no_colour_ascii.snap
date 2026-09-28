@@ -3,10 +3,10 @@ source: crates/zenith/tests/screens.rs
 expression: screen(&buffer)
 ---
  ZENITH   1 Session  2 APIs  3 Log  4 History                .     .     ? keys
-
-
-
-
+                                         +             '
+       '        .                                       *
+         **        +               +       *
+ +   '.                                                      '
 
 
       ..######..
@@ -31,6 +31,15 @@ expression: screen(&buffer)
  0: 10-18  - on - bold underlined
  0: 45-72  - on - dim
  0: 73-73  - on - bold
+ 1: 55-55  - on - dim
+ 2:  7-7   - on - dim
+ 2: 16-16  - on - dim
+ 2: 56-56  - on - dim
+ 3: 10-10  - on - dim
+ 3: 19-19  - on - dim
+ 3: 43-43  - on - dim
+ 4:  1-1   - on - dim
+ 4:  5-5   - on - dim
  9: 22-26  - on - bold
 16:  3-3   - on - bold
 20:  0-79  - on - dim

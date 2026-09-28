@@ -139,6 +139,30 @@ did before SOLAR could change its level, and what it still does for a SOLAR that
 **Revisit when** someone wants to read what SOLAR wrote below the level they chose: the
 filter and SOLAR's level would then be two settings.
 
+### The Session tab's sky is still
+
+The architect saw no stars at all: the opening lasts as long as the connection, 28 ms on
+their machine. The rows above a short transcript now show the opening's stars, in the
+same cells, and they do not twinkle there, so that nothing wakes the loop of an idle
+ZENITH, which `STATUS.md` measures at no processor time. The other tabs have no sky: their
+lists and tables fill them.
+
+**Revisit when** a twinkling sky is wanted, at the price of twelve wake-ups a second.
+
+### ZENITH sets the terminal's background while it runs
+
+The margin a terminal keeps around its cells showed the terminal's own background beside
+ZENITH's, a black border on the right in the architect's Windows Terminal. ZENITH sets the
+terminal's background with OSC 11 at true colour and at 256 colours, and puts the
+terminal's own back with OSC 111 when it gives the terminal back, in the same three places
+it leaves the alternate screen. A terminal that knows OSC 11 but not OSC 111 would keep
+ZENITH's background after it exits; no such terminal was looked for. It was written with
+no terminal on screen to look at: the tests check the sequences and when they are sent,
+and whether Windows Terminal paints its margin with them is for a person to see.
+
+**Revisit when** a terminal keeps the colour after ZENITH exits: the background would then
+be asked for first, with OSC 11 and `?`, and written back.
+
 ## Validation
 
 ### A keyword ZENITH does not check never fails a call

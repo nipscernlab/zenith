@@ -75,30 +75,41 @@ impl Rgb {
     /// differently.
     #[must_use]
     pub fn nearest_256(self) -> u8 {
-        const STEPS: [u8; 6] = [0, 95, 135, 175, 215, 255];
         let distance = |a: Self, b: Self| {
             let d = |x: u8, y: u8| (i32::from(x) - i32::from(y)).pow(2);
             d(a.0, b.0) + d(a.1, b.1) + d(a.2, b.2)
         };
         let mut best = (u8::MAX, i32::MAX);
         for index in 16..=255_u8 {
-            let candidate = if index < 232 {
-                let offset = index - 16;
-                Self(
-                    STEPS[usize::from(offset / 36)],
-                    STEPS[usize::from(offset % 36 / 6)],
-                    STEPS[usize::from(offset % 6)],
-                )
-            } else {
-                let grey = 8 + (index - 232) * 10;
-                Self(grey, grey, grey)
-            };
+            let candidate = Self::of_256(index);
             let score = distance(self, candidate);
             if score < best.1 {
                 best = (index, score);
             }
         }
         best.0
+    }
+
+    /// The colour of entry `index` of the xterm 256-colour palette, from its cube and its
+    /// grey ramp; the first sixteen, which every terminal draws its own way, are black here.
+    #[must_use]
+    pub fn of_256(index: u8) -> Self {
+        const STEPS: [u8; 6] = [0, 95, 135, 175, 215, 255];
+        match index {
+            0..16 => Self(0, 0, 0),
+            16..232 => {
+                let offset = index - 16;
+                Self(
+                    STEPS[usize::from(offset / 36)],
+                    STEPS[usize::from(offset % 36 / 6)],
+                    STEPS[usize::from(offset % 6)],
+                )
+            }
+            _ => {
+                let grey = 8 + (index - 232) * 10;
+                Self(grey, grey, grey)
+            }
+        }
     }
 }
 
@@ -358,6 +369,19 @@ impl Theme {
             .bg(self.color(self.palette.background, self.sixteen().background))
     }
 
+    /// The colour of the margin a terminal keeps around its cells, where ZENITH cannot
+    /// draw: the background, as the terminal shows it, at the depths where ZENITH gives its
+    /// colours in red, green and blue or in the xterm palette. At sixteen colours and
+    /// without colour the background is the terminal's own, and so is the margin.
+    #[must_use]
+    pub fn margin(&self) -> Option<Rgb> {
+        match self.depth {
+            Depth::TrueColor => Some(self.palette.background),
+            Depth::Indexed => Some(Rgb::of_256(self.palette.background.nearest_256())),
+            Depth::Sixteen | Depth::None => None,
+        }
+    }
+
     /// Whether this is drawn with no colour at all.
     #[must_use]
     pub fn colourless(&self) -> bool {
@@ -514,6 +538,34 @@ mod tests {
             ("accent", palette.accent),
             ("error", palette.error),
         ]
+    }
+
+    #[test]
+    fn the_margin_is_the_background_the_terminal_shows_and_only_where_zenith_gives_it() {
+        let night = Theme::new(ThemeName::Night, Depth::TrueColor);
+        assert_eq!(night.margin(), Some(NIGHT));
+        let light = Theme::new(ThemeName::Light, Depth::TrueColor);
+        assert_eq!(light.margin(), Some(MIST));
+        // At 256 colours, the colour of the palette's entry the cells are drawn with.
+        let indexed = Theme::new(ThemeName::Night, Depth::Indexed);
+        assert_eq!(indexed.base().bg, Some(Color::Indexed(233)));
+        assert_eq!(indexed.margin(), Some(Rgb(18, 18, 18)));
+        for depth in [Depth::Sixteen, Depth::None] {
+            assert_eq!(Theme::new(ThemeName::Night, depth).margin(), None);
+        }
+    }
+
+    #[test]
+    fn the_256_palette_is_the_xterm_cube_and_grey_ramp() {
+        assert_eq!(Rgb::of_256(16), Rgb(0, 0, 0));
+        assert_eq!(Rgb::of_256(215), Rgb(255, 175, 95));
+        assert_eq!(Rgb::of_256(231), Rgb(255, 255, 255));
+        assert_eq!(Rgb::of_256(232), Rgb(8, 8, 8));
+        assert_eq!(Rgb::of_256(255), Rgb(238, 238, 238));
+        assert_eq!(Rgb::of_256(7), Rgb(0, 0, 0));
+        for index in 16..=255_u8 {
+            assert_eq!(Rgb::of_256(index).nearest_256(), index, "{index}");
+        }
     }
 
     #[test]
