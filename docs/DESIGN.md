@@ -120,7 +120,9 @@ below is the state of the connection.
 - **Any key skips it.** The connection carries on, and the status bar shows it.
 - **The stars twinkle** at twelve frames a second, and only during the opening. No star is
   drawn within two cells of the mark and its words, which is the clear space the brand
-  rules ask for, nor of the line below.
+  rules ask for, nor of the line below. Where a star is depends only on its cell and the
+  width of the screen, so the stars stay where they were when the opening gives way to the
+  Session tab, whose sky keeps them, still (section 4).
 - **The mark is never stretched, turned or recoloured outside the palette.** It is gold
   on the night background, copper on the light one, and the terminal's own foreground
   when there is no colour. With `--ascii` it is `banner-ascii.txt`.
@@ -141,6 +143,12 @@ place (section 9). The stars stay, still.
 
 The Session tab is a transcript above a command line. Every command typed, and every
 response to it, goes into the transcript, laid out for a person.
+
+**The sky.** A transcript too short to fill the tab sits at the bottom, next to the
+command line, and the rows above it are the sky: the stars the opening showed in those
+very cells, still, with one empty row between them and the first line. They are drawn
+where nothing is, they never move, and the sky shrinks as the transcript grows, so they
+cost nothing and wake nothing: an idle ZENITH stays idle.
 
 **A connection** starts with SOLAR's mark, laid out as SOLAR's brand lays it out, with
 the version that answered the handshake where the brand puts the version, and then the
@@ -757,6 +765,15 @@ principle 4 requires anyway.
 `--color <depth>` or `ZENITH_COLOR` overrides the guess: `truecolor`, `256`, `16` or
 `none`. `NO_COLOR` wins over everything except an explicit `--color`, which is the rule
 no-color.org gives to a user who asks for colour on purpose.
+
+**The margin.** A terminal keeps a margin around its cells, and Windows Terminal a
+scrollbar beside them, which no program can draw in: they show the terminal's own
+background, and next to ZENITH's they look like a black border. So, at true colour and at
+256 colours, ZENITH sets the terminal's background to its own while it runs, with OSC 11,
+the colour of the palette entry the cells are drawn with at 256, and again when `/theme`
+changes it; giving the terminal back puts the terminal's own back, with OSC 111. At 16
+colours and without colour the background is the terminal's own already, and ZENITH
+sends neither.
 
 ### 14.4 Characters
 

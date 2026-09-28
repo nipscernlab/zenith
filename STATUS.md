@@ -27,7 +27,7 @@ Everything the brief asks for, as `docs/DESIGN.md` describes it.
 
 | What | How many | Where |
 | ---- | -------- | ----- |
-| Tests | 345, all passing, against SOLAR 0.3.0 on this machine; 29 of them start a real program, the installed SOLAR or a double of it for the failures SOLAR cannot produce | `cargo nextest run --workspace` |
+| Tests | 350, all passing, against SOLAR 0.3.0 on this machine; 29 of them start a real program, the installed SOLAR or a double of it for the failures SOLAR cannot produce | `cargo nextest run --workspace` |
 | Snapshots | 135: every screen at 80 × 24 and 160 × 48 in each theme, without colour and in ASCII; the opening in each theme at 256 colours, 16 and none, and the Session tab at 256 and 16; the screen of a terminal too small; and the README's seven | `crates/zenith/tests/snapshots/` |
 | Line coverage | 89.73 % of the lines of `zenith-client` and `zenith` on Windows, with the tests against SOLAR 0.3.0, and 88.98 % on Linux in CI two changes before, against the head of SOLAR's main, counted from the job's lcov; the floor is 88 % | `cargo xtask coverage` |
 | The guide's table | 23 of 23 rows, typed into the real binary in a pseudo-terminal, on Windows 11 on this machine against SOLAR 0.3.0, and in CI on Linux, Windows and macOS | `cargo xtask walkthrough` |

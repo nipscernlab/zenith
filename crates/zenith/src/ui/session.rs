@@ -6,8 +6,8 @@ use ratatui::style::Modifier;
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Clear, Paragraph};
 
-use super::cards;
 use super::text::{self, pad, truncate, wrap};
+use super::{cards, chrome};
 use crate::app::App;
 use crate::app::session::Tone;
 
@@ -96,11 +96,21 @@ fn draw_transcript(frame: &mut Frame<'_>, area: Rect, app: &App) {
     let end = lines.len() - scroll;
     let start = end.saturating_sub(height);
     let visible: Vec<Line<'static>> = lines[start..end].to_vec();
-    // Short transcripts sit at the bottom, next to the command line.
+    // Short transcripts sit at the bottom, next to the command line, under the sky of the
+    // opening, which keeps one empty row between its stars and the first line.
     let top_padding = height.saturating_sub(visible.len());
     let mut shown: Vec<Line<'static>> = vec![Line::from(""); top_padding];
     shown.extend(visible);
     frame.render_widget(Paragraph::new(shown).style(theme.base()), area);
+    if let Some(rows) = top_padding
+        .checked_sub(1)
+        .and_then(|rows| u16::try_from(rows).ok())
+        .filter(|rows| *rows > 0)
+    {
+        let screen_width = frame.area().width;
+        let heavens = Rect::new(area.x, area.y, area.width, rows);
+        chrome::sky(frame.buffer_mut(), screen_width, heavens, &[], 0, app);
+    }
     if scroll > 0 {
         let marker = if app.session.unseen > 0 {
             format!(" {} {} new ", app.glyphs.down, app.session.unseen)

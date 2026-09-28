@@ -332,6 +332,69 @@ fn the_opening_in_every_theme_at_every_depth() {
     }
 }
 
+/// The Session tab's sky: the rows above a transcript too short to fill the tab show the
+/// stars the opening showed in those very cells, with no star on the row just above the
+/// first line; a transcript that fills the tab leaves no sky.
+#[test]
+fn a_short_transcript_sits_under_the_stars_of_the_opening() {
+    let night = || options(ThemeName::Night, Depth::TrueColor, Charset::Unicode);
+    let stars = zenith::glyphs::Glyphs::of(Charset::Unicode).stars;
+    let is_star = |symbol: &str| stars.contains(&symbol);
+    let opening = draw(&opening_connecting(night()).app, 80, 24);
+    let session = draw(&session_just_connected(night()).app, 80, 24);
+    let row_of = |buffer: &ratatui::buffer::Buffer, y: u16| -> Vec<String> {
+        (0..80)
+            .map(|x| buffer[(x, y)].symbol().to_owned())
+            .collect()
+    };
+    // The first row under the header with something on it other than stars.
+    let first = (1..24)
+        .find(|y| {
+            row_of(&session, *y)
+                .iter()
+                .any(|symbol| symbol != " " && !is_star(symbol))
+        })
+        .unwrap();
+    let mut seen = 0;
+    for y in 1..first {
+        for (x, symbol) in row_of(&session, y).iter().enumerate() {
+            if is_star(symbol) {
+                seen += 1;
+                assert_eq!(
+                    opening[(u16::try_from(x).unwrap(), y)].symbol(),
+                    symbol,
+                    "the star at {x}, {y} is not where the opening had one"
+                );
+            }
+        }
+    }
+    assert!(seen > 3, "only {seen} stars in the sky");
+    assert!(
+        !row_of(&session, first - 1)
+            .iter()
+            .any(|symbol| is_star(symbol)),
+        "a star touches the first line"
+    );
+    // The stars are still: a later frame of the same session draws the same sky.
+    let mut later = session_just_connected(night());
+    later.later(Duration::from_secs(5));
+    later.feed(Incoming::Tick);
+    let redrawn = draw(&later.app, 80, 24);
+    for y in 1..first {
+        assert_eq!(row_of(&redrawn, y), row_of(&session, y), "row {y} moved");
+    }
+    // A transcript that fills the tab leaves no sky: no row of stars and nothing else. The
+    // dot between a card's facts is a star's glyph too, which is why rows and not glyphs
+    // are counted.
+    let full = draw(&session_after_calls(night()).app, 80, 24);
+    for y in 1..20 {
+        let row = row_of(&full, y);
+        let sky = row.iter().any(|symbol| is_star(symbol))
+            && row.iter().all(|symbol| symbol == " " || is_star(symbol));
+        assert!(!sky, "row {y} of a full transcript is sky");
+    }
+}
+
 /// ZENITH's mark stands for ZENITH and SOLAR's for SOLAR: the opening draws ZENITH's and
 /// not SOLAR's, and where ZENITH shows SOLAR itself, the start of a connection and the
 /// card of `/version`, it draws SOLAR's and not ZENITH's.

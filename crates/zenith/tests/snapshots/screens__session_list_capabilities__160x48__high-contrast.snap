@@ -3,8 +3,8 @@ source: crates/zenith/tests/screens.rs
 expression: "screen(&draw(&script.app, width, height))"
 ---
  ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·                        ••      ·        ∙  ·                                        ? keys
-
-
+       ∙        ·                                       *                                **        •               •       *
+ •   ∙·                                                      ∙                    ·                                                         •
 
 
       ▄▄██████▄▄

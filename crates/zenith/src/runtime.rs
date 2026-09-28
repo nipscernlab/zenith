@@ -28,6 +28,7 @@ use crate::app::link::Failure;
 use crate::app::{App, Effect, Incoming, Options, StartSteps, Started, Written, report};
 use crate::clock::Utc;
 use crate::command_history;
+use crate::theme::Rgb;
 
 /// How many events may wait in the channel. When the interface falls behind, the threads
 /// that read SOLAR wait, and then SOLAR waits on its pipe: nothing piles up between.
@@ -162,6 +163,22 @@ pub struct Runtime<B: Backend> {
     queue: VecDeque<Incoming>,
     timings: Option<Timings>,
     history: HistoryWriter,
+    margin: Option<Margin>,
+}
+
+/// What paints the terminal's margin, and the colour it was last painted.
+struct Margin {
+    paint: Box<dyn FnMut(Rgb) + Send>,
+    painted: Option<Rgb>,
+}
+
+impl std::fmt::Debug for Margin {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter
+            .debug_struct("Margin")
+            .field("painted", &self.painted)
+            .finish_non_exhaustive()
+    }
 }
 
 impl<B: Backend> Runtime<B> {
@@ -179,6 +196,7 @@ impl<B: Backend> Runtime<B> {
             queue: VecDeque::new(),
             timings,
             history,
+            margin: None,
         };
         if let Ok(size) = runtime.terminal.size() {
             runtime.queue.push_back(Incoming::Resize {
@@ -188,6 +206,27 @@ impl<B: Backend> Runtime<B> {
         }
         runtime.execute(effects);
         runtime
+    }
+
+    /// Paints the terminal's margin with `paint`, in the colour the theme gives it, before
+    /// the first frame and again whenever the theme changes it. The binary passes
+    /// `terminal::paint_background`; the tests pass something that watches.
+    pub fn paint_margin_with(&mut self, paint: impl FnMut(Rgb) + Send + 'static) {
+        self.margin = Some(Margin {
+            paint: Box::new(paint),
+            painted: None,
+        });
+    }
+
+    fn paint_margin(&mut self) {
+        let wanted = self.app.theme.margin();
+        if let Some(margin) = self.margin.as_mut()
+            && margin.painted != wanted
+            && let Some(rgb) = wanted
+        {
+            (margin.paint)(rgb);
+            margin.painted = wanted;
+        }
     }
 
     /// Where events are sent from other threads, and from the tests.
@@ -292,20 +331,24 @@ impl<B: Backend> Runtime<B> {
             let effects = self.app.handle(incoming, started);
             self.execute(effects);
             handled += 1;
-            if key && let Some(timings) = &mut self.timings {
+            if key && self.timings.is_some() {
                 let handle = started.elapsed().as_micros();
                 // The draw is measured with the key, since the redraw is what a person
                 // waits for.
+                self.paint_margin();
                 draw_frame(&mut self.terminal, &self.app)?;
                 let total = started.elapsed().as_micros();
-                timings.frames += 1;
-                timings.mark("key", &[("handle_us", handle), ("total_us", total)]);
+                if let Some(timings) = &mut self.timings {
+                    timings.frames += 1;
+                    timings.mark("key", &[("handle_us", handle), ("total_us", total)]);
+                }
             }
         }
         Ok(())
     }
 
     fn draw(&mut self) -> io::Result<()> {
+        self.paint_margin();
         draw_frame(&mut self.terminal, &self.app)?;
         if let Some(timings) = &mut self.timings {
             timings.frames += 1;
@@ -575,6 +618,55 @@ fn start_solar(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_margin_is_painted_before_the_first_frame_and_again_only_when_the_theme_changes() {
+        use ratatui::backend::TestBackend;
+        use ratatui::crossterm::event::{
+            KeyCode, KeyEvent, KeyEventKind, KeyEventState, KeyModifiers,
+        };
+
+        let options = Options {
+            opening: false,
+            solar: Some(PathBuf::from("no-such-solar-for-the-margin")),
+            history: crate::app::KeptHistory::default(),
+            ..Options::default()
+        };
+        let terminal = Terminal::new(TestBackend::new(80, 24)).unwrap();
+        let mut runtime = Runtime::new(terminal, options, None);
+        let painted = Arc::new(Mutex::new(Vec::new()));
+        let seen = Arc::clone(&painted);
+        runtime.paint_margin_with(move |rgb| seen.lock().unwrap().push(rgb));
+        runtime.step(Duration::from_millis(10)).unwrap();
+        runtime.step(Duration::from_millis(10)).unwrap();
+        assert_eq!(*painted.lock().unwrap(), vec![crate::theme::NIGHT]);
+        let sender = runtime.sender();
+        for character in "/theme light".chars() {
+            sender
+                .send(Incoming::Key(KeyEvent {
+                    code: KeyCode::Char(character),
+                    modifiers: KeyModifiers::NONE,
+                    kind: KeyEventKind::Press,
+                    state: KeyEventState::NONE,
+                }))
+                .unwrap();
+        }
+        sender
+            .send(Incoming::Key(KeyEvent {
+                code: KeyCode::Enter,
+                modifiers: KeyModifiers::NONE,
+                kind: KeyEventKind::Press,
+                state: KeyEventState::NONE,
+            }))
+            .unwrap();
+        for _ in 0..5 {
+            runtime.step(Duration::from_millis(10)).unwrap();
+        }
+        assert_eq!(
+            *painted.lock().unwrap(),
+            vec![crate::theme::NIGHT, crate::theme::MIST]
+        );
+    }
 
     #[test]
     fn a_file_is_never_overwritten_and_a_taken_name_gets_a_number() {

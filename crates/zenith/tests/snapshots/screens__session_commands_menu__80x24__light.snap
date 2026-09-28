@@ -3,10 +3,10 @@ source: crates/zenith/tests/screens.rs
 expression: "screen(&draw(&script.app, width, height))"
 ---
  ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·     ? keys
-
-
-
-
+                                         •             ∙
+       ∙        ·                                       *
+         **        •               •       *
+ •   ∙·                                                      ∙
 
 
       ▄▄██████▄▄
@@ -35,6 +35,20 @@ expression: "screen(&draw(&script.app, width, height))"
  0: 45-72  #868482 on #F5F1E8
  0: 73-73  #8C4907 on #F5F1E8 bold
  0: 74-79  #555355 on #F5F1E8
+ 1: 41-41  #555355 on #F5F1E8
+ 1: 55-55  #868482 on #F5F1E8
+ 2:  7-7   #868482 on #F5F1E8
+ 2: 16-16  #868482 on #F5F1E8
+ 2: 56-56  #868482 on #F5F1E8
+ 3:  9-9   #555355 on #F5F1E8
+ 3: 10-10  #868482 on #F5F1E8
+ 3: 19-19  #868482 on #F5F1E8
+ 3: 35-35  #555355 on #F5F1E8
+ 3: 43-43  #868482 on #F5F1E8
+ 4:  1-1   #868482 on #F5F1E8
+ 4:  5-5   #868482 on #F5F1E8
+ 4:  6-6   #555355 on #F5F1E8
+ 4: 61-61  #555355 on #F5F1E8
  7:  3-18  #B35A00 on #F5F1E8
  8:  3-18  #B35A00 on #F5F1E8
  9:  3-18  #B35A00 on #F5F1E8

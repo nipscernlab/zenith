@@ -106,7 +106,7 @@ cd ~\constellation\zenith
 
 A starfield with ZENITH's mark, the dome of an observatory, shows while SOLAR starts,
 which on a fast machine is too quick to see. Then the Session tab shows SOLAR's mark, a
-disc cut by two slots, with SOLAR's version beside it, and says
+disc cut by two slots, with SOLAR's version beside it, under the opening's stars, and says
 `Connected to SOLAR <version> in <time>: protocol solar/1, manifest 2.0.0, <n> APIs.`
 
 ## 4. What to try
