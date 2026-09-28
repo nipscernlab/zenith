@@ -350,4 +350,47 @@ mod tests {
     fn a_line_without_a_slash_offers_nothing() {
         assert!(inserts("solar.ping").is_empty());
     }
+
+    fn replaced(line: &str, catalogue: &Catalogue) -> Option<std::ops::Range<usize>> {
+        complete(line, line.len(), Some(catalogue)).map(|completion| completion.replace)
+    }
+
+    #[test]
+    fn a_key_of_the_parameters_is_replaced_where_it_is_on_the_line() {
+        // Two spaces before the parameters, so that where they start is not where the
+        // API's name ends.
+        let line = r#"/call solar.ping  {"me"#;
+        assert_eq!(replaced(line, &catalogue()), Some(19..22));
+        assert_eq!(inserts(line).len(), 1);
+    }
+
+    #[test]
+    fn a_value_of_the_parameters_is_replaced_where_it_is_on_the_line() {
+        let catalogue = Catalogue::from_data(&serde_json::json!({
+            "schema_version": "2.0.0",
+            "apis": [{
+                "name": "t.flag",
+                "params_schema": {"type": "object", "properties": {"on": {"type": "boolean"}}}
+            }]
+        }))
+        .unwrap();
+        let line = r#"/call t.flag {"on": t"#;
+        let completion = complete(line, line.len(), Some(&catalogue)).unwrap();
+        assert_eq!(completion.replace, 20..21);
+        let offered: Vec<String> = completion
+            .candidates
+            .into_iter()
+            .map(|candidate| candidate.insert)
+            .collect();
+        assert_eq!(offered, ["true"]);
+    }
+
+    #[test]
+    fn a_theme_or_a_command_is_offered_in_the_first_word_only() {
+        let catalogue = catalogue();
+        assert!(complete("/theme ni", 9, Some(&catalogue)).is_some());
+        assert!(complete("/theme night ", 13, Some(&catalogue)).is_none());
+        assert!(complete("/help pi", 8, Some(&catalogue)).is_some());
+        assert!(complete("/help ping ", 11, Some(&catalogue)).is_none());
+    }
 }

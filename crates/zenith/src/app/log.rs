@@ -343,4 +343,25 @@ mod tests {
             Some("SOLAR kept its level: no")
         );
     }
+
+    #[test]
+    fn a_line_of_the_log_is_counted_by_its_members_and_an_overhead() {
+        let entry = LogEntry::read(TRACE, 0, 1, SystemTime::UNIX_EPOCH);
+        let message = entry.message.len();
+        let time = "2026-09-27T15:47:00.906643Z".len();
+        assert_eq!(entry.request_id, None);
+        assert_eq!(entry.bytes(), message + time + limits::ENTRY_OVERHEAD);
+        let full = LogEntry::read(
+            r#"{"level":"debug","message":"answered","method":"solar.ping","request_id":"3","time":"t"}"#,
+            0,
+            1,
+            SystemTime::UNIX_EPOCH,
+        );
+        assert_eq!(
+            full.bytes(),
+            "answered".len() + 1 + 1 + "solar.ping".len() + limits::ENTRY_OVERHEAD
+        );
+        let raw = LogEntry::read("panicked", 0, 1, SystemTime::UNIX_EPOCH);
+        assert_eq!(raw.bytes(), "panicked".len() + limits::ENTRY_OVERHEAD);
+    }
 }

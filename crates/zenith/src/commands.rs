@@ -502,4 +502,38 @@ mod tests {
             assert!(parse(&line, &APIS).is_ok(), "{line}");
         }
     }
+
+    #[test]
+    fn each_command_parses_to_itself_and_to_no_other() {
+        for (line, command) in [
+            ("/list", Command::List),
+            ("/version", Command::Version),
+            ("/reconnect", Command::Reconnect),
+            ("/clear", Command::Clear),
+            ("/quit", Command::Quit),
+            ("/forget", Command::Forget),
+            ("/export", Command::Export { path: None }),
+            ("/report", Command::Report { path: None }),
+            ("/ping", Command::Ping { message: None }),
+            ("/theme", Command::Theme { name: None }),
+            ("/help", Command::Help { command: None }),
+            (
+                "/raw {}",
+                Command::Raw {
+                    line: "{}".to_owned(),
+                },
+            ),
+            (
+                "/describe solar.ping",
+                Command::Describe {
+                    api: "solar.ping".to_owned(),
+                },
+            ),
+        ] {
+            assert_eq!(parse(line, &APIS), Ok(Some(command)), "{line}");
+        }
+        // The help of one command is not the help of another.
+        assert_ne!(parse("/help ping", &APIS), parse("/help list", &APIS));
+        assert_eq!(parse("/help ping", &APIS), parse("/help ping", &APIS));
+    }
 }

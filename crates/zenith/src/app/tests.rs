@@ -70,14 +70,33 @@ impl Harness {
 
     /// A ZENITH started with this command line history.
     fn with(history: KeptHistory) -> Self {
-        let now = Instant::now();
-        let options = Options {
+        Self::started(Options {
             opening: false,
             history,
             ..Options::default()
-        };
+        })
+    }
+
+    /// A ZENITH started with these options.
+    fn started(options: Options) -> Self {
+        let now = Instant::now();
         let (app, effects) = App::new(options, now, wall());
         Self { app, now, effects }
+    }
+
+    /// A ZENITH that could not start SOLAR, with the opening showing the failure card.
+    fn failed_at_the_start() -> Self {
+        let mut harness = Self::started(Options::default());
+        harness.feed(Incoming::Started {
+            generation: 1,
+            result: Err(Failure::Locate(
+                zenith_client::locate::LocateError::NotOnPath { directories: 12 },
+            )),
+        });
+        assert_eq!(harness.app.link.phase, Phase::Down);
+        assert!(harness.app.opening.is_some());
+        harness.effects.clear();
+        harness
     }
 
     fn connected() -> Self {
@@ -173,6 +192,14 @@ impl Harness {
     fn run(&mut self, line: &str) {
         self.type_text(line);
         self.key(KeyCode::Enter, KeyModifiers::NONE);
+    }
+
+    fn paste(&mut self, text: &str) {
+        self.feed(Incoming::Paste(text.to_owned()));
+    }
+
+    fn line(&self) -> &str {
+        self.app.session.editor.text()
     }
 
     fn written(&self) -> Vec<Value> {
@@ -1516,4 +1543,645 @@ fn a_written_recording_says_where_it_is_and_what_it_left_out() {
         harness.app.flash.clone().map(|(_, text)| text).as_deref(),
         Some("Could not write the recording: rec.ndjson: it exists")
     );
+}
+
+#[test]
+fn a_key_that_means_nothing_where_it_is_pressed_types_nothing() {
+    let mut harness = Harness::connected();
+    harness.key(KeyCode::Char('z'), KeyModifiers::CONTROL);
+    assert_eq!(
+        harness.line(),
+        "",
+        "Ctrl+Z has no meaning on the command line"
+    );
+    harness.key(KeyCode::Char('?'), KeyModifiers::NONE);
+    assert!(matches!(harness.app.overlay, Some(Overlay::Help { .. })));
+    harness.key(KeyCode::Char('z'), KeyModifiers::NONE);
+    harness.key(KeyCode::Esc, KeyModifiers::NONE);
+    assert_eq!(harness.app.overlay, None);
+    assert_eq!(
+        harness.line(),
+        "",
+        "a letter pressed over the help is not typed under it"
+    );
+}
+
+#[test]
+fn the_function_keys_and_alt_with_a_digit_go_straight_to_a_tab() {
+    let mut harness = Harness::connected();
+    for (code, modifiers, tab) in [
+        (KeyCode::F(3), KeyModifiers::NONE, Tab::Log),
+        (KeyCode::F(2), KeyModifiers::NONE, Tab::Apis),
+        (KeyCode::F(4), KeyModifiers::NONE, Tab::History),
+        (KeyCode::F(1), KeyModifiers::NONE, Tab::Session),
+        (KeyCode::Char('4'), KeyModifiers::ALT, Tab::History),
+        (KeyCode::Char('1'), KeyModifiers::ALT, Tab::Session),
+    ] {
+        harness.key(code, modifiers);
+        assert_eq!(harness.app.tab, tab, "{code:?} with {modifiers:?}");
+    }
+}
+
+#[test]
+fn a_slash_on_another_tab_goes_to_the_command_line_with_a_slash_on_it() {
+    let mut harness = Harness::connected();
+    go_to_tab(&mut harness, Tab::Log);
+    harness.key(KeyCode::Char('/'), KeyModifiers::NONE);
+    assert_eq!(harness.app.tab, Tab::Session);
+    assert_eq!(harness.line(), "/");
+    // A line already started is left as it is.
+    harness.type_text("pi");
+    harness.key(KeyCode::F(4), KeyModifiers::NONE);
+    harness.key(KeyCode::Char('/'), KeyModifiers::NONE);
+    assert_eq!(harness.app.tab, Tab::Session);
+    assert_eq!(harness.line(), "/pi");
+}
+
+#[test]
+fn ctrl_l_asks_for_the_whole_screen_to_be_drawn_again_even_from_the_filter() {
+    let mut harness = Harness::connected();
+    harness.key(KeyCode::Char('l'), KeyModifiers::CONTROL);
+    assert_eq!(harness.effects, vec![Effect::Repaint]);
+    go_to_tab(&mut harness, Tab::Apis);
+    harness.key(KeyCode::Char('f'), KeyModifiers::NONE);
+    harness.effects.clear();
+    harness.key(KeyCode::Char('l'), KeyModifiers::CONTROL);
+    assert_eq!(harness.effects, vec![Effect::Repaint]);
+}
+
+#[test]
+fn trying_again_from_the_failure_card_twinkles_again_a_frame_later() {
+    let mut harness = Harness::failed_at_the_start();
+    harness.later(Duration::from_secs(3));
+    harness.key(KeyCode::Char('r'), KeyModifiers::CONTROL);
+    assert!(matches!(
+        harness.effects.last(),
+        Some(Effect::Start { generation: 2, .. })
+    ));
+    assert_eq!(harness.app.link.phase, Phase::Starting);
+    assert_eq!(
+        harness.app.next_deadline(),
+        Some(harness.now + OPENING_FRAME)
+    );
+    let frame = harness.app.opening.map(|opening| opening.frame);
+    harness.feed(Incoming::Tick);
+    assert_eq!(
+        harness.app.opening.map(|opening| opening.frame),
+        frame,
+        "the next frame is not due yet"
+    );
+}
+
+#[test]
+fn enter_on_the_failure_card_goes_on_to_the_tabs() {
+    let mut harness = Harness::failed_at_the_start();
+    assert!(screen_text(&harness.app).contains("Not connected to SOLAR"));
+    harness.key(KeyCode::Enter, KeyModifiers::NONE);
+    assert!(harness.app.opening.is_none());
+    let screen = screen_text(&harness.app);
+    assert!(screen.contains("4 History"), "{screen}");
+}
+
+#[test]
+fn q_on_the_failure_card_quits() {
+    let mut harness = Harness::failed_at_the_start();
+    // The command line takes printable keys even under the card, so the card is tried
+    // with the APIs tab under it.
+    harness.key(KeyCode::Tab, KeyModifiers::NONE);
+    harness.key(KeyCode::Char('q'), KeyModifiers::NONE);
+    assert!(harness.app.quitting);
+    assert!(harness.effects.contains(&Effect::Quit));
+}
+
+#[test]
+fn the_help_scrolls_by_a_line_and_a_page_and_to_either_end() {
+    let mut harness = Harness::connected();
+    harness.key(KeyCode::Char('?'), KeyModifiers::NONE);
+    let scroll = |harness: &Harness| match harness.app.overlay {
+        Some(Overlay::Help { scroll }) => scroll,
+        other => panic!("the help is not open: {other:?}"),
+    };
+    assert_eq!(scroll(&harness), 0);
+    // At 24 rows a page of the help is 18 lines.
+    for (code, expected) in [
+        (KeyCode::Down, 1),
+        (KeyCode::Char('j'), 2),
+        (KeyCode::PageDown, 20),
+        (KeyCode::Up, 19),
+        (KeyCode::Char('k'), 18),
+        (KeyCode::PageUp, 0),
+    ] {
+        harness.key(code, KeyModifiers::NONE);
+        assert_eq!(scroll(&harness), expected, "after {code:?}");
+    }
+    let last_line = "Every action has a plain key or a Ctrl key";
+    assert!(!screen_text(&harness.app).contains(last_line));
+    harness.key(KeyCode::End, KeyModifiers::NONE);
+    assert!(screen_text(&harness.app).contains(last_line));
+    harness.key(KeyCode::Home, KeyModifiers::NONE);
+    assert_eq!(scroll(&harness), 0);
+    assert!(!screen_text(&harness.app).contains(last_line));
+}
+
+#[test]
+fn the_viewer_goes_to_the_previous_and_the_next_call_and_stops_at_either_end() {
+    let mut harness = Harness::connected();
+    harness.run("/ping");
+    let id = harness.written()[0]["id"].as_u64().unwrap();
+    harness.answer(id, &success(id, "solar.ping", &json!({"pong": true})));
+    // The handshake's two calls are the first two of the History, and the ping the third.
+    harness.key(KeyCode::Char('o'), KeyModifiers::CONTROL);
+    let viewing = |harness: &Harness| match harness.app.overlay {
+        Some(Overlay::Viewer { record, .. }) => record,
+        other => panic!("the viewer is not open: {other:?}"),
+    };
+    assert_eq!(viewing(&harness), 2);
+    assert!(!screen_text(&harness.app).contains("solar.manifest"));
+    harness.key(KeyCode::Left, KeyModifiers::NONE);
+    assert_eq!(viewing(&harness), 1);
+    assert!(screen_text(&harness.app).contains("solar.manifest"));
+    for (code, expected) in [
+        (KeyCode::Left, 0),
+        (KeyCode::Left, 0),
+        (KeyCode::Right, 1),
+        (KeyCode::Right, 2),
+        (KeyCode::Right, 2),
+    ] {
+        harness.key(code, KeyModifiers::NONE);
+        assert_eq!(viewing(&harness), expected, "after {code:?}");
+    }
+}
+
+#[test]
+fn ctrl_c_empties_the_command_line_of_the_session_tab_and_leaves_it_from_another() {
+    let mut harness = Harness::connected();
+    harness.type_text("/ping");
+    harness.key(KeyCode::Char('c'), KeyModifiers::CONTROL);
+    assert_eq!(harness.line(), "");
+    assert!(!harness.app.quitting);
+    harness.type_text("/version");
+    harness.key(KeyCode::F(3), KeyModifiers::NONE);
+    harness.key(KeyCode::Char('c'), KeyModifiers::CONTROL);
+    assert_eq!(harness.line(), "/version");
+    assert!(!harness.app.quitting);
+}
+
+#[test]
+fn a_paste_goes_onto_the_command_line_even_from_a_tab_without_a_text_field() {
+    let mut harness = Harness::connected();
+    harness.paste("/ping one");
+    assert_eq!(harness.line(), "/ping one");
+    harness.key(KeyCode::Char('u'), KeyModifiers::CONTROL);
+    go_to_tab(&mut harness, Tab::Log);
+    harness.paste("/version");
+    assert_eq!(harness.app.tab, Tab::Session);
+    assert_eq!(harness.line(), "/version");
+}
+
+#[test]
+fn the_filter_takes_every_key_until_enter_or_esc_closes_it() {
+    let mut harness = Harness::connected();
+    go_to_tab(&mut harness, Tab::Apis);
+    select_api(&mut harness, "solar.ping");
+    harness.key(KeyCode::Char('f'), KeyModifiers::NONE);
+    assert!(harness.app.apis.filtering);
+    harness.type_text("inf?");
+    assert_eq!(harness.app.apis.filter.text(), "inf?");
+    assert_eq!(
+        harness.app.overlay, None,
+        "a question mark is text in the filter"
+    );
+    harness.key(KeyCode::Backspace, KeyModifiers::NONE);
+    assert_eq!(harness.app.apis.filter.text(), "inf");
+    assert_eq!(
+        harness.app.selected_api().map(|api| api.name.as_str()),
+        Some("system.info")
+    );
+    harness.key(KeyCode::Tab, KeyModifiers::NONE);
+    assert_eq!(harness.app.tab, Tab::Apis, "Tab stays in the filter");
+    harness.paste("o");
+    assert_eq!(harness.app.apis.filter.text(), "info");
+    harness.key(KeyCode::Enter, KeyModifiers::NONE);
+    assert!(!harness.app.apis.filtering);
+    assert_eq!(
+        harness.app.apis.filter.text(),
+        "info",
+        "the filter stays applied"
+    );
+    harness.key(KeyCode::Esc, KeyModifiers::NONE);
+    assert!(harness.app.apis.filter.is_empty());
+}
+
+#[test]
+fn shift_tab_on_a_line_with_text_goes_back_through_the_candidates() {
+    let mut harness = Harness::connected();
+    harness.type_text("/");
+    let inserts: Vec<String> = harness
+        .app
+        .session
+        .completion
+        .as_ref()
+        .map(|completion| {
+            completion
+                .candidates
+                .iter()
+                .map(|candidate| candidate.insert.clone())
+                .collect()
+        })
+        .unwrap_or_default();
+    assert!(inserts.len() > 2, "{inserts:?}");
+    harness.key(KeyCode::BackTab, KeyModifiers::SHIFT);
+    harness.key(KeyCode::BackTab, KeyModifiers::SHIFT);
+    harness.key(KeyCode::Tab, KeyModifiers::NONE);
+    assert_eq!(harness.line(), inserts[inserts.len() - 2]);
+}
+
+#[test]
+fn up_and_down_walk_the_command_line_history_and_back_to_the_line_being_typed() {
+    let mut harness = Harness::connected_with(kept_in_a_file());
+    harness.type_text("/ping draft");
+    for (code, expected) in [
+        (KeyCode::Up, "/ping hello"),
+        (KeyCode::Up, "/list"),
+        (KeyCode::Down, "/ping hello"),
+        (KeyCode::Down, "/ping draft"),
+    ] {
+        harness.key(code, KeyModifiers::NONE);
+        assert_eq!(harness.line(), expected, "after {code:?}");
+    }
+}
+
+#[test]
+fn the_cursor_keys_move_along_the_command_line_and_typing_goes_in_at_the_cursor() {
+    let mut harness = Harness::connected();
+    harness.type_text("/pig one");
+    harness.key(KeyCode::Home, KeyModifiers::NONE);
+    for _ in 0..3 {
+        harness.key(KeyCode::Right, KeyModifiers::NONE);
+    }
+    harness.type_text("n");
+    assert_eq!(harness.line(), "/ping one");
+    harness.key(KeyCode::End, KeyModifiers::NONE);
+    harness.type_text(" two");
+    assert_eq!(harness.line(), "/ping one two");
+    harness.key(KeyCode::Left, KeyModifiers::CONTROL);
+    harness.key(KeyCode::Left, KeyModifiers::NONE);
+    harness.type_text(",");
+    assert_eq!(harness.line(), "/ping one, two");
+}
+
+#[test]
+fn the_page_keys_scroll_the_entry_of_the_selected_api() {
+    let mut harness = Harness::connected();
+    go_to_tab(&mut harness, Tab::Apis);
+    let top = screen_text(&harness.app);
+    // At 24 rows a page of the entry is 18 lines.
+    harness.key(KeyCode::PageDown, KeyModifiers::NONE);
+    assert_eq!(harness.app.apis.scroll, 18);
+    assert_ne!(screen_text(&harness.app), top);
+    harness.key(KeyCode::PageUp, KeyModifiers::NONE);
+    assert_eq!(harness.app.apis.scroll, 0);
+    assert_eq!(screen_text(&harness.app), top);
+}
+
+#[test]
+fn a_on_the_apis_tab_runs_every_example_of_the_selected_api() {
+    let mut harness = Harness::connected();
+    go_to_tab(&mut harness, Tab::Apis);
+    select_api(&mut harness, "solar.ping");
+    harness.key(KeyCode::Char('a'), KeyModifiers::NONE);
+    let written = harness.written();
+    let calls: Vec<(&Value, &Value)> = written
+        .iter()
+        .map(|request| (&request["method"], &request["params"]))
+        .collect();
+    assert_eq!(
+        calls,
+        [
+            (&json!("solar.ping"), &json!({})),
+            (&json!("solar.ping"), &json!({"message": "hi"}))
+        ]
+    );
+    for index in 0..2 {
+        assert_eq!(
+            harness
+                .app
+                .apis
+                .results
+                .get(&("solar.ping".to_owned(), index)),
+            Some(&ExampleResult::Running)
+        );
+    }
+}
+
+#[test]
+fn e_on_the_apis_tab_puts_the_first_example_on_the_command_line() {
+    let mut harness = Harness::connected();
+    go_to_tab(&mut harness, Tab::Apis);
+    // solar.describe is the first API, and its first example describes solar.ping.
+    harness.key(KeyCode::Char('e'), KeyModifiers::NONE);
+    assert_eq!(harness.app.tab, Tab::Session);
+    assert_eq!(
+        harness.line(),
+        r#"/call solar.describe {"api":"solar.ping"}"#
+    );
+}
+
+#[test]
+fn a_capital_r_on_the_apis_tab_reads_the_manifest_again_and_says_so() {
+    let mut harness = Harness::connected();
+    go_to_tab(&mut harness, Tab::Apis);
+    harness.key(KeyCode::Char('R'), KeyModifiers::SHIFT);
+    let written = harness.written();
+    assert_eq!(written.len(), 1);
+    assert_eq!(written[0]["method"], json!("solar.manifest"));
+    let id = written[0]["id"].as_u64().unwrap();
+    let manifest: Value = serde_json::from_str(MANIFEST).unwrap();
+    harness.answer(id, &success(id, "solar.manifest", &manifest));
+    assert_eq!(
+        harness.app.flash,
+        Some((
+            Tone::Info,
+            "The manifest was read again: 5 APIs.".to_owned()
+        ))
+    );
+}
+
+/// The manifest of 0.3.0 with one more API, `test.form`, whose form has three fields: a
+/// name of at least three characters, which is required, a boolean, and a whole number of
+/// at least one.
+fn manifest_with_a_form_of_three_fields() -> Value {
+    let mut manifest = manifest_0_3_0();
+    manifest["apis"].as_array_mut().unwrap().push(json!({
+        "name": "test.form",
+        "params_schema": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "name": {"type": "string", "minLength": 3},
+                "loud": {"type": "boolean"},
+                "times": {"type": "integer", "minimum": 1}
+            },
+            "required": ["name"]
+        }
+    }));
+    manifest
+}
+
+/// Opens the form of `api` on the APIs tab.
+fn open_form(harness: &mut Harness, api: &str) {
+    go_to_tab(harness, Tab::Apis);
+    select_api(harness, api);
+    harness.key(KeyCode::Enter, KeyModifiers::NONE);
+    assert_eq!(
+        harness.app.apis.form.as_ref().map(|form| form.api.as_str()),
+        Some(api)
+    );
+}
+
+#[test]
+fn the_form_moves_between_its_fields_both_ways_and_round_from_either_end() {
+    let mut harness = Harness::connected_to(&manifest_with_a_form_of_three_fields());
+    open_form(&mut harness, "test.form");
+    let focus = |harness: &Harness| harness.app.apis.form.as_ref().map(|form| form.focus);
+    assert_eq!(focus(&harness), Some(0));
+    for (code, expected) in [
+        (KeyCode::Tab, 1),
+        (KeyCode::Down, 2),
+        (KeyCode::Tab, 0),
+        (KeyCode::BackTab, 2),
+        (KeyCode::Up, 1),
+        (KeyCode::Up, 0),
+    ] {
+        harness.key(code, KeyModifiers::NONE);
+        assert_eq!(focus(&harness), Some(expected), "after {code:?}");
+    }
+}
+
+#[test]
+fn the_form_of_an_api_without_parameters_takes_the_keys_of_the_fields_and_still_runs() {
+    let mut harness = Harness::connected();
+    open_form(&mut harness, "solar.version");
+    for code in [KeyCode::Tab, KeyCode::Down, KeyCode::BackTab, KeyCode::Up] {
+        harness.key(code, KeyModifiers::NONE);
+    }
+    assert_eq!(
+        harness.app.apis.form.as_ref().map(|form| form.focus),
+        Some(0)
+    );
+    harness.key(KeyCode::Enter, KeyModifiers::NONE);
+    let written = harness.written();
+    assert_eq!(written[0]["method"], json!("solar.version"));
+    assert_eq!(written[0]["params"], json!({}));
+}
+
+#[test]
+fn a_boolean_toggles_with_space_and_a_failure_is_shown_at_the_field_it_is_about() {
+    let mut harness = Harness::connected_to(&manifest_with_a_form_of_three_fields());
+    open_form(&mut harness, "test.form");
+    harness.type_text("ab");
+    harness.key(KeyCode::Tab, KeyModifiers::NONE);
+    harness.key(KeyCode::Char(' '), KeyModifiers::NONE);
+    harness.key(KeyCode::Tab, KeyModifiers::NONE);
+    harness.type_text("2");
+    harness.key(KeyCode::Enter, KeyModifiers::NONE);
+    assert!(
+        harness.written().is_empty(),
+        "a name of two characters is refused"
+    );
+    let errors = &harness.app.apis.form.as_ref().unwrap().errors;
+    let fields: Vec<Option<usize>> = errors.iter().map(|(field, _)| *field).collect();
+    assert_eq!(fields, [Some(0)], "{errors:?}");
+    // The name is mended where it failed.
+    harness.key(KeyCode::BackTab, KeyModifiers::NONE);
+    harness.key(KeyCode::BackTab, KeyModifiers::NONE);
+    harness.type_text("c");
+    harness.key(KeyCode::Enter, KeyModifiers::NONE);
+    assert_eq!(
+        harness.written()[0]["params"],
+        json!({"name": "abc", "loud": true, "times": 2})
+    );
+}
+
+/// Feeds SOLAR's standard error one JSON log line.
+fn log_line(harness: &mut Harness, level: &str, message: &str) {
+    harness.feed(Incoming::Connection {
+        generation: harness.app.link.generation,
+        event: ConnectionEvent::Stderr {
+            text: json!({"level": level, "message": message, "time": "t"}).to_string(),
+            cut: 0,
+            at: harness.now,
+        },
+    });
+}
+
+#[test]
+fn left_and_right_on_the_log_show_one_level_fewer_and_one_more() {
+    let mut harness = Harness::connected();
+    for level in ["warn", "info", "debug"] {
+        log_line(&mut harness, level, &format!("a line at {level}"));
+    }
+    go_to_tab(&mut harness, Tab::Log);
+    assert_eq!(harness.app.log.minimum, LevelKey::Info);
+    assert_eq!(harness.app.log.visible().len(), 2);
+    harness.key(KeyCode::Left, KeyModifiers::NONE);
+    assert_eq!(harness.app.log.minimum, LevelKey::Warn);
+    assert_eq!(harness.app.log.visible().len(), 1);
+    harness.key(KeyCode::Right, KeyModifiers::NONE);
+    harness.key(KeyCode::Right, KeyModifiers::NONE);
+    assert_eq!(harness.app.log.minimum, LevelKey::Debug);
+    assert_eq!(harness.app.log.visible().len(), 3);
+}
+
+#[test]
+fn the_log_moves_by_a_line_and_a_page_and_follows_its_end_again() {
+    let mut harness = Harness::connected();
+    for index in 0..40 {
+        log_line(&mut harness, "info", &format!("line {index} of the log"));
+    }
+    go_to_tab(&mut harness, Tab::Log);
+    let visible = harness.app.log.visible();
+    // At 24 rows a page of the Log is 19 lines, counted up from the newest.
+    harness.key(KeyCode::PageUp, KeyModifiers::NONE);
+    assert_eq!(harness.app.log.selected, Some(visible[20]));
+    harness.key(KeyCode::Char('g'), KeyModifiers::NONE);
+    harness.key(KeyCode::Down, KeyModifiers::NONE);
+    assert_eq!(harness.app.log.selected, Some(visible[1]));
+    harness.key(KeyCode::Char('j'), KeyModifiers::NONE);
+    assert_eq!(harness.app.log.selected, Some(visible[2]));
+    harness.key(KeyCode::Char('G'), KeyModifiers::NONE);
+    assert_eq!(
+        harness.app.log.selected, None,
+        "the end of the Log is followed again"
+    );
+}
+
+/// Runs `/ping` and answers it, `times` times.
+fn pings_answered(harness: &mut Harness, times: usize) {
+    for _ in 0..times {
+        harness.run("/ping");
+        let id = harness
+            .app
+            .link
+            .tracker
+            .waiting()
+            .last()
+            .map(|waiting| waiting.call)
+            .unwrap();
+        harness.answer(id, &success(id, "solar.ping", &json!({"pong": true})));
+    }
+}
+
+#[test]
+fn the_history_moves_by_a_call_and_a_page_and_follows_the_newest_again() {
+    let mut harness = Harness::connected();
+    pings_answered(&mut harness, 30);
+    // The handshake's two calls come first, so the pings are 2 to 31.
+    go_to_tab(&mut harness, Tab::History);
+    assert_eq!(harness.app.history.current(), Some(31));
+    // At 24 rows a page of the History is 16 calls.
+    for (code, expected) in [
+        (KeyCode::Char('g'), 0),
+        (KeyCode::Down, 1),
+        (KeyCode::Char('j'), 2),
+        (KeyCode::PageDown, 18),
+        (KeyCode::PageUp, 2),
+        (KeyCode::PageDown, 18),
+    ] {
+        harness.key(code, KeyModifiers::NONE);
+        assert_eq!(
+            harness.app.history.current(),
+            Some(expected),
+            "after {code:?}"
+        );
+    }
+    // A page down from 18 reaches the newest, which is followed from then on.
+    harness.key(KeyCode::PageDown, KeyModifiers::NONE);
+    harness.key(KeyCode::F(1), KeyModifiers::NONE);
+    pings_answered(&mut harness, 1);
+    harness.key(KeyCode::F(4), KeyModifiers::NONE);
+    assert_eq!(harness.app.history.current(), Some(32));
+    harness.key(KeyCode::Char('g'), KeyModifiers::NONE);
+    harness.key(KeyCode::Char('G'), KeyModifiers::NONE);
+    assert_eq!(harness.app.history.selected, None, "the newest is followed");
+    assert_eq!(harness.app.history.current(), Some(32));
+}
+
+#[test]
+fn enter_on_the_history_views_the_selected_call_and_x_asks_for_the_recording() {
+    let mut harness = Harness::connected();
+    pings_answered(&mut harness, 1);
+    go_to_tab(&mut harness, Tab::History);
+    harness.key(KeyCode::Up, KeyModifiers::NONE);
+    harness.key(KeyCode::Enter, KeyModifiers::NONE);
+    assert_eq!(
+        harness.app.overlay,
+        Some(Overlay::Viewer {
+            record: 1,
+            scroll: 0
+        })
+    );
+    harness.key(KeyCode::Esc, KeyModifiers::NONE);
+    harness.effects.clear();
+    harness.key(KeyCode::Char('x'), KeyModifiers::NONE);
+    assert_eq!(harness.effects, vec![Effect::Export { path: None }]);
+}
+
+#[test]
+fn a_call_sent_again_has_an_id_of_its_own_and_a_raw_line_goes_again_exactly() {
+    let mut harness = Harness::connected();
+    harness.run(r#"/call solar.ping {"message": "again"}"#);
+    let first = harness.written()[0]["id"].as_u64().unwrap();
+    harness.answer(
+        first,
+        &success(first, "solar.ping", &json!({"pong": true, "echo": "again"})),
+    );
+    harness.effects.clear();
+    go_to_tab(&mut harness, Tab::History);
+    harness.key(KeyCode::Char('r'), KeyModifiers::NONE);
+    let again = harness.written();
+    assert_eq!(again.len(), 1);
+    assert_eq!(again[0]["params"], json!({"message": "again"}));
+    assert_ne!(again[0]["id"], json!(first));
+
+    let raw = r#"{"jsonrpc": "2.0",  "id": "by hand", "method": "solar.version"}"#;
+    harness.key(KeyCode::F(1), KeyModifiers::NONE);
+    harness.run(&format!("/raw {raw}"));
+    let id = json!("by hand");
+    let answer = json!({"jsonrpc": "2.0", "id": id,
+        "result": {"data": {}, "meta": meta(&id, "solar.version"), "warnings": []}});
+    harness.answer(0, &answer.to_string());
+    harness.effects.clear();
+    harness.key(KeyCode::F(4), KeyModifiers::NONE);
+    harness.key(KeyCode::Char('r'), KeyModifiers::NONE);
+    let lines: Vec<&str> = harness
+        .effects
+        .iter()
+        .filter_map(|effect| match effect {
+            Effect::Write { line, .. } => Some(line.as_str()),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(lines, [raw]);
+}
+
+#[test]
+fn the_history_counts_each_call_once_and_keeps_every_call_its_bytes_allow() {
+    let mut harness = Harness::connected();
+    let limit = 8 * 1024;
+    harness.app.history = History::new(1_000, limit);
+    pings_answered(&mut harness, 40);
+    let calls = &harness.app.history.calls;
+    let sizes: Vec<usize> = calls
+        .iter()
+        .map(|(_, record)| crate::ring::Measured::bytes(record))
+        .collect();
+    assert_eq!(calls.bytes(), sizes.iter().sum::<usize>());
+    let largest = sizes.iter().copied().max().unwrap_or(1);
+    assert!(
+        sizes.len() >= limit / largest,
+        "{} calls of at most {largest} bytes held in {limit}",
+        sizes.len()
+    );
+    assert!(calls.dropped() > 0, "the limit was reached");
 }

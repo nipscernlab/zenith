@@ -263,4 +263,45 @@ mod tests {
         }
         assert_eq!(ring.dropped() + ring.len() as u64, 1_000_000);
     }
+
+    #[test]
+    fn a_ring_says_whether_it_holds_anything_and_what_its_limit_in_entries_is() {
+        let mut ring = Ring::new(7, usize::MAX);
+        assert!(ring.is_empty());
+        ring.push(text(1));
+        assert!(!ring.is_empty());
+        assert_eq!(ring.max_entries(), 7);
+    }
+
+    #[test]
+    fn an_entry_that_grows_is_counted_again_and_the_oldest_go_only_past_the_limit() {
+        let overhead = crate::limits::ENTRY_OVERHEAD;
+        let mut ring = Ring::new(10, 2 * overhead + 30);
+        let first = ring.push(text(10));
+        let second = ring.push(text(10));
+        // Grown to exactly the limit: both are kept.
+        let before = ring.get(second).map(Measured::bytes).unwrap();
+        if let Some(entry) = ring.get_mut(second) {
+            entry.push_str(&text(10));
+        }
+        ring.resized(second, before);
+        assert_eq!(ring.bytes(), 2 * overhead + 30);
+        assert_eq!(ring.len(), 2);
+        assert!(ring.get(first).is_some());
+        // One byte more, and the oldest goes.
+        let before = ring.get(second).map(Measured::bytes).unwrap();
+        if let Some(entry) = ring.get_mut(second) {
+            entry.push('x');
+        }
+        ring.resized(second, before);
+        assert_eq!(ring.len(), 1);
+        assert!(ring.get(first).is_none());
+        // Alone, it is kept however large it grows.
+        let before = ring.get(second).map(Measured::bytes).unwrap();
+        if let Some(entry) = ring.get_mut(second) {
+            entry.push_str(&text(1_000));
+        }
+        ring.resized(second, before);
+        assert_eq!(ring.len(), 1);
+    }
 }

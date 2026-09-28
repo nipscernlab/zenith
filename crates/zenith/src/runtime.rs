@@ -547,6 +547,16 @@ fn draw_frame<B: Backend>(terminal: &mut Terminal<B>, app: &App) -> io::Result<(
 /// current directory, with `-2`, `-3` and so on when that name is taken. ZENITH never
 /// overwrites a file.
 fn create(path: Option<PathBuf>, stem: &str, now: SystemTime) -> io::Result<(File, PathBuf)> {
+    create_in(Path::new(""), path, stem, now)
+}
+
+/// [`create`], with the names made in `directory`, which the tests choose.
+fn create_in(
+    directory: &Path,
+    path: Option<PathBuf>,
+    stem: &str,
+    now: SystemTime,
+) -> io::Result<(File, PathBuf)> {
     let open = |path: &Path| OpenOptions::new().write(true).create_new(true).open(path);
     if let Some(path) = path {
         return open(&path)
@@ -560,7 +570,7 @@ fn create(path: Option<PathBuf>, stem: &str, now: SystemTime) -> io::Result<(Fil
         } else {
             format!("{stem}-{stamp}-{attempt}.ndjson")
         };
-        let path = PathBuf::from(name);
+        let path = directory.join(name);
         match open(&path) {
             Ok(file) => return Ok((file, path)),
             Err(error) if error.kind() == io::ErrorKind::AlreadyExists => {}
@@ -618,6 +628,81 @@ fn start_solar(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_name_that_is_taken_gets_the_next_number_and_another_failure_is_said_at_once() {
+        let directory = std::env::temp_dir().join(format!("zenith-names-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&directory);
+        std::fs::create_dir_all(&directory).unwrap();
+        let when = SystemTime::UNIX_EPOCH;
+        let name = |suffix: &str| format!("zenith-x-1970-01-01T00-00-00Z{suffix}.ndjson");
+        let (_, first) = create_in(&directory, None, "zenith-x", when).unwrap();
+        assert_eq!(first, directory.join(name("")));
+        let (_, second) = create_in(&directory, None, "zenith-x", when).unwrap();
+        assert_eq!(second, directory.join(name("-2")));
+        let (_, third) = create_in(&directory, None, "zenith-x", when).unwrap();
+        assert_eq!(third, directory.join(name("-3")));
+        // A directory that is not there fails at the first name, with what the system said.
+        let error = create_in(&directory.join("missing"), None, "zenith-x", when).unwrap_err();
+        assert_eq!(error.kind(), io::ErrorKind::NotFound);
+        let _ = std::fs::remove_dir_all(&directory);
+    }
+
+    #[test]
+    fn one_step_handles_at_most_a_batch_of_events_before_it_draws() {
+        use ratatui::backend::TestBackend;
+        let options = Options {
+            opening: false,
+            solar: Some(PathBuf::from("no-such-solar-for-the-batch")),
+            history: crate::app::KeptHistory::default(),
+            ..Options::default()
+        };
+        let terminal = Terminal::new(TestBackend::new(80, 24)).unwrap();
+        let mut runtime = Runtime::new(terminal, options, None);
+        // Nothing else is on its way once SOLAR has failed to start.
+        for _ in 0..500 {
+            if runtime.app().link.phase == crate::app::link::Phase::Down {
+                break;
+            }
+            runtime.step(Duration::from_millis(10)).unwrap();
+        }
+        assert_eq!(runtime.app().link.phase, crate::app::link::Phase::Down);
+        let sender = runtime.sender();
+        for _ in 0..(3 * BATCH) {
+            sender.send(Incoming::Paste("x".to_owned())).unwrap();
+        }
+        runtime.step(Duration::from_millis(10)).unwrap();
+        assert_eq!(runtime.app().session.editor.text().len(), BATCH);
+        runtime.step(Duration::from_millis(10)).unwrap();
+        assert_eq!(runtime.app().session.editor.text().len(), 2 * BATCH);
+    }
+
+    #[test]
+    fn a_solar_that_may_not_be_run_is_said_to_need_its_permission_on_unix() {
+        let directory =
+            std::env::temp_dir().join(format!("zenith-permission-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&directory);
+        std::fs::create_dir_all(&directory).unwrap();
+        let program = directory.join("solar");
+        std::fs::write(&program, b"not a program").unwrap();
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            std::fs::set_permissions(&program, std::fs::Permissions::from_mode(0o644)).unwrap();
+        }
+        let (sender, _receiver) = mpsc::sync_channel(8);
+        let connections: Connections = Arc::new(Mutex::new(HashMap::new()));
+        let settings = zenith_client::connection::Settings {
+            log_level: "off".to_owned(),
+            environment: Vec::new(),
+        };
+        match start_solar(1, Some(program), &settings, &sender, &connections) {
+            Err(Failure::Start { permission, .. }) => assert_eq!(permission, cfg!(unix)),
+            Err(other) => panic!("{other:?}"),
+            Ok(_) => panic!("a file that is not a program started"),
+        }
+        let _ = std::fs::remove_dir_all(&directory);
+    }
 
     #[test]
     fn the_margin_is_painted_before_the_first_frame_and_again_only_when_the_theme_changes() {

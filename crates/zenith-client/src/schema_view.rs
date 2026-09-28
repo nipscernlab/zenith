@@ -506,4 +506,75 @@ mod tests {
         let view = View::new(&whole);
         assert_eq!(view.at(&Pointer::root()).len(), 1);
     }
+
+    fn described(document: Value) -> Description {
+        let whole = schema(document);
+        let view = View::new(&whole);
+        view.describe(&view.at(&Pointer::root()))
+    }
+
+    fn kind(document: Value) -> FieldKind {
+        let whole = schema(document);
+        let view = View::new(&whole);
+        view.field_kind(&view.at(&Pointer::root()))
+    }
+
+    #[test]
+    fn a_list_of_values_says_more_than_their_type_but_null_is_kept() {
+        let description = described(json!({"type": ["string", "null"], "enum": ["a", null]}));
+        assert_eq!(description.types, ["null"]);
+        assert_eq!(description.allowed, [json!("a"), json!(null)]);
+        let description = described(json!({"type": "string", "enum": ["a"]}));
+        assert!(description.types.is_empty());
+    }
+
+    #[test]
+    fn a_field_is_a_number_or_a_boolean_by_its_types() {
+        for (types, expected) in [
+            (json!("number"), FieldKind::Number),
+            (json!(["integer", "number"]), FieldKind::Number),
+            (json!(["number", "integer"]), FieldKind::Number),
+            (json!(["number", "null"]), FieldKind::Number),
+            (json!("boolean"), FieldKind::Boolean),
+            (json!(["boolean", "null"]), FieldKind::Boolean),
+            (json!("integer"), FieldKind::Integer),
+            (json!("string"), FieldKind::Text),
+            (json!(["string", "boolean"]), FieldKind::Json),
+        ] {
+            assert_eq!(kind(json!({"type": types})), expected, "{types}");
+        }
+    }
+
+    /// A schema whose description is `levels` references down from the root.
+    fn chain_of_references(levels: usize) -> Value {
+        let mut definitions = serde_json::Map::new();
+        for level in 1..levels {
+            definitions.insert(
+                format!("d{level}"),
+                json!({"$ref": format!("#/$defs/d{}", level + 1)}),
+            );
+        }
+        definitions.insert(format!("d{levels}"), json!({"description": "deep"}));
+        json!({"$defs": definitions, "$ref": "#/$defs/d1"})
+    }
+
+    /// A schema whose description is `levels` branches of `allOf` down from the root.
+    fn nested_branches(levels: usize) -> Value {
+        let mut schema = json!({"description": "deep"});
+        for _ in 0..levels {
+            schema = json!({"allOf": [schema]});
+        }
+        schema
+    }
+
+    #[test]
+    fn references_and_branches_are_followed_sixteen_levels_down_and_no_further() {
+        for build in [chain_of_references, nested_branches] {
+            assert_eq!(
+                described(build(MAX_EXPANSION_DEPTH)).description.as_deref(),
+                Some("deep")
+            );
+            assert_eq!(described(build(MAX_EXPANSION_DEPTH + 1)).description, None);
+        }
+    }
 }

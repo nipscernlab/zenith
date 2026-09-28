@@ -101,7 +101,9 @@ pub fn wrap(line: &Line<'_>, max: usize, hanging: usize) -> Vec<Line<'static>> {
                 used = hanging;
                 continue;
             }
-            if used > hanging && cells <= max - hanging {
+            // A word that fits on a line of its own starts the next one. It cannot be
+            // the first thing on this line, since it does not fit here.
+            if cells <= max - hanging {
                 push_line(&mut out, &mut current);
                 current.push(Span::raw(" ".repeat(hanging)));
                 current.push(Span::styled(piece.to_owned(), style));
@@ -167,26 +169,19 @@ pub fn facts(
     out
 }
 
-/// A span's text split into words and the spaces between them.
+/// A span's text split into words and the spaces between them. A piece ends where a space
+/// meets anything else, which is always between two characters: a space is one byte, and
+/// no byte of a longer character is a space.
 fn pieces(text: &str) -> Vec<&str> {
-    let mut pieces = Vec::new();
     let mut start = 0;
-    let mut in_space = None;
-    for (at, character) in text.char_indices() {
-        let space = character == ' ';
-        match in_space {
-            Some(previous) if previous != space => {
-                pieces.push(&text[start..at]);
-                start = at;
-            }
-            _ => {}
-        }
-        in_space = Some(space);
-    }
-    if start < text.len() {
-        pieces.push(&text[start..]);
-    }
-    pieces
+    text.as_bytes()
+        .chunk_by(|a, b| (*a == b' ') == (*b == b' '))
+        .map(|chunk| {
+            let piece = &text[start..start + chunk.len()];
+            start += chunk.len();
+            piece
+        })
+        .collect()
 }
 
 /// A line with neighbouring spans of the same style joined, which keeps the buffer small
@@ -278,6 +273,46 @@ mod tests {
     }
 
     #[test]
+    fn a_word_that_fits_on_a_line_of_its_own_moves_whole_and_a_longer_one_is_broken() {
+        let wrapped = |text: &'static str| texts(&wrap(&Line::from(text), 10, 4));
+        // Six cells is what a line holds after the hanging indent: the word moves whole.
+        assert_eq!(wrapped("key: abcdef"), vec!["key:", "    abcdef"]);
+        // Seven is more, and the word is broken where the line ends.
+        assert_eq!(wrapped("key: abcdefg"), vec!["key: abcde", "    fg"]);
+        // So is a word too long for any line, after other words.
+        let long = texts(&wrap(&Line::from("ab abcdefghijkl"), 10, 0));
+        assert_eq!(long, vec!["ab abcdefg", "hijkl"]);
+    }
+
+    #[test]
+    fn text_splits_into_words_and_the_spaces_between_them() {
+        assert_eq!(
+            pieces("ab  cd \u{e9}t\u{e9} f"),
+            vec!["ab", "  ", "cd", " ", "\u{e9}t\u{e9}", " ", "f"]
+        );
+        assert_eq!(pieces("  lead"), vec!["  ", "lead"]);
+        assert_eq!(pieces("x"), vec!["x"]);
+        assert!(pieces("").is_empty());
+    }
+
+    #[test]
+    fn neighbouring_spans_of_one_style_are_joined_and_others_are_not() {
+        let bold = Style::new().bold();
+        let line = Line::from(vec![
+            Span::styled("one ", bold),
+            Span::styled("two", bold),
+            Span::raw(" three"),
+        ]);
+        let wrapped = wrap(&line, 40, 0);
+        let spans: Vec<(&str, Style)> = wrapped[0]
+            .spans
+            .iter()
+            .map(|span| (span.content.as_ref(), span.style))
+            .collect();
+        assert_eq!(spans, vec![("one two", bold), (" three", Style::new())]);
+    }
+
+    #[test]
     fn facts_break_between_them_and_never_inside_one() {
         let fact = |text: &str| vec![Span::raw(text.to_owned())];
         let dot = Span::raw(" · ");
@@ -301,6 +336,16 @@ mod tests {
         assert_eq!(
             facts_of(40),
             vec![" idempotent · budget 1000 ms", " responses up to 8 MiB"]
+        );
+        // A fact that ends on the last cell of the line stays on it; one cell less, and it
+        // starts the next line.
+        assert_eq!(
+            facts_of(28),
+            vec![" idempotent · budget 1000 ms", " responses up to 8 MiB"]
+        );
+        assert_eq!(
+            facts_of(27),
+            vec![" idempotent", " budget 1000 ms", " responses up to 8 MiB"]
         );
         assert_eq!(
             facts_of(16),

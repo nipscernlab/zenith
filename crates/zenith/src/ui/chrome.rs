@@ -89,10 +89,13 @@ pub fn header(frame: &mut Frame<'_>, area: Rect, app: &App) {
         .map(|span| text::width(&span.content))
         .sum();
     let gap = usize::from(area.width).saturating_sub(used);
+    // Two cells at each end of the gap are always blank, so that no star touches a tab or
+    // the hint.
+    let sky = 2..gap.saturating_sub(2);
     let mut stars = String::new();
     for column in 0..gap {
         let value = scatter(column as u64, 0x5A7E_11E5);
-        let star = if column > 1 && column + 2 < gap && value.is_multiple_of(7) {
+        let star = if sky.contains(&column) && value.is_multiple_of(7) {
             app.glyphs.stars[usize::try_from(value >> 8).unwrap_or(0) % 3]
         } else {
             " "
@@ -103,6 +106,13 @@ pub fn header(frame: &mut Frame<'_>, area: Rect, app: &App) {
     spans.extend(hint);
     frame.render_widget(Paragraph::new(Line::from(spans)).style(theme.base()), area);
 }
+
+/// What stands between two stretches of the status bar: a space, three cells of orbit and a
+/// space.
+const BETWEEN: usize = 5;
+
+/// A stretch of the status bar, and whether it says the state, which is never dropped.
+type Stretch = (Vec<Span<'static>>, bool);
 
 /// The status bar: a line across the whole width with SOLAR on it, and what matters about
 /// the connection between the stretches of orbit.
@@ -123,64 +133,84 @@ pub fn status(frame: &mut Frame<'_>, area: Rect, app: &App) {
     } else {
         (glyphs.hollow, theme.muted())
     };
-    let mut segments: Vec<Vec<Span<'static>>> = Vec::new();
+    let mut stretches: Vec<Stretch> = Vec::new();
     if let Some((tone, message)) = &app.flash {
         let style = if *tone == Tone::Error {
             theme.error()
         } else {
             theme.text()
         };
-        segments.push(vec![Span::styled(text::clean(message).into_owned(), style)]);
+        stretches.push((
+            vec![Span::styled(text::clean(message).into_owned(), style)],
+            true,
+        ));
     } else {
         match link.phase {
             Phase::Connected => {
                 if let Some(info) = &link.info {
-                    segments.push(vec![
-                        Span::styled(format!("SOLAR {}", info.solar_version), theme.strong()),
-                        Span::styled(format!(" {} ", glyphs.dot), theme.muted()),
-                        Span::styled(info.protocol.clone(), theme.text()),
-                    ]);
+                    stretches.push((
+                        vec![
+                            Span::styled(format!("SOLAR {}", info.solar_version), theme.strong()),
+                            Span::styled(format!(" {} ", glyphs.dot), theme.muted()),
+                            Span::styled(info.protocol.clone(), theme.text()),
+                        ],
+                        false,
+                    ));
                 }
                 if let Some(trip) = link.last_round_trip {
-                    segments.push(vec![
-                        Span::styled("last call ", theme.muted()),
-                        Span::styled(clock::latency(trip), theme.text()),
-                    ]);
+                    stretches.push((
+                        vec![
+                            Span::styled("last call ", theme.muted()),
+                            Span::styled(clock::latency(trip), theme.text()),
+                        ],
+                        false,
+                    ));
                 }
                 if let Some(connected_at) = link.connected_at {
                     let lasted = app.now.saturating_duration_since(connected_at);
-                    segments.push(vec![
-                        Span::styled("in orbit ", theme.muted()),
-                        Span::styled(clock::lasted(lasted), theme.text()),
-                    ]);
+                    stretches.push((
+                        vec![
+                            Span::styled("in orbit ", theme.muted()),
+                            Span::styled(clock::lasted(lasted), theme.text()),
+                        ],
+                        true,
+                    ));
                 }
             }
             Phase::Starting | Phase::Handshaking => {
                 let waited = app.now.saturating_duration_since(link.requested);
-                segments.push(vec![
-                    Span::styled("SOLAR connecting", body_style),
-                    Span::styled(format!(" {} ", glyphs.dot), theme.muted()),
-                    Span::styled(clock::latency(waited), theme.muted()),
-                ]);
+                stretches.push((
+                    vec![
+                        Span::styled("SOLAR connecting", body_style),
+                        Span::styled(format!(" {} ", glyphs.dot), theme.muted()),
+                        Span::styled(clock::latency(waited), theme.muted()),
+                    ],
+                    true,
+                ));
             }
             Phase::Down => {
                 let short = link.failure.as_ref().map_or_else(
                     || "not connected".to_owned(),
                     super::super::app::link::Failure::short,
                 );
-                segments.push(vec![
-                    Span::styled("SOLAR disconnected", theme.error()),
-                    Span::styled(format!(" {} ", glyphs.dot), theme.muted()),
-                    Span::styled(short, theme.text()),
-                ]);
-                segments.push(vec![
-                    Span::styled("Ctrl+R", theme.key()),
-                    Span::styled(" reconnect", theme.muted()),
-                ]);
+                stretches.push((
+                    vec![
+                        Span::styled("SOLAR disconnected", theme.error()),
+                        Span::styled(format!(" {} ", glyphs.dot), theme.muted()),
+                        Span::styled(short, theme.text()),
+                    ],
+                    true,
+                ));
+                stretches.push((
+                    vec![
+                        Span::styled("Ctrl+R", theme.key()),
+                        Span::styled(" reconnect", theme.muted()),
+                    ],
+                    false,
+                ));
             }
         }
     }
-    let width = usize::from(area.width);
     let start = vec![
         Span::styled(format!(" {}", orbit(2)), theme.faint()),
         Span::styled(body.to_owned(), body_style),
@@ -188,48 +218,251 @@ pub fn status(frame: &mut Frame<'_>, area: Rect, app: &App) {
     ];
     // The state is in the words already: `in orbit` when connected, `SOLAR connecting`
     // and `SOLAR disconnected` otherwise, beside a body that is full or hollow.
-    let end = vec![Span::styled(format!("{} ", orbit(1)), theme.faint())];
+    let end = Span::styled(format!("{} ", orbit(1)), theme.faint());
     let cells =
         |spans: &[Span<'_>]| -> usize { spans.iter().map(|span| text::width(&span.content)).sum() };
-    let fixed = cells(&start) + cells(&end);
-    // Drop segments from the end until what is left fits, then cut the first if needed.
-    while segments.len() > 1 {
-        let joined: usize =
-            segments.iter().map(|segment| cells(segment)).sum::<usize>() + (segments.len() - 1) * 5;
-        if fixed + joined < width {
+    // What the stretches may take: the width less the orbit at both ends, and the space
+    // that always comes before the rest of the orbit.
+    let room =
+        usize::from(area.width).saturating_sub(cells(&start) + text::width(&end.content) + 1);
+    let taken = |stretches: &[Stretch]| -> usize {
+        stretches
+            .iter()
+            .map(|(spans, _)| cells(spans) + BETWEEN)
+            .sum::<usize>()
+            .saturating_sub(BETWEEN)
+    };
+    // Stretches drop from the end until what is left fits, all but the one that says the
+    // state.
+    while taken(&stretches) > room {
+        let Some(last) = stretches.iter().rposition(|(_, state)| !state) else {
             break;
-        }
-        segments.pop();
+        };
+        stretches.remove(last);
     }
-    let mut spans = start;
-    for (index, segment) in segments.into_iter().enumerate() {
+    let mut middle: Vec<Span<'static>> = Vec::new();
+    for (index, (spans, _)) in stretches.into_iter().enumerate() {
         if index > 0 {
-            spans.push(Span::styled(format!(" {} ", orbit(3)), theme.faint()));
+            middle.push(Span::styled(format!(" {} ", orbit(3)), theme.faint()));
         }
-        spans.extend(segment);
+        middle.extend(spans);
     }
-    let room = width.saturating_sub(cells(&spans) + cells(&end));
-    if cells(&spans) + cells(&end) > width {
-        let flat: String = spans.iter().map(|span| span.content.as_ref()).collect();
-        let cut = text::truncate(&flat, width.saturating_sub(cells(&end)), glyphs.ellipsis);
-        spans = vec![Span::styled(cut, theme.text())];
-    } else {
-        spans.push(Span::styled(
-            format!(" {}", orbit(room.saturating_sub(1))),
-            theme.faint(),
-        ));
+    // What still does not fit is cut, in the colour of text.
+    if cells(&middle) > room {
+        let flat: String = middle.iter().map(|span| span.content.as_ref()).collect();
+        middle = vec![Span::styled(
+            text::truncate(&flat, room, glyphs.ellipsis),
+            theme.text(),
+        )];
     }
-    spans.extend(end);
+    let rest = room.saturating_sub(cells(&middle));
+    let mut spans = start;
+    spans.extend(middle);
+    spans.push(Span::styled(format!(" {}", orbit(rest)), theme.faint()));
+    spans.push(end);
     frame.render_widget(Paragraph::new(Line::from(spans)).style(theme.base()), area);
 }
 
 #[cfg(test)]
 mod tests {
+    use std::time::{Duration, Instant, SystemTime};
+
+    use ratatui::Terminal;
+    use ratatui::backend::TestBackend;
+    use ratatui::buffer::Buffer;
+    use ratatui::style::Style;
+    use zenith_client::handshake::ServerInfo;
+
     use super::*;
+    use crate::app::Options;
+    use crate::app::link::Failure;
+    use crate::theme::Theme;
 
     #[test]
     fn the_scatter_is_the_same_every_time_and_differs_by_position() {
         assert_eq!(scatter(7, 1), scatter(7, 1));
         assert_ne!(scatter(7, 1), scatter(8, 1));
+    }
+
+    fn started() -> App {
+        let options = Options {
+            opening: false,
+            ..Options::default()
+        };
+        App::new(options, Instant::now(), SystemTime::UNIX_EPOCH).0
+    }
+
+    fn connected() -> App {
+        let mut app = started();
+        app.link.phase = Phase::Connected;
+        app.link.info = Some(ServerInfo {
+            solar_version: "0.1.0".to_owned(),
+            protocol: "solar/1".to_owned(),
+            manifest_schema_version: "2.0.0".to_owned(),
+            build: serde_json::Value::Null,
+        });
+        app.link.last_round_trip = Some(Duration::from_micros(490));
+        app.link.connected_at = Some(app.now);
+        app.now += Duration::from_secs(42);
+        app
+    }
+
+    /// One row, `width` cells wide, drawn by `draw`.
+    fn row(width: u16, draw: impl FnOnce(&mut Frame<'_>, Rect)) -> Buffer {
+        let mut terminal = Terminal::new(TestBackend::new(width, 1)).unwrap();
+        terminal.draw(|frame| draw(frame, frame.area())).unwrap();
+        terminal.backend().buffer().clone()
+    }
+
+    fn symbols(buffer: &Buffer) -> String {
+        buffer
+            .content()
+            .iter()
+            .map(ratatui::buffer::Cell::symbol)
+            .collect()
+    }
+
+    /// A state of the status bar: the body, and what the bar may show, the first choice
+    /// first, each with the style it starts in.
+    struct Bar {
+        app: App,
+        body: &'static str,
+        choices: Vec<(&'static str, Style)>,
+    }
+
+    fn bars() -> Vec<Bar> {
+        let theme = Theme::new(
+            crate::theme::ThemeName::Night,
+            crate::theme::Depth::TrueColor,
+        );
+        let mut down = started();
+        down.link.phase = Phase::Down;
+        down.link.failure = Some(Failure::Timeout);
+        let mut error = connected();
+        error.flash = Some((Tone::Error, "The history could not be written.".to_owned()));
+        let mut info = connected();
+        info.flash = Some((Tone::Info, "Press Ctrl+C again to quit".to_owned()));
+        vec![
+            // Connected, the stretches before `in orbit` drop from the end, and `in orbit`,
+            // which says the state, is the one that stays.
+            Bar {
+                app: connected(),
+                body: "\u{25cf}",
+                choices: vec![
+                    (
+                        "SOLAR 0.1.0 \u{b7} solar/1 \u{2500}\u{2500}\u{2500} last call 0.49 ms \u{2500}\u{2500}\u{2500} in orbit 42s",
+                        theme.strong(),
+                    ),
+                    (
+                        "SOLAR 0.1.0 \u{b7} solar/1 \u{2500}\u{2500}\u{2500} in orbit 42s",
+                        theme.strong(),
+                    ),
+                    ("in orbit 42s", theme.muted()),
+                ],
+            },
+            Bar {
+                app: started(),
+                body: "\u{25cb}",
+                choices: vec![("SOLAR connecting \u{b7} 0.00 ms", theme.muted())],
+            },
+            Bar {
+                app: down,
+                body: "\u{25cb}",
+                choices: vec![
+                    (
+                        "SOLAR disconnected \u{b7} no answer to the handshake \u{2500}\u{2500}\u{2500} Ctrl+R reconnect",
+                        theme.error(),
+                    ),
+                    (
+                        "SOLAR disconnected \u{b7} no answer to the handshake",
+                        theme.error(),
+                    ),
+                ],
+            },
+            // A message for the person takes the place of the stretches, in its tone.
+            Bar {
+                app: error,
+                body: "\u{25cf}",
+                choices: vec![("The history could not be written.", theme.error())],
+            },
+            Bar {
+                app: info,
+                body: "\u{25cf}",
+                choices: vec![("Press Ctrl+C again to quit", theme.text())],
+            },
+        ]
+    }
+
+    /// At every width the bar is the orbit from edge to edge: its start with SOLAR on it,
+    /// the first choice that fits, or the last one cut, a space, and orbit to the edge
+    /// with one space after it. What is cut is in the colour of text; what is not keeps
+    /// the colours of its stretches.
+    #[test]
+    fn the_status_bar_shows_what_fits_at_every_width_and_never_drops_the_state() {
+        let orbit = "\u{2500}";
+        for bar in bars() {
+            let text = bar.app.theme.text();
+            for width in 1..=90_u16 {
+                let buffer = row(width, |frame, area| status(frame, area, &bar.app));
+                let room = usize::from(width).saturating_sub(10);
+                let (middle, style) = bar
+                    .choices
+                    .iter()
+                    .find(|(choice, _)| text::width(choice) <= room)
+                    .map_or_else(
+                        || {
+                            let (last, _) = bar.choices.last().unwrap();
+                            (text::truncate(last, room, "\u{2026}"), text)
+                        },
+                        |(choice, style)| ((*choice).to_owned(), *style),
+                    );
+                let rest = room - text::width(&middle);
+                let whole = format!(
+                    " {orbit}{orbit}{}{orbit}{orbit} {middle} {}{orbit} ",
+                    bar.body,
+                    orbit.repeat(rest)
+                );
+                let expected: String = whole.chars().take(usize::from(width)).collect();
+                assert_eq!(symbols(&buffer), expected, "at {width} cells");
+                if !middle.is_empty() {
+                    assert_eq!(
+                        buffer[(7, 0)].fg,
+                        style.fg.unwrap(),
+                        "at {width} cells: {middle}"
+                    );
+                }
+            }
+        }
+    }
+
+    /// The stars of the header fill the gap between the tabs and the hint, and the two
+    /// cells at each end of it are always blank.
+    #[test]
+    fn the_stars_of_the_header_never_touch_a_tab_or_the_hint() {
+        let app = started();
+        let tabs: usize = Tab::ALL
+            .iter()
+            .enumerate()
+            .map(|(index, tab)| 2 + text::width(&format!("{} {}", index + 1, tab.title())))
+            .sum();
+        let before = " ZENITH ".len() + tabs;
+        let hint = "? keys ".len();
+        let mut stars = 0;
+        for width in 60..=220_u16 {
+            let buffer = row(width, |frame, area| header(frame, area, &app));
+            let line = symbols(&buffer);
+            let cells: Vec<char> = line.chars().collect();
+            let gap = usize::from(width) - before - hint;
+            assert_eq!(cells.len(), usize::from(width));
+            assert!(line.ends_with("? keys "), "{line}");
+            for (column, cell) in cells[before..before + gap].iter().enumerate() {
+                if column < 2 || column + 2 >= gap {
+                    assert_eq!(*cell, ' ', "column {column} of a gap of {gap}: {line}");
+                } else if *cell != ' ' {
+                    stars += 1;
+                }
+            }
+        }
+        assert!(stars > 100, "{stars}");
     }
 }

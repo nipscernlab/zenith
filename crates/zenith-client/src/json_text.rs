@@ -406,12 +406,14 @@ fn read_unicode_escape(text: &str, at: usize) -> Escape {
         let Some(second) = hex4(text, next + 2) else {
             return Escape::Invalid(next);
         };
+        let after = next + 6;
         if !(0xDC00..0xE000).contains(&second) {
-            return Escape::Invalid(next + 6);
+            return Escape::Invalid(after);
         }
         let combined = 0x10000 + ((first - 0xD800) << 10) + (second - 0xDC00);
-        return char::from_u32(combined).map_or(Escape::Invalid(next + 6), |character| {
-            Escape::Char(character, next + 6)
+        // Two halves of a pair always make a character, so the fallback is never taken.
+        return char::from_u32(combined).map_or(Escape::Invalid(after), |character| {
+            Escape::Char(character, after)
         });
     }
     char::from_u32(first).map_or(Escape::Invalid(next), |character| {
@@ -975,7 +977,158 @@ mod tests {
     #[test]
     fn a_cursor_inside_a_character_is_moved_back_to_its_start() {
         let text = "{\"é";
-        assert!(matches!(position_at(text, 3), Position::Key { .. }));
+        let Position::Key {
+            prefix, replace, ..
+        } = position_at(text, 3)
+        else {
+            panic!("{:?}", position_at(text, 3));
+        };
+        assert_eq!(prefix, "");
+        assert_eq!(replace, Span { start: 1, end: 2 });
+    }
+
+    /// The key of the first member of the object `text` is, as `spans` decodes it.
+    fn key_of(text: &str) -> Option<String> {
+        match spans(text)? {
+            Node::Object { members, .. } => members.first().map(|member| member.key.clone()),
+            _ => None,
+        }
+    }
+
+    /// The same, as `serde_json` decodes it.
+    fn serde_key_of(text: &str) -> Option<String> {
+        let value: serde_json::Value = serde_json::from_str(text).ok()?;
+        value.as_object()?.keys().next().cloned()
+    }
+
+    #[test]
+    fn every_escape_of_json_is_decoded_in_a_key_as_serde_json_decodes_it() {
+        let text = r#"{"q\"b\\s\/b\bf\fn\nr\rt\tu\u0041z": 1}"#;
+        let decoded = key_of(text);
+        assert_eq!(decoded.as_deref(), Some("q\"b\\s/b\u{8}f\u{c}n\nr\rt\tuAz"));
+        assert_eq!(decoded, serde_key_of(text));
+    }
+
+    #[test]
+    fn a_unicode_escape_is_one_character_or_a_surrogate_pair_of_two() {
+        for (written, decoded) in [
+            (r"\u00e9", "é"),
+            (r"\u00E9", "é"),
+            (r"\uFFFF", "\u{FFFF}"),
+            (r"\uD83D\uDE00", "😀"),
+            (r"\uD800\uDC00", "\u{10000}"),
+            (r"\uDBFF\uDFFF", "\u{10FFFF}"),
+            (r"a\uD83D\uDE00b", "a😀b"),
+            (r"\u0041\u0042", "AB"),
+        ] {
+            let text = format!(r#"{{"{written}": 1}}"#);
+            assert_eq!(key_of(&text).as_deref(), Some(decoded), "{written}");
+            assert_eq!(key_of(&text), serde_key_of(&text), "{written}");
+        }
+    }
+
+    #[test]
+    fn a_broken_unicode_escape_makes_the_text_not_json() {
+        for written in [
+            r"\u00zz",
+            r"\uD800\u0041",
+            r"\uD800xxxxxx",
+            r"\uDC00",
+            r"\uD800\uDBFF",
+            r"\uD800\uDCzz",
+        ] {
+            let text = format!(r#"{{"{written}": 1}}"#);
+            assert_eq!(spans(&text), None, "{written}");
+            assert_eq!(serde_key_of(&text), None, "{written}");
+        }
+    }
+
+    fn key_prefix(text: &str) -> String {
+        match position_at(text, text.len()) {
+            Position::Key { prefix, .. } => prefix,
+            other => panic!("{text}: {other:?}"),
+        }
+    }
+
+    #[test]
+    fn an_escape_cut_off_by_the_cursor_is_left_out_of_the_prefix() {
+        // Not a mistake yet: the person is typing it.
+        assert_eq!(key_prefix(r#"{"ab\u00"#), "ab");
+        assert_eq!(key_prefix(r#"{"ab\u"#), "ab");
+        assert_eq!(key_prefix(r#"{"x\uD83D"#), "x");
+        assert_eq!(key_prefix(r#"{"x\uD83D\uDE"#), "x");
+        // Whole, the pair is in the prefix.
+        assert_eq!(key_prefix(r#"{"x\uD83D\uDE00"#), "x😀");
+        assert_eq!(key_prefix(r#"{"x\u0041y"#), "xAy");
+    }
+
+    #[test]
+    fn a_wrong_escape_before_the_cursor_leaves_the_prefix_empty() {
+        // Four characters that are not hex are a mistake, not a cut-off escape.
+        assert_eq!(key_prefix(r#"{"ab\u00zz"#), "");
+        assert_eq!(key_prefix(r#"{"ab\uD800\u0041cd"#), "");
+    }
+
+    #[test]
+    fn a_key_with_a_wrong_escape_still_ends_at_its_closing_quote() {
+        // The key is finished, so what comes next is its colon, and nothing is completed.
+        let finished = r#"{"\uD800\u0041""#;
+        assert_eq!(position_at(finished, finished.len()), Position::Elsewhere);
+        let colon = r#"{"\uD800\u0041": "#;
+        assert!(matches!(
+            position_at(colon, colon.len()),
+            Position::Value { .. }
+        ));
+    }
+
+    #[test]
+    fn a_closed_object_or_array_counts_as_one_value_of_the_array_it_is_in() {
+        for text in ["[{}, ", "[[], ", "[{\"a\": [1, {}]}, "] {
+            let Position::Value { at, .. } = position_at(text, text.len()) else {
+                panic!("{text}: {:?}", position_at(text, text.len()));
+            };
+            assert_eq!(at.to_string(), "/1", "{text}");
+        }
+        let text = r#"{"a": [], "#;
+        assert!(matches!(
+            position_at(text, text.len()),
+            Position::Key { .. }
+        ));
+        let text = r#"{"a": {}, "#;
+        assert!(matches!(
+            position_at(text, text.len()),
+            Position::Key { .. }
+        ));
+    }
+
+    #[test]
+    fn a_bracket_or_a_comma_where_none_can_go_is_not_json() {
+        for text in [r#"{"a", "#, "[, ", "{, ", "[}", r#"{"a": ]"#, "{]"] {
+            assert_eq!(position_at(text, text.len()), Position::Elsewhere, "{text}");
+        }
+    }
+
+    #[test]
+    fn the_depth_limit_counts_the_levels_open_at_the_cursor() {
+        let at_the_limit = "[".repeat(MAX_DEPTH) + " ";
+        let Position::Value { at, .. } = position_at(&at_the_limit, at_the_limit.len()) else {
+            panic!("{MAX_DEPTH} levels are allowed");
+        };
+        assert_eq!(at.to_string(), "/0".repeat(MAX_DEPTH));
+        let beyond = "[".repeat(MAX_DEPTH + 1) + " ";
+        assert_eq!(position_at(&beyond, beyond.len()), Position::Elsewhere);
+    }
+
+    #[test]
+    fn a_position_on_a_later_line_or_inside_a_character_becomes_the_byte_it_is_at() {
+        assert_eq!(offset_of("ab\ncd", 2, 1), 3);
+        assert_eq!(offset_of("ab\ncd", 2, 2), 4);
+        assert_eq!(offset_of("a\nb\ncd", 3, 2), 5);
+        // A column inside é, which is two bytes, is moved back to where é starts.
+        assert_eq!(offset_of("é\n", 1, 2), 0);
+        assert_eq!(offset_of("xé", 1, 3), 1);
+        // A line past the end is the end.
+        assert_eq!(offset_of("ab", 5, 1), 2);
     }
 
     #[test]

@@ -25,8 +25,11 @@ zenith-client.workspace = true
 [dev-dependencies]
 criterion.workspace = true
 insta.workspace = true
+# The binary in a pseudo-terminal, in tests/binary.rs; xtask uses the same two.
+portable-pty.workspace = true
 proptest.workspace = true
 serde.workspace = true
+vt100.workspace = true
 
 [[bench]]
 name = "draw"

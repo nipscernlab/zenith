@@ -619,4 +619,134 @@ mod tests {
             "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
         );
     }
+
+    #[test]
+    fn a_program_without_its_extension_is_completed_with_exe_on_windows_only() {
+        let scratch = Scratch::new("extension");
+        fs::write(scratch.0.join("prog.exe"), b"x").unwrap();
+        let without = given_path(scratch.0.join("prog"), Origin::Flag);
+        if cfg!(windows) {
+            assert_eq!(without.unwrap().path, scratch.0.join("prog.exe"));
+        } else {
+            assert!(matches!(without, Err(LocateError::Missing { .. })));
+        }
+        // A name that has an extension already is never given another.
+        let other = given_path(scratch.0.join("prog.bin"), Origin::Flag);
+        assert!(matches!(other, Err(LocateError::Missing { .. })));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn on_unix_a_file_on_the_path_is_a_program_only_when_it_may_be_run() {
+        use std::os::unix::fs::PermissionsExt;
+        let scratch = Scratch::new("mode");
+        let program = fake_program(&scratch.0, b"x");
+        let search = Search {
+            flag: None,
+            environment: None,
+            path: Some(scratch.0.clone().into_os_string()),
+        };
+        assert!(locate(&search).is_ok());
+        fs::set_permissions(&program, fs::Permissions::from_mode(0o644)).unwrap();
+        assert!(matches!(
+            locate(&search),
+            Err(LocateError::NotOnPath { directories: 1 })
+        ));
+        for mode in [0o744, 0o654, 0o645] {
+            fs::set_permissions(&program, fs::Permissions::from_mode(mode)).unwrap();
+            assert!(locate(&search).is_ok(), "{mode:o}");
+        }
+        // A directory that may be entered is not a program either.
+        fs::remove_file(&program).unwrap();
+        fs::create_dir_all(&program).unwrap();
+        fs::set_permissions(&program, fs::Permissions::from_mode(0o755)).unwrap();
+        assert!(matches!(
+            locate(&search),
+            Err(LocateError::NotOnPath { .. })
+        ));
+    }
+
+    #[test]
+    fn a_copy_that_failed_says_what_zenith_was_doing_and_why() {
+        let error = CopyError {
+            path: PathBuf::from("cache/solar"),
+            error: io::Error::other("the disk is full"),
+            doing: "create the directory",
+        };
+        assert_eq!(
+            error.to_string(),
+            "ZENITH could not create the directory cache/solar: the disk is full."
+        );
+        assert_eq!(
+            std::error::Error::source(&error)
+                .map(ToString::to_string)
+                .as_deref(),
+            Some("the disk is full")
+        );
+    }
+
+    #[test]
+    fn a_whole_copy_is_used_as_it_is_and_a_cut_one_is_copied_again() {
+        let scratch = Scratch::new("whole");
+        let program = fake_program(&scratch.0, b"the build");
+        let placement = Placement::CopyUnder(scratch.0.join("cache"));
+        let found = Found {
+            path: program,
+            origin: Origin::Path,
+        };
+        let first = prepare(found.clone(), &placement).unwrap();
+        // The same length: the copy is taken to be whole and is not written again.
+        fs::write(&first.runs, b"THE BUILD").unwrap();
+        let again = prepare(found.clone(), &placement).unwrap();
+        assert_eq!(fs::read(&again.runs).unwrap(), b"THE BUILD");
+        // Another length: the copy was cut, and is made again.
+        fs::write(&first.runs, b"the bu").unwrap();
+        let mended = prepare(found, &placement).unwrap();
+        assert_eq!(fs::read(&mended.runs).unwrap(), b"the build");
+    }
+
+    #[test]
+    fn a_copy_that_cannot_be_put_in_place_is_an_error_and_not_a_program() {
+        let scratch = Scratch::new("blocked");
+        let program = fake_program(&scratch.0, b"a build");
+        let root = scratch.0.join("cache");
+        let hash = sha256_of(&program).unwrap();
+        // A directory where the copy should go: the copy cannot be renamed onto it.
+        let target = root.join("solar").join(&hash[..16]).join(program_name());
+        fs::create_dir_all(target.join("inside")).unwrap();
+        let prepared = prepare(
+            Found {
+                path: program,
+                origin: Origin::Path,
+            },
+            &Placement::CopyUnder(root),
+        );
+        let error = prepared.unwrap_err();
+        assert_eq!(error.doing, "put the copy in place at");
+    }
+
+    #[test]
+    fn only_a_directory_named_by_sixteen_hex_digits_is_a_copy_to_remove() {
+        let scratch = Scratch::new("names");
+        let program = fake_program(&scratch.0, b"x");
+        let root = scratch.0.join("cache");
+        let solar = root.join("solar");
+        for name in ["cafe", "not-hex-sixteen!", "0123456789abcdef0"] {
+            fs::create_dir_all(solar.join(name)).unwrap();
+        }
+        fs::create_dir_all(solar.join("0123456789abcdef")).unwrap();
+        let prepared = prepare(
+            Found {
+                path: program,
+                origin: Origin::Path,
+            },
+            &Placement::CopyUnder(root),
+        )
+        .unwrap();
+        assert!(prepared.runs.is_file());
+        for name in ["cafe", "not-hex-sixteen!", "0123456789abcdef0"] {
+            assert!(solar.join(name).is_dir(), "{name} was removed");
+        }
+        assert!(!solar.join("0123456789abcdef").exists());
+    }
 }

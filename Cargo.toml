@@ -20,12 +20,14 @@ criterion = { version = "0.8", default-features = false, features = ["cargo_benc
 ctrlc = { version = "3.5", features = ["termination"] }
 insta = { version = "1.48", features = ["json"] }
 jsonschema = { version = "0.58", default-features = false }
+portable-pty = "0.9"
 proptest = "1.11"
 ratatui = "0.30"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0", features = ["preserve_order"] }
 sha2 = "0.11"
 unicode-width = "0.2"
+vt100 = "0.16"
 
 # Lints are shared by every crate in the workspace. CI runs clippy with `-D warnings`,
 # so everything below that is a warning is effectively an error there as well.

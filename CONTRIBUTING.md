@@ -127,7 +127,9 @@ did. It runs weekly in `.github/workflows/scheduled.yml`, and whenever it is sta
 hand from the Actions tab or with `gh workflow run scheduled.yml`, with the configuration
 in `.cargo/mutants.toml`. The mutants are split into twenty shards; the job called
 `mutation score` adds them up with `cargo xtask mutants`, shows the report on the run,
-with every survivor by file, and keeps it as the artefact `mutants-report`.
+with every survivor by file, and keeps it as the artefact `mutants-report`. It does not
+gate yet: the ceiling is set from the first run that finishes all twenty shards, as
+`docs/OPEN_QUESTIONS.md` says.
 
 To read a run here without running anything:
 

@@ -16,8 +16,9 @@ use std::collections::BTreeMap;
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
 
-/// The survivors the weekly run allows. `None` until a run has been measured, and the job
-/// then reports without gating.
+/// The survivors the weekly run allows. `None` until a run finishes all its shards, which
+/// is for stage three, as `docs/OPEN_QUESTIONS.md` says; until then the job reports
+/// without gating.
 pub(crate) const CEILING: Option<usize> = None;
 
 /// What happened to a mutant, as cargo-mutants files it.

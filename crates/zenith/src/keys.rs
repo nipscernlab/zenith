@@ -131,6 +131,9 @@ pub enum LevelKey {
     Trace,
 }
 
+/// The modifiers a binding can ask for; Shift is in the character itself.
+const CONTROL_AND_ALT: KeyModifiers = KeyModifiers::CONTROL.union(KeyModifiers::ALT);
+
 /// Where a binding works.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Place {
@@ -294,7 +297,7 @@ impl Key {
     /// already in the character, and for `Shift+Tab`, which terminals send as its own key.
     #[must_use]
     pub fn matches(&self, event: &KeyEvent) -> bool {
-        let wanted = self.modifiers & (KeyModifiers::CONTROL | KeyModifiers::ALT);
+        let wanted = self.modifiers & CONTROL_AND_ALT;
         let pressed = typed_modifiers(event);
         if wanted != pressed {
             return false;
@@ -317,8 +320,8 @@ impl Key {
 /// them for shortcuts would make those keyboards unable to type a command.
 #[must_use]
 pub fn typed_modifiers(event: &KeyEvent) -> KeyModifiers {
-    let held = event.modifiers & (KeyModifiers::CONTROL | KeyModifiers::ALT);
-    let altgr = held.contains(KeyModifiers::CONTROL | KeyModifiers::ALT)
+    let held = event.modifiers & CONTROL_AND_ALT;
+    let altgr = held.contains(CONTROL_AND_ALT)
         && matches!(event.code, KeyCode::Char(character) if !character.is_control());
     if altgr { KeyModifiers::NONE } else { held }
 }
@@ -1001,5 +1004,15 @@ mod tests {
         assert_eq!(rows.len(), Place::ALL.len());
         let listed: usize = rows.iter().map(|(_, rows)| rows.len()).sum();
         assert_eq!(listed, BINDINGS.len());
+    }
+
+    #[test]
+    fn only_alt_or_a_function_key_is_a_key_some_terminal_does_not_deliver() {
+        let key = |code, modifiers| Key { code, modifiers };
+        assert!(key(KeyCode::Char('1'), KeyModifiers::ALT).is_extra());
+        assert!(key(KeyCode::F(1), KeyModifiers::NONE).is_extra());
+        assert!(key(KeyCode::F(4), KeyModifiers::ALT).is_extra());
+        assert!(!key(KeyCode::Char('r'), KeyModifiers::CONTROL).is_extra());
+        assert!(!key(KeyCode::Tab, KeyModifiers::NONE).is_extra());
     }
 }

@@ -145,3 +145,68 @@ impl Session {
         !self.menu_dismissed && self.completion.is_some()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::completion::Completion;
+
+    #[test]
+    fn an_entry_is_counted_by_its_text_and_an_overhead() {
+        let overhead = limits::ENTRY_OVERHEAD;
+        let command = Entry::Command {
+            text: "/ping".to_owned(),
+        };
+        assert_eq!(command.bytes(), 5 + overhead);
+        let notice = Entry::Notice {
+            tone: Tone::Info,
+            lines: vec!["one".to_owned(), "three".to_owned()],
+        };
+        assert_eq!(notice.bytes(), 8 + overhead);
+        let unexpected = Entry::Unexpected {
+            line: "{}".to_owned(),
+        };
+        assert_eq!(unexpected.bytes(), 2 + overhead);
+        let mark = Entry::Mark {
+            version: "0.3.0".to_owned(),
+        };
+        assert_eq!(mark.bytes(), 5 + overhead);
+        let call = Entry::Call {
+            record: 1,
+            layout: Layout::Generic,
+        };
+        assert_eq!(call.bytes(), overhead);
+    }
+
+    #[test]
+    fn an_entry_that_arrives_while_the_view_is_scrolled_up_is_counted_as_unseen() {
+        let mut session = Session::default();
+        let line = || Entry::Command {
+            text: "x".to_owned(),
+        };
+        session.push(line());
+        assert_eq!(session.unseen, 0);
+        session.scroll = 3;
+        session.push(line());
+        session.push(line());
+        assert_eq!(session.unseen, 2);
+        session.scroll = 1;
+        session.push(line());
+        assert_eq!(session.unseen, 3);
+    }
+
+    #[test]
+    fn the_menu_shows_while_there_is_a_completion_that_was_not_dismissed() {
+        let mut session = Session::default();
+        assert!(!session.menu_open());
+        session.completion = Some(Completion {
+            replace: 0..0,
+            candidates: Vec::new(),
+        });
+        assert!(session.menu_open());
+        session.menu_dismissed = true;
+        assert!(!session.menu_open());
+        session.completion = None;
+        assert!(!session.menu_open());
+    }
+}
