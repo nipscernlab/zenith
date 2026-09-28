@@ -73,7 +73,7 @@ To test a particular version, check it out in each repository; for example, for 
 version of ZENITH this guide came with:
 
 ```bash
-cd ~/constellation/zenith && git checkout v0.1.0 && cd ..
+cd ~/constellation/zenith && git checkout v0.2.0 && cd ..
 ```
 
 Build SOLAR, then ZENITH. The first build of each downloads the compiler and the

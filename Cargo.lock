@@ -2800,7 +2800,7 @@ checksum = "1ebf944e87a7c253233ad6766e082e3cd714b5d03812acc24c318f549614536e"
 
 [[package]]
 name = "xtask"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "portable-pty",
  "serde_json",
@@ -2811,7 +2811,7 @@ dependencies = [
 
 [[package]]
 name = "zenith"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "clap",
  "criterion",
@@ -2829,7 +2829,7 @@ dependencies = [
 
 [[package]]
 name = "zenith-client"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "jsonschema",
  "proptest",

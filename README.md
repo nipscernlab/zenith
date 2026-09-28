@@ -155,21 +155,21 @@ A system monitor written in Rust installs a binary of the same name. `zenith --v
 says which one runs:
 
 ```text
-ZENITH 0.1.0, the terminal of Constellation, NIPS-CERN
+ZENITH 0.2.0, the terminal of Constellation, NIPS-CERN
 ```
 
 ## Measured
 
 On the machine it was written on, a Windows 11 laptop with an Intel Core i7-13620H, against
-SOLAR 0.2.0. `cargo xtask perf` and `cargo xtask soak` measure the real binary in a
-pseudo-terminal, and `STATUS.md` has every figure with how it was taken.
+SOLAR 0.3.1, for version 0.2.0. `cargo xtask perf` and `cargo xtask soak` measure the real
+binary in a pseudo-terminal, and `STATUS.md` has every figure with how it was taken.
 
 | What | Figure |
 | ---- | ------ |
-| Start to connected, drawn | 20 to 25 ms, the median of ten starts, in four runs; 37 to 51 ms until the terminal shows it |
-| A key to its redraw | 0.3 to 0.5 ms, the median of two hundred keys, in four runs; at most 1.1 ms at the 99th percentile |
-| Idle | No processor time that can be measured in a minute, one wake-up, about 8.5 MiB resident |
-| Memory after 100 000 calls | 28.6 MiB, level from 20 000 calls on, when every ring buffer is full |
+| Start to connected, drawn | 20.8 ms, the median of ten starts; 44.8 ms until the terminal shows it |
+| A key to its redraw | 0.45 ms, the median of 208 keys; 0.73 ms at the 99th percentile |
+| Idle | No processor time that can be measured in a minute, one wake-up, 9.4 MiB resident |
+| Memory after 100 000 calls | 30.5 MiB, level from 70 000 calls on and within 4.6 % of the figure at 20 000 |
 
 ## How it is built and checked
 

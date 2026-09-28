@@ -33,4 +33,4 @@ group.
 
 ## Versions
 
-ZENITH is `0.1.0`. Until there are releases, the fix goes on `main` and into the next tag.
+ZENITH is `0.2.0`. Until there are releases, the fix goes on `main` and into the next tag.

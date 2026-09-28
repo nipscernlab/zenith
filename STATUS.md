@@ -1,10 +1,11 @@
 # Status
 
-ZENITH 0.1.0, on 27 September 2026: what is ready, what was measured and how, what was
+ZENITH 0.2.0, on 27 September 2026: what is ready, what was measured and how, what was
 decided without asking, what ZENITH needed from SOLAR and did not find, and what is left.
 Every figure below was taken on the machine ZENITH was written on, a Windows 11 laptop
-with an Intel Core i7-13620H, against SOLAR 0.2.0 built from commit `76d80c0` of its main
-branch with uncommitted changes, as `/version` reported it.
+with an Intel Core i7-13620H, against SOLAR 0.3.1 built from commit `fcad2a395f07` of its
+main branch with nothing uncommitted, as `solar version` reported it, unless it says
+otherwise.
 
 ## Ready
 
@@ -28,33 +29,25 @@ Everything the brief asks for, as `docs/DESIGN.md` describes it.
 
 | What | How many | Where |
 | ---- | -------- | ----- |
-| Tests | 350, all passing, against SOLAR 0.3.0 on this machine; 29 of them start a real program, the installed SOLAR or a double of it for the failures SOLAR cannot produce | `cargo nextest run --workspace` |
-| Snapshots | 135: every screen at 80 × 24 and 160 × 48 in each theme, without colour and in ASCII; the opening in each theme at 256 colours, 16 and none, and the Session tab at 256 and 16; the screen of a terminal too small; and the README's seven | `crates/zenith/tests/snapshots/` |
-| Line coverage | 89.73 % of the lines of `zenith-client` and `zenith` on Windows, with the tests against SOLAR 0.3.0, and 88.98 % on Linux in CI two changes before, against the head of SOLAR's main, counted from the job's lcov; the floor is 88 % | `cargo xtask coverage` |
-| The guide's table | 26 of 26 rows, typed into the real binary in a pseudo-terminal, on Windows 11 on this machine against SOLAR 0.3.1, the wheel's included, and in CI on Linux, Windows and macOS | `cargo xtask walkthrough` |
+| Tests | 452 on Windows against SOLAR 0.3.1 and 457 in AlmaLinux 9 under WSL against SOLAR 0.2.0, all passing and none skipped; 30 of them start the installed SOLAR or ZENITH's double of it, one on Linux only, and 2 start ZENITH itself in a pseudo-terminal, on Unix | `cargo nextest run --workspace` |
+| Snapshots | 142: every screen at 80 × 24 and 160 × 48 in each theme, without colour and in ASCII, the help at its last page among them; the opening in each theme at 256 colours, 16 and none, and the Session tab at 256 and 16; the screen of a terminal too small; and the README's seven | `crates/zenith/tests/snapshots/` |
+| Line coverage | 92.09 % of the lines of `zenith-client` and `zenith` on Windows, at the release, 92.83 % in AlmaLinux under WSL and 92.89 % in CI on Linux, 12 978 of 13 971 lines, at the mouse wheel, counted from the job's lcov; the floor is 88 % | `cargo xtask coverage` |
+| The guide's table | 26 of 26 rows, typed into the real binary in a pseudo-terminal: on Windows 11 on this machine against SOLAR 0.3.1, in AlmaLinux under WSL against SOLAR 0.2.0, and in CI on Linux, Windows and macOS against SOLAR 0.3.1, the three rows of the mouse among them | `cargo xtask walkthrough` |
+| Mutations | Before: on 0.1.0, 17 of the 20 shards finished, and of 2 237 mutants 1 608 were caught, 463 survived, 6 timed out and 160 could not be built, 77.70 % of the viable ones caught. After: not measured, since no run has finished all twenty shards; the ceiling is open for stage three | `.github/workflows/scheduled.yml` |
 
-**CI** builds SOLAR from the head of its main branch on every run, and ran three times on
-27 September 2026. The first run, on the push at 16:06, built `2497b3f`, SOLAR 0.1.0 from
-before batches and `solar.cancel`, which SOLAR pushed minutes later; the second and third
-built `b14ec3b`, SOLAR 0.2.0 with both. In all three, every step passed on Linux, Windows
-and macOS, the tests and the walkthrough included, and with SOLAR 0.2.0 the walkthrough
-saw a batch answered with an array and `solar.cancel {"id": 1}` answered on all three
-systems. The coverage job failed once, in the second run, at 87.87 % of lines on Linux
-against the floor: some interaction code was reached only by the random cases of the
-property tests. That code has tests of its own now, a coverage run seeds the random
-cases, and the third run measured 88.71 %.
-
-One test was flaky on Linux in that run: a SOLAR that dies at once could have its exit
-reported before its last words had been read, so the card lost the line that says why it
-died. It is fixed; in AlmaLinux under WSL the test failed 2 runs in 40 before the fix and
-none in 40 after.
+**CI** builds SOLAR from the head of its main branch on every run: SOLAR 0.3.0 for the
+tests written for the mutation run's survivors, and 0.3.1 for the mouse wheel, the last
+two pull requests of the stage. Every check passed on both, on Linux, Windows and macOS, the tests and
+the walkthrough included, and on Windows the walkthrough's rows for the wheel went through
+ConPTY, as they do on this machine.
 
 **AlmaLinux 9 under WSL**, on the same machine. ZENITH is cloned into `~/zenith`, inside
 the WSL file system, and built there; `zenith` and `solar` are links in `~/.local/bin`,
 which AlmaLinux's own `~/.bashrc` puts on the `PATH`, so both run from any new shell.
-`solar` is SOLAR's own build in `~/solar`, which ZENITH's setup only reads, so it is
-always SOLAR's latest there. At commit `77f25ff` the 291 tests pass against it, none
-skipped, and the walkthrough does the 20 rows. Nothing needed `sudo`.
+`solar` is SOLAR's own build in `~/solar`, which ZENITH's setup only reads; it was SOLAR
+0.2.0. At commit `25ff6bb`, the mouse wheel, every step of `cargo xtask ci` passed against
+it: the 457 tests, none skipped, the test of the binary's wheel in a pseudo-terminal among
+them, and the walkthrough's 26 rows. Nothing needed `sudo`.
 
 `cargo` is not on the `PATH` of a new shell there, because rustup was installed without
 touching `~/.bashrc`. To rebuild ZENITH after a push:
@@ -71,58 +64,81 @@ The laboratory Mac is not tested yet: that is Arthur's run of `docs/TESTING_BY_H
 
 `cargo xtask perf` and `cargo xtask soak` measure the release binary in a pseudo-terminal,
 ConPTY on this machine; `cargo bench -p zenith --bench draw` measures drawing in process.
-The raw figures are in `target/perf/` after a run. The table has the last of four runs of
-`perf` that day, at commit `77f25ff`; over the four, the median start to the first
-connected frame was 20.5 to 24.7 ms, and the median key to its frame 0.31 to 0.49 ms.
+The raw figures are in `target/perf/` after a run. The table has one run of each on the
+code of 0.2.0, one after the other with nothing else running.
 
 | What | Figure |
 | ---- | ------ |
-| Start to the first frame drawn connected, by ZENITH's own clock | 24.7 ms, the median of ten starts; 19.5 ms the fastest |
-| Start to `in orbit` on the terminal's screen | 50.7 ms, the median of the same ten |
-| A key read to its frame flushed | 0.49 ms median, 1.07 ms at the 99th percentile, 6.22 ms the slowest, over 208 keys |
-| A key written into the terminal to seeing it there | 15.7 ms median, 18.5 ms at the 99th percentile, over 50 keys |
-| Idle, over a minute after the first | 0 ms of processor, one wake-up, 8.6 MiB resident |
-| A `solar.ping` through ZENITH's connection code | 0.082 ms median with SOLAR at `trace`, 0.076 ms at `off`, over 2 000 calls each |
+| Start to the first frame drawn connected, by ZENITH's own clock | 20.8 ms, the median of ten starts; 19.9 ms the fastest |
+| Start to `in orbit` on the terminal's screen | 44.8 ms, the median of the same ten; 34.0 ms the fastest |
+| A key read to its frame flushed | 0.45 ms median, 0.73 ms at the 99th percentile, 5.61 ms the slowest, over 208 keys |
+| A key written into the terminal to seeing it there | 15.6 ms median, 18.5 ms at the 99th percentile, over 50 keys |
+| Idle, over a minute after the first | 0 ms of processor, one wake-up, 9.4 MiB resident |
+| A `solar.ping` through ZENITH's connection code | 0.078 ms median with SOLAR at `trace`, 0.072 ms at `off`, over 2 000 calls each |
 | What SOLAR writes to standard error at `trace` | 693 bytes a call |
-| Memory over 100 000 `/ping` | 8.7 MiB at the start, 24.6 MiB at 10 000, 27.9 MiB at 20 000, and 28.6 MiB at 100 000; the highest sample was 29.6 MiB, at 60 000 |
-| Drawing a frame, at 80 × 24 | Session 0.23 ms, APIs 0.13 ms, Log 0.14 ms, History 0.11 ms, the help overlay 0.64 ms |
-| Drawing a frame, at 200 × 60 | Session 1.03 ms, APIs 0.91 ms, Log 0.38 ms, History 0.54 ms, the help overlay 2.48 ms |
-| The release binary, `zenith.exe` | 2 285 056 bytes, with fat LTO and one codegen unit |
+| Memory over 100 000 `/ping` | 9.5 MiB idle at the start, 25.3 MiB at 10 000, 29.1 MiB at 20 000, and 30.5 MiB from 70 000 to 100 000, the highest |
+| Drawing a frame, at 80 × 24 | Session 0.11 ms, APIs 0.26 ms, Log 0.04 ms, History 0.15 ms, the help overlay 0.30 ms |
+| Drawing a frame, at 200 × 60 | Session 0.72 ms, APIs 0.55 ms, Log 0.39 ms, History 0.21 ms, the help overlay 0.76 ms |
+| The release binary, `zenith.exe` | 2 411 520 bytes, with fat LTO and one codegen unit |
+| The build footprint | 12.8 GB after the release: the main checkout's build tree, 4.6 GB, the release's worktree, 5.0 GB, and the one in AlmaLinux under WSL, 3.2 GB; at the most, with a third tree for the mouse wheel, 16.0 GB. The architect's budget is 20 GB |
 
 What the figures say:
 
 - **Idle is idle.** The loop waits on one channel and wakes only for a deadline on screen;
-  after the first minute, the only one is the minute of `in orbit`.
+  after the first minute, the only one is the minute of `in orbit`. Taking the mouse
+  changed nothing here: ZENITH asks for no movement, and on Windows, whose console
+  reports it anyway, movement stops in the thread that reads the terminal.
 - **The memory is bounded.** It rises while the History, the Log and the transcript fill,
-  and from 20 000 calls on it stays level, within 2.4 % at 100 000. The soak fails when
+  and from 20 000 calls on it stays within 4.6 %, level from 70 000. The soak fails when
   the last figure is more than a fifth above the one at 20 000.
 - **`trace` costs SOLAR's standard error and not time.** The median round trip differed
-  by at most 6 µs between `trace` and `off` in the two runs that measured it, so ZENITH
-  can start SOLAR at `trace` and filter in the Log tab.
-- **The first start of a run is slower.** In three of the four runs the first of the ten
-  starts was the slowest, 329, 582 and 671 ms to show `in orbit`. The last run recorded
-  where the time went: finding SOLAR took 0.09 ms, hashing `solar.exe` to name its copy
-  238 ms, and starting the copy's process 237 ms, against about 1.2 ms and 3 to 8 ms in
-  the quick starts; the copy already existed. Both slow steps are a first read and a first
-  run of a file, which is what the antivirus of Windows scanning it would look like: that
-  is deduced from the pattern, not measured. In three other starts of that run, 39 to
-  86 ms went before ZENITH's own loop began, in parsing the command line, entering raw
-  mode and the alternate screen, and opening the timings file; which of those is not
-  recorded.
-- **Most of a key's way to the screen is outside ZENITH.** Between a key flushed, 0.49 ms,
-  and a key seen, 15.7 ms, are ConPTY and the harness that reads it: deduced from the two
+  by 6 µs between `trace` and `off`, so ZENITH can start SOLAR at `trace` and filter in the
+  Log tab.
+- **The first start of a run is slower.** Of the ten starts the first took 421 ms to show
+  `in orbit`, and its steps say where: finding SOLAR took 0.07 ms, naming and checking its
+  copy 3.1 ms, and starting the copy's process 286 ms, against 3 to 8 ms in the other
+  nine. A first run of a file is what the antivirus of Windows scanning it would look like:
+  that is deduced from the pattern, as in the first stage, not measured. One other start
+  took 143 ms to show `in orbit`, where ZENITH's own steps account for at most 14 ms;
+  where the rest went is not recorded.
+- **Most of a key's way to the screen is outside ZENITH.** Between a key flushed, 0.45 ms,
+  and a key seen, 15.6 ms, are ConPTY and the harness that reads it: deduced from the two
   figures, not measured on its own.
+- **Drawing is well inside a frame.** The slowest, the help overlay at 200 × 60, takes
+  0.76 ms. Against the first stage's figures some tabs drew faster and some slower; the
+  scenes of the bench changed with the stage, the mark at the start of every connection
+  and the sky among them, so the two are not compared figure by figure.
 
 ## Decided without asking
 
 On 27 September 2026 the architect confirmed seven of those decisions, which are now
 records in `docs/adr/`, 0007 to 0013: ZENITH's own schema validator, `Tab` switching tabs
 on an empty command line, the five commands beyond the brief, the fifteen-second
-handshake, the coverage floor at 88 %, the name `zenith`, and no mouse, for now.
+handshake, the coverage floor at 88 %, the name `zenith`, and no mouse, for now. The same
+day the architect decided the wheel must scroll, which is record 0015 and supersedes 0013,
+and that the mutation measurement does not hold 0.2.0 back.
 
 `docs/OPEN_QUESTIONS.md` has each decision that is still open, with what it rules out and
 what would change it. The ones with the most consequence:
 
+- **What a notch of the wheel does**: text three lines and a list one row; over the band
+  and the command line the transcript scrolls, over the header, the status bar, the
+  opening and the form nothing does, and an open help or viewer scrolls from anywhere.
+- **The wheel is not a key**: it neither clears the status bar's message nor disarms the
+  second `Ctrl+C`.
+- **ZENITH asks for the mouse's buttons and not its movement**, so that moving the mouse
+  wakes nothing.
+- **Each terminal's key to select text is its documentation's**, not measured, since
+  selecting takes a hand on the mouse; macOS Terminal documents none, only `Cmd+R`.
+- **Every scroll stops at its end**, from the lines the drawing lays out, so that the
+  first notch or key back moves the view.
+- **The status bar keeps the state when it is too narrow**, as `docs/DESIGN.md` says, by
+  dropping the stretches before `in orbit`.
+- **A `multipleOf` of zero holds no number to anything**, since JSON Schema does not allow
+  one and a tool that tests SOLAR must not refuse what SOLAR would accept.
+- **The survivors of the mutation run in the drawing code wait for the complete run**,
+  and where a mutant changed nothing, the redundant code went rather than the mutant being
+  recorded as equivalent.
 - **Where the command line history is kept**, `nipscern-zenith/command-history.ndjson`
   in the system's per-user data directory, the command `/forget` and the flag
   `--no-history`, and that two ZENITHs at once each write their own, the last one winning.
@@ -144,7 +160,8 @@ Each is in the first section of `docs/OPEN_QUESTIONS.md`, with what would close 
 works around none of them.
 
 1. **The exit codes of `solar replay` are not in the contract.** ZENITH's test of the
-   replay takes exit 0 as every answer being the same, which is what SOLAR 0.3.0 did.
+   replay takes exit 0 as every answer being the same, which is what SOLAR 0.3.0 did and
+   0.3.1 does.
 2. **`solar replay` reports a batch's answer as different when only its times differ**,
    seen with SOLAR 0.3.0 built with uncommitted changes. ZENITH's test of the replay
    records no batch.
@@ -157,12 +174,14 @@ what it did before for a SOLAR that has none of them.
 ## Left
 
 - **The Mac.** Arthur's run of `docs/TESTING_BY_HAND.md` on the laboratory Mac, in macOS
-  Terminal and in iTerm2 if it is there.
+  Terminal and in iTerm2 if it is there, with what each does when text is selected while
+  ZENITH has the mouse.
 - **The mutation ceiling**, for stage three, set from the first run whose twenty shards
   all finish, as the architect decided on 27 September 2026; `docs/OPEN_QUESTIONS.md` has
   why. The one measurement, of 17 of the 20 shards on version 0.1.0, found 463 survivors
   among 2 237 mutants, 77.70 % of the viable ones caught. The survivors outside the
   drawing code have tests now; those in it wait for that run.
+- **Clicks**, which do nothing in this version.
 - **The slow first start**, with the steps it now records.
 
 ## How changes reach `main`
@@ -170,11 +189,14 @@ what it did before for a SOLAR that has none of them.
 A ruleset protects `main`, as the repository's settings showed on 27 September 2026: a
 change arrives by pull request, with the checks `ubuntu-latest`, `windows-latest`,
 `macos-latest` and `coverage` passing; force pushes and deletion are refused; no review is
-required.
+required. Every change of the stage arrived that way, the last two as pull requests #10
+and #11, and 0.2.0 as its own.
 
 ## Versions
 
-ZENITH 0.1.0, tagged `v0.1.0`. Rust 1.97.1, the toolchain SOLAR pins. Tested against
-SOLAR 0.1.0, whose manifest is the fixture of the unit tests and which CI built at
-`2497b3f`, and SOLAR 0.2.0, which the tests against SOLAR, the measurements and the
-walkthrough ran against on this machine, and CI at `b14ec3b`.
+ZENITH 0.2.0, tagged `v0.2.0` on the merge commit of its release, with no release
+artefacts. Rust 1.97.1, the toolchain SOLAR pins. Tested against SOLAR 0.1.0's manifest,
+the fixture of the unit tests; SOLAR 0.2.0 in AlmaLinux under WSL; and SOLAR 0.3.1, which
+the tests against SOLAR, the measurements and the walkthrough ran against on this machine,
+and CI built from the head of SOLAR's main for the last pull request, after 0.3.0 for the
+one before it.

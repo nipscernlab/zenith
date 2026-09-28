@@ -1,7 +1,7 @@
 # The design of ZENITH
 
-**Status:** the design of version 0.1.0, written before the code and kept true to it.
-**Applies to:** ZENITH 0.1.0, talking to SOLAR through `solar/1` with a manifest whose
+**Status:** the design of version 0.2.0, written before the code and kept true to it.
+**Applies to:** ZENITH 0.2.0, talking to SOLAR through `solar/1` with a manifest whose
 `schema_version` has major 2.
 
 ZENITH is the terminal of the Constellation project: a full-screen application in which a
@@ -431,8 +431,8 @@ Then it checks, in this order, and stops at the first that fails:
 
 | Check | ZENITH knows | When it does not match |
 | ----- | ------------ | ---------------------- |
-| `protocol` of `solar.version` | `solar/1` | `SOLAR 0.3.0 speaks solar/2, and ZENITH 0.1.0 speaks solar/1. Use a ZENITH that speaks solar/2, or a SOLAR that speaks solar/1.` |
-| `manifest_schema_version` of `solar.version`, and `schema_version` of the manifest | major `2` | `SOLAR 0.3.0 writes its manifest in layout 3.0.0, and ZENITH 0.1.0 reads layout 2. ...` |
+| `protocol` of `solar.version` | `solar/1` | `SOLAR 0.3.0 speaks solar/2, and ZENITH 0.2.0 speaks solar/1. Use a ZENITH that speaks solar/2, or a SOLAR that speaks solar/1.` |
+| `manifest_schema_version` of `solar.version`, and `schema_version` of the manifest | major `2` | `SOLAR 0.3.0 writes its manifest in layout 3.0.0, and ZENITH 0.2.0 reads layout 2. ...` |
 | The manifest's `apis` and `$defs` | present, with the shape section 8 of the contract gives | What was missing, and where. |
 
 A manifest whose major differs is refused, as section 10 of the contract requires of every
