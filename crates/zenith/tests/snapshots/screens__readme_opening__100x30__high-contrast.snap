@@ -16,7 +16,7 @@ expression: "screen(&draw(&script.app, 100, 30))"
                              ▄▄██  ██▄▄      ZENITH
                            ▄█████  █████▄    The terminal of Constellation      *
                 ∙ ∙       ▄██████████████▄   NIPS-CERN
-                 ·        ████████████████   0.1.0                                             ∙
+                 ·        ████████████████   0.2.0                                             ∙
                                                                                 *         ·
 
    •                                     Connecting to SOLAR       *            •          •

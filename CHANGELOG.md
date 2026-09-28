@@ -9,6 +9,12 @@ either is stated here in its own line.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-27
+
+The second version, for SOLAR's protocol `solar/1` and manifests of layout 2, from 2.0.0
+to 2.1.0, tested against SOLAR 0.2.0 and 0.3.1 and against the head of SOLAR's main in CI.
+It reads what a SOLAR declares in its manifest and does without what an older one lacks.
+
 ### Added
 
 - The command line history survives between sessions, as the architect decided, ADR 0014:
@@ -244,5 +250,6 @@ against SOLAR 0.1.0 and 0.2.0.
   exit could be reported before the thread reading standard error had delivered them. It
   is now reported once that pipe is read to its end, or half a second after the exit.
 
-[Unreleased]: https://github.com/nipscernlab/zenith/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/nipscernlab/zenith/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/nipscernlab/zenith/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/nipscernlab/zenith/tree/v0.1.0
