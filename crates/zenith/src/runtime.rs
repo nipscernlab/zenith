@@ -164,6 +164,23 @@ pub struct Runtime<B: Backend> {
     timings: Option<Timings>,
     history: HistoryWriter,
     margin: Option<Margin>,
+    mouse: Option<Mouse>,
+}
+
+/// What gives the terminal's mouse to ZENITH or back, and whether ZENITH has it, which it
+/// does not until it takes it.
+struct Mouse {
+    set: Box<dyn FnMut(bool) + Send>,
+    captured: Option<bool>,
+}
+
+impl std::fmt::Debug for Mouse {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter
+            .debug_struct("Mouse")
+            .field("captured", &self.captured)
+            .finish_non_exhaustive()
+    }
 }
 
 /// What paints the terminal's margin, and the colour it was last painted.
@@ -197,6 +214,7 @@ impl<B: Backend> Runtime<B> {
             timings,
             history,
             margin: None,
+            mouse: None,
         };
         if let Ok(size) = runtime.terminal.size() {
             runtime.queue.push_back(Incoming::Resize {
@@ -216,6 +234,26 @@ impl<B: Backend> Runtime<B> {
             paint: Box::new(paint),
             painted: None,
         });
+    }
+
+    /// Takes the mouse with `set(true)` and gives it back with `set(false)`, before the
+    /// first frame and whenever `/mouse` changes whether ZENITH has it. The binary passes
+    /// `terminal::set_mouse`; the tests pass something that watches.
+    pub fn mouse_with(&mut self, set: impl FnMut(bool) + Send + 'static) {
+        self.mouse = Some(Mouse {
+            set: Box::new(set),
+            captured: Some(false),
+        });
+    }
+
+    fn sync_mouse(&mut self) {
+        let wanted = self.app.mouse == crate::app::Mouse::Zenith;
+        if let Some(mouse) = self.mouse.as_mut()
+            && mouse.captured != Some(wanted)
+        {
+            (mouse.set)(wanted);
+            mouse.captured = Some(wanted);
+        }
     }
 
     fn paint_margin(&mut self) {
@@ -336,6 +374,7 @@ impl<B: Backend> Runtime<B> {
                 // The draw is measured with the key, since the redraw is what a person
                 // waits for.
                 self.paint_margin();
+                self.sync_mouse();
                 draw_frame(&mut self.terminal, &self.app)?;
                 let total = started.elapsed().as_micros();
                 if let Some(timings) = &mut self.timings {
@@ -349,6 +388,7 @@ impl<B: Backend> Runtime<B> {
 
     fn draw(&mut self) -> io::Result<()> {
         self.paint_margin();
+        self.sync_mouse();
         draw_frame(&mut self.terminal, &self.app)?;
         if let Some(timings) = &mut self.timings {
             timings.frames += 1;
@@ -628,6 +668,59 @@ fn start_solar(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_mouse_is_taken_before_the_first_frame_and_given_back_when_mouse_says_so() {
+        use ratatui::backend::TestBackend;
+        use ratatui::crossterm::event::{
+            KeyCode, KeyEvent, KeyEventKind, KeyEventState, KeyModifiers,
+        };
+        let started = |mouse| {
+            let options = Options {
+                opening: false,
+                solar: Some(PathBuf::from("no-such-solar-for-the-mouse")),
+                history: crate::app::KeptHistory::default(),
+                mouse,
+                ..Options::default()
+            };
+            let terminal = Terminal::new(TestBackend::new(80, 24)).unwrap();
+            let mut runtime = Runtime::new(terminal, options, None);
+            let calls = Arc::new(Mutex::new(Vec::new()));
+            let seen = Arc::clone(&calls);
+            runtime.mouse_with(move |on| seen.lock().unwrap().push(on));
+            (runtime, calls)
+        };
+        let run = |runtime: &mut Runtime<TestBackend>, line: &str| {
+            let sender = runtime.sender();
+            sender.send(Incoming::Paste(line.to_owned())).unwrap();
+            sender
+                .send(Incoming::Key(KeyEvent {
+                    code: KeyCode::Enter,
+                    modifiers: KeyModifiers::NONE,
+                    kind: KeyEventKind::Press,
+                    state: KeyEventState::NONE,
+                }))
+                .unwrap();
+            runtime.step(Duration::from_millis(10)).unwrap();
+        };
+        let (mut runtime, calls) = started(crate::app::Mouse::Zenith);
+        runtime.step(Duration::from_millis(10)).unwrap();
+        runtime.step(Duration::from_millis(10)).unwrap();
+        assert_eq!(
+            *calls.lock().unwrap(),
+            [true],
+            "taken once, before the first frame"
+        );
+        run(&mut runtime, "/mouse off");
+        run(&mut runtime, "/clear");
+        assert_eq!(*calls.lock().unwrap(), [true, false]);
+        // Told not to take it, ZENITH leaves the terminal alone until /mouse.
+        let (mut runtime, calls) = started(crate::app::Mouse::Terminal);
+        runtime.step(Duration::from_millis(10)).unwrap();
+        assert!(calls.lock().unwrap().is_empty());
+        run(&mut runtime, "/mouse");
+        assert_eq!(*calls.lock().unwrap(), [true]);
+    }
 
     #[test]
     fn a_name_that_is_taken_gets_the_next_number_and_another_failure_is_said_at_once() {

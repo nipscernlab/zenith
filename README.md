@@ -95,6 +95,7 @@ parameter names and values the schema allows at the cursor:
 | `/forget` | Empty the command line history, here and in the file that keeps it |
 | `/export [path]` | Write the current connection in SOLAR's recording format |
 | `/report [path]` | Write one file with everything a bug report needs |
+| `/mouse [on\|off]` | Give the mouse to the terminal, to select text, or take it back for the wheel |
 
 ## Keys
 
@@ -109,6 +110,11 @@ where Option is not Alt, and in the classic Windows console. `?` lists every key
 | `Ctrl+R` | Restart SOLAR |
 | `Ctrl+L` | Draw the screen again |
 | `?` | Every key, by where it works |
+
+The mouse wheel scrolls what is under the pointer, and never walks the command history,
+which `↑` and `↓` walk. To select text while ZENITH has the mouse, hold `Shift`, or
+`Option` in iTerm2; in macOS Terminal, `Cmd+R` turns its mouse reporting off and on.
+`/mouse off` gives the mouse back to the terminal in any of them.
 
 ## When SOLAR fails
 
@@ -137,6 +143,7 @@ and colour never carries meaning alone.
 | `--ascii` | `ZENITH_ASCII` | 7-bit ASCII only, for terminals without Unicode |
 | `--solar-log <level>` | | The level SOLAR is started at; the Log tab filters below it, or sets another when SOLAR has `solar.set_log_level` |
 | `--no-history` | `ZENITH_NO_HISTORY` | Keep the command line history for this session only |
+| `--no-mouse` | `ZENITH_NO_MOUSE` | Leave the mouse to the terminal, which then selects text as usual; `/mouse` takes it while ZENITH runs |
 | | `ZENITH_DATA_DIR` | The directory the command line history is kept in, instead of the system's own |
 
 ZENITH works at 80 × 24 and above, handles resizing, and gives the terminal back as it

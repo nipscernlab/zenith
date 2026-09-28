@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: superseded by ADR-0015
 date: 2026-09-27
 decision-makers: Chrysthofer Arthur Amaro Afonso
 ---

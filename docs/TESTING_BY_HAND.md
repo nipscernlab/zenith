@@ -133,6 +133,9 @@ Type each line and press `Enter`. The right column is what should happen.
 | `Ctrl+R` | `Restarting SOLAR.`, then `Connected to SOLAR` again |
 | `/theme light`, `/theme high-contrast`, `/theme night` | The colours change |
 | `?` on an empty line | Every key, by where it works. `Esc` closes it |
+| The mouse wheel, over the transcript, the APIs and the help | It scrolls what is under the pointer: the transcript, the list of APIs one API a notch, the entry beside it, the help. It never brings back an earlier command line; `↑` and `↓` do that |
+| `Shift` and drag, or `Option` and drag in iTerm2 | The terminal selects the text dragged over, to copy, while ZENITH keeps the wheel. In macOS Terminal, `Cmd+R` turns its mouse reporting off and on instead |
+| `/mouse off`, then `/mouse on` | `The terminal has the mouse`: dragging selects text with no key held, and the wheel is the terminal's. `/mouse on` gives it back to ZENITH |
 | Make the window smaller than 80 × 24 | One sentence saying how large ZENITH needs the window to be. Make it larger and the screen comes back |
 | `Ctrl+C`, then `Ctrl+C` again | The first says `Press Ctrl+C again to quit`; the second quits, and the terminal works normally afterwards |
 | Start ZENITH again, and press `↑` | The last line you ran before quitting is back on the command line: ZENITH keeps what you type there between sessions, in the file section 7 names |

@@ -1,0 +1,48 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, width, height))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·     ? keys
+  ┌ keys ────────────────────────────────────────────────────────────────────┐
+  │   q, Ctrl+O               close                                          │
+  │                                                                          │
+  │ This help                                                                │
+  │   ?, q                    close                                          │
+  │                                                                          │
+  │ When SOLAR fails at the start                                            │
+  │   r                       try again                                      │
+  │   Enter                   go to the tabs, to read the Log                │
+  │   q                       quit                                           │
+  │                                                                          │
+  │ The mouse                                                                │
+  │   wheel                   scroll what is under the pointer; in a list,   │
+  │                           move the selection                             │
+  │   Shift+drag              select text while ZENITH has the mouse;        │
+  │                           Option+drag in iTerm2                          │
+  │   /mouse                  give the mouse to the terminal, and take it    │
+  │                           back                                           │
+  │                                                                          │
+  │ Every action has a plain key or a Ctrl key; Alt and the function keys    │
+  │ are extra routes.                                                        │
+  └ Esc close  ↑ ↓ scroll  ──────────────────────────────────────────────────┘
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 1.84 ms ─── in orbit 42s ───────────
+--- every cell not listed is #F5F1E8 on #0B0C14
+ 0:  0-7   #FFC23D on #0B0C14 bold
+ 0: 10-18  #FFC23D on #0B0C14 bold underlined
+ 0: 73-73  #FFC23D on #0B0C14 bold
+ 1:  3-8   #FFC23D on #0B0C14 bold
+ 2:  6-27  #FFC23D on #0B0C14 bold
+ 4:  4-12  #FFC23D on #0B0C14 bold
+ 5:  6-27  #FFC23D on #0B0C14 bold
+ 7:  4-32  #FFC23D on #0B0C14 bold
+ 8:  6-27  #FFC23D on #0B0C14 bold
+ 9:  6-27  #FFC23D on #0B0C14 bold
+10:  6-27  #FFC23D on #0B0C14 bold
+12:  4-12  #FFC23D on #0B0C14 bold
+13:  6-27  #FFC23D on #0B0C14 bold
+15:  6-27  #FFC23D on #0B0C14 bold
+17:  6-27  #FFC23D on #0B0C14 bold
+22:  4-6   #FFC23D on #0B0C14 bold
+22: 15-17  #FFC23D on #0B0C14 bold
+23:  3-3   #FFC23D on #0B0C14
+23:  7-17  #FFC23D on #0B0C14 bold

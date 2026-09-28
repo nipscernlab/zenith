@@ -379,6 +379,21 @@ use Place::{
     Apis, CommandLine, Everywhere, Failure, Form, Help as HelpPlace, History, List, Log, Viewer,
 };
 
+/// What the help says about the mouse, which is not a key and so has no row in the table.
+/// The key that selects text belongs to the terminal: `docs/DESIGN.md`, section 11.1, has
+/// each terminal's.
+pub const MOUSE: &[(&str, &str)] = &[
+    (
+        "wheel",
+        "scroll what is under the pointer; in a list, move the selection",
+    ),
+    (
+        "Shift+drag",
+        "select text while ZENITH has the mouse; Option+drag in iTerm2",
+    ),
+    ("/mouse", "give the mouse to the terminal, and take it back"),
+];
+
 /// Every key ZENITH answers to.
 pub const BINDINGS: &[Binding] = &[
     bind(

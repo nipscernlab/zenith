@@ -163,6 +163,59 @@ and whether Windows Terminal paints its margin with them is for a person to see.
 **Revisit when** a terminal keeps the colour after ZENITH exits: the background would then
 be asked for first, with OSC 11 and `?`, and written back.
 
+### The wheel moves text three lines a notch, and a list one row
+
+ADR 0015 says the wheel scrolls the view under the pointer, and not by how much. Text, the
+transcript, an API's entry, the help and the viewer, moves three lines a notch, as most
+programs scroll. A list, the APIs, the Log and the History, moves its selection one row a
+notch, as its arrow keys do, because in those lists the selection is what the view
+follows, and each API has an entry of its own beside the list, which a jump of three would
+skip. The completion menu moves its highlight by one.
+
+**Revisit when** a person testing by hand finds the Log too slow to scroll this way.
+
+### What the wheel does where nothing scrolls
+
+The transcript is the Session tab's one view that scrolls, so the wheel over the band or
+the command line scrolls it too. Over the header, the status bar, the opening and the
+parameter form it does nothing: the form's fields fit, and `Tab` moves between them. While
+the help or the viewer is open, the wheel scrolls it from anywhere, because it covers the
+tab and has the keys.
+
+**Revisit when** clicks come, and the header's tabs can be clicked.
+
+### A notch of the wheel is not a key
+
+A key clears the message on the status bar and disarms the second `Ctrl+C`; a notch of the
+wheel does neither, so that scrolling to read a message does not remove it, and a
+`Ctrl+C` that was about to quit still quits.
+
+**Revisit when** a person is surprised by it.
+
+### ZENITH asks for the mouse's buttons, and not its movement
+
+The terminal is asked for normal tracking, `CSI ? 1000 h`, which reports a press and a
+release of each button with the wheel's notches among them, in SGR's encoding,
+`CSI ? 1006 h`, and not for movement, which ZENITH has no use for. Windows' console reports
+movement whatever it is asked, so everything but a notch of the wheel stops in the thread
+that reads the terminal, and moving the mouse costs no frame on any system.
+
+**Revisit when** clicks come: a click is already reported, and a drag would need
+`CSI ? 1002 h`.
+
+### Each terminal's key to select is documented, not measured
+
+The table of section 11.1 of `docs/DESIGN.md` is what each terminal documents: Microsoft,
+GNOME, xterm, Alacritty, WezTerm, iTerm2 and Apple, read on 27 September 2026. Selecting is
+done by a hand on the mouse, which the machine ZENITH was written on is not to be driven
+with, so none of it was measured. The walkthrough checks what is ZENITH's, that it asks for
+the mouse and gives it back, through the real binary on Windows, and the guide has a row
+for the person. Apple documents no key to hold in macOS Terminal, only `Cmd+R`, which turns
+Allow Mouse Reporting off and on.
+
+**Revisit when** the run of the guide on the laboratory Mac reports what macOS Terminal
+does with a key held.
+
 ## Validation
 
 ### A keyword ZENITH does not check never fails a call

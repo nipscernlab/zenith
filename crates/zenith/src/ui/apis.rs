@@ -1,13 +1,13 @@
 //! The APIs tab: the catalogue on the left, the entry or the form on the right.
 
 use ratatui::Frame;
-use ratatui::layout::{Constraint, Layout, Rect};
+use ratatui::layout::{Constraint, Layout, Position, Rect};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::Paragraph;
 use zenith_client::schema_view::FieldKind;
 
-use super::cards;
 use super::text::{self, pad, span, truncate, wrap};
+use super::{Scrolls, cards};
 use crate::app::App;
 use crate::app::apis::Form;
 
@@ -31,13 +31,8 @@ pub fn draw(frame: &mut Frame<'_>, area: Rect, app: &App) {
         frame.render_widget(message, body);
         return;
     };
-    let list_width = (area.width / 3).clamp(28, 40);
-    let [list, bar, detail] = Layout::horizontal([
-        Constraint::Length(list_width),
-        Constraint::Length(1),
-        Constraint::Min(1),
-    ])
-    .areas(body);
+    let list_width = list_width(area.width);
+    let [list, bar, detail] = columns(body);
     let visible = app.apis.visible(catalogue);
     let selected = app.apis.selected.min(visible.len().saturating_sub(1));
 
@@ -110,7 +105,7 @@ pub fn draw(frame: &mut Frame<'_>, area: Rect, app: &App) {
         (None, Some(api)) => cards::api_entry(app, api, width, 1, Some(&app.apis.results)),
         (None, None) => Vec::new(),
     };
-    let scroll = usize::from(app.apis.scroll).min(content.len().saturating_sub(1));
+    let scroll = usize::from(entry_scroll(app.apis.scroll, content.len()));
     let shown: Vec<Line<'static>> = content.into_iter().skip(scroll).collect();
     frame.render_widget(Paragraph::new(shown).style(theme.base()), detail);
 
@@ -132,6 +127,61 @@ pub fn draw(frame: &mut Frame<'_>, area: Rect, app: &App) {
         ]
     };
     frame.render_widget(super::hint_bar(app, &hint), hints);
+}
+
+/// The list's width, for a tab `width` cells wide.
+fn list_width(width: u16) -> u16 {
+    (width / 3).clamp(28, 40)
+}
+
+/// The list, the rule and the entry, left to right.
+fn columns(body: Rect) -> [Rect; 3] {
+    Layout::horizontal([
+        Constraint::Length(list_width(body.width)),
+        Constraint::Length(1),
+        Constraint::Min(1),
+    ])
+    .areas(body)
+}
+
+/// The scroll an entry of `lines` lines can have of `scroll`: down to its last line.
+fn entry_scroll(scroll: u16, lines: usize) -> u16 {
+    scroll.min(u16::try_from(lines.saturating_sub(1)).unwrap_or(u16::MAX))
+}
+
+/// What the wheel scrolls at `position` of the tab: the list left of the rule and the
+/// entry right of it, and nothing while the form is open, whose fields `Tab` moves
+/// between.
+#[must_use]
+pub fn scrolls_at(app: &App, area: Rect, position: Position) -> Scrolls {
+    if app.apis.form.is_some() || app.catalogue().is_none() {
+        return Scrolls::Nothing;
+    }
+    let [list, _, _] = columns(area);
+    if position.x < list.right() {
+        Scrolls::ApiList
+    } else {
+        Scrolls::ApiEntry
+    }
+}
+
+/// How far down the entry of the API selected can be, of the `scroll` lines asked for:
+/// all of them, unless that is past its last line.
+#[must_use]
+pub fn scroll_of_entry(app: &App, scroll: u16) -> u16 {
+    let Some(catalogue) = app.catalogue() else {
+        return 0;
+    };
+    let visible = app.apis.visible(catalogue);
+    let Some(api) = visible.get(app.apis.selected.min(visible.len().saturating_sub(1))) else {
+        return 0;
+    };
+    let area = super::content_area(app);
+    let [body, _] = Layout::vertical([Constraint::Min(1), Constraint::Length(1)]).areas(area);
+    let [_, _, detail] = columns(body);
+    let width = usize::from(detail.width).saturating_sub(2);
+    let lines = cards::api_entry(app, api, width, 1, Some(&app.apis.results)).len();
+    entry_scroll(scroll, lines)
 }
 
 #[allow(

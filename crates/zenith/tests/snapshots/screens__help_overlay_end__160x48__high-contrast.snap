@@ -1,0 +1,97 @@
+---
+source: crates/zenith/tests/screens.rs
+expression: "screen(&draw(&script.app, width, height))"
+---
+ ZENITH   1 Session  2 APIs  3 Log  4 History                ·     ·                        ••      ·        ∙  ·                                        ? keys
+                                ┌ keys ────────────────────────────────────────────────────────────────────────────────────────┐
+                                │ The parameter form                                                                           │
+                                │   Tab, ↓                  the next field                                                     │
+                                │   Shift+Tab, ↑            the previous field                                                 │
+                                │   Space                   toggle a boolean                                                   │
+                                │   ←                       the previous fixed value, or the cursor left in text               │
+                                │   →                       the next fixed value, or the cursor right in text                  │
+                                │   Enter                   validate and run                                                   │
+                                │                                                                                              │
+                                │ Log                                                                                          │
+                                │   e                       show errors only                                                   │
+                                │   w                       warnings and up                                                    │
+                                │   i                       information and up                                                 │
+                                │   d                       debugging and up                                                   │
+                                │   t                       everything                                                         │
+                                │   ←                       one level fewer                                                    │
+                                │   →                       one level more                                                     │
+                                │   Enter                   the whole line                                                     │
+                                │   c                       clear the tab                                                      │
+                                │                                                                                              │
+                                │ History                                                                                      │
+                                │   Enter                   view the call                                                      │
+                                │   r                       send the request again                                             │
+                                │   e                       the request, on the command line                                   │
+                                │   x                       write this connection as a recording for solar replay              │
+                                │                                                                                              │
+                                │ The envelope viewer                                                                          │
+                                │   ←                       the previous call                                                  │
+                                │   →                       the next call                                                      │
+                                │   q, Ctrl+O               close                                                              │
+                                │                                                                                              │
+                                │ This help                                                                                    │
+                                │   ?, q                    close                                                              │
+                                │                                                                                              │
+                                │ When SOLAR fails at the start                                                                │
+                                │   r                       try again                                                          │
+                                │   Enter                   go to the tabs, to read the Log                                    │
+                                │   q                       quit                                                               │
+                                │                                                                                              │
+                                │ The mouse                                                                                    │
+                                │   wheel                   scroll what is under the pointer; in a list, move the selection    │
+                                │   Shift+drag              select text while ZENITH has the mouse; Option+drag in iTerm2      │
+                                │   /mouse                  give the mouse to the terminal, and take it back                   │
+                                │                                                                                              │
+                                │ Every action has a plain key or a Ctrl key; Alt and the function keys are extra routes.      │
+                                └ Esc close  ↑ ↓ scroll  ──────────────────────────────────────────────────────────────────────┘
+ ──●── SOLAR 0.1.0 · solar/1 ─── last call 1.84 ms ─── in orbit 42s ───────────────────────────────────────────────────────────────────────────────────────────
+--- every cell not listed is #F5F1E8 on #0B0C14
+ 0:  0-7   #FFC23D on #0B0C14 bold
+ 0: 10-18  #FFC23D on #0B0C14 bold underlined
+ 0:153-153 #FFC23D on #0B0C14 bold
+ 1: 33-38  #FFC23D on #0B0C14 bold
+ 2: 34-51  #FFC23D on #0B0C14 bold
+ 3: 36-57  #FFC23D on #0B0C14 bold
+ 4: 36-57  #FFC23D on #0B0C14 bold
+ 5: 36-57  #FFC23D on #0B0C14 bold
+ 6: 36-57  #FFC23D on #0B0C14 bold
+ 7: 36-57  #FFC23D on #0B0C14 bold
+ 8: 36-57  #FFC23D on #0B0C14 bold
+10: 34-36  #FFC23D on #0B0C14 bold
+11: 36-57  #FFC23D on #0B0C14 bold
+12: 36-57  #FFC23D on #0B0C14 bold
+13: 36-57  #FFC23D on #0B0C14 bold
+14: 36-57  #FFC23D on #0B0C14 bold
+15: 36-57  #FFC23D on #0B0C14 bold
+16: 36-57  #FFC23D on #0B0C14 bold
+17: 36-57  #FFC23D on #0B0C14 bold
+18: 36-57  #FFC23D on #0B0C14 bold
+19: 36-57  #FFC23D on #0B0C14 bold
+21: 34-40  #FFC23D on #0B0C14 bold
+22: 36-57  #FFC23D on #0B0C14 bold
+23: 36-57  #FFC23D on #0B0C14 bold
+24: 36-57  #FFC23D on #0B0C14 bold
+25: 36-57  #FFC23D on #0B0C14 bold
+27: 34-52  #FFC23D on #0B0C14 bold
+28: 36-57  #FFC23D on #0B0C14 bold
+29: 36-57  #FFC23D on #0B0C14 bold
+30: 36-57  #FFC23D on #0B0C14 bold
+32: 34-42  #FFC23D on #0B0C14 bold
+33: 36-57  #FFC23D on #0B0C14 bold
+35: 34-62  #FFC23D on #0B0C14 bold
+36: 36-57  #FFC23D on #0B0C14 bold
+37: 36-57  #FFC23D on #0B0C14 bold
+38: 36-57  #FFC23D on #0B0C14 bold
+40: 34-42  #FFC23D on #0B0C14 bold
+41: 36-57  #FFC23D on #0B0C14 bold
+42: 36-57  #FFC23D on #0B0C14 bold
+43: 36-57  #FFC23D on #0B0C14 bold
+46: 34-36  #FFC23D on #0B0C14 bold
+46: 45-47  #FFC23D on #0B0C14 bold
+47:  3-3   #FFC23D on #0B0C14
+47:  7-17  #FFC23D on #0B0C14 bold

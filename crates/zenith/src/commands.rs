@@ -1,7 +1,8 @@
 //! The slash commands: the table `/help` and completion read, and the parser.
 //!
-//! The first eight commands are the ones the brief names. The other five exist because
-//! testing SOLAR by hand needs them, and `docs/DESIGN.md`, section 10, says why each one.
+//! The first eight commands are the ones the brief names. The others exist because testing
+//! SOLAR by hand needs them, and `docs/DESIGN.md`, section 10, says why each one; `/mouse`
+//! is the architect's, ADR 0015.
 
 use std::ops::Range;
 
@@ -125,6 +126,12 @@ pub const COMMANDS: &[Spec] = &[
         summary: "write one file with everything a bug report needs",
         argument: Argument::OptionalRest,
     },
+    Spec {
+        name: "mouse",
+        usage: "/mouse [on|off]",
+        summary: "the mouse to the terminal, to select text, or to ZENITH, for the wheel",
+        argument: Argument::OptionalWord,
+    },
 ];
 
 /// The command a name stands for.
@@ -192,6 +199,11 @@ pub enum Command {
     Report {
         /// The path.
         path: Option<String>,
+    },
+    /// `/mouse [on|off]`.
+    Mouse {
+        /// Whether ZENITH takes the mouse, or, without a word, the other of what it does.
+        on: Option<bool>,
     },
 }
 
@@ -343,6 +355,19 @@ pub fn parse(line: &str, api_names: &[&str]) -> Result<Option<Command>, ParseErr
         "export" => Command::Export {
             path: optional(rest),
         },
+        "mouse" => Command::Mouse {
+            on: match rest {
+                "" => None,
+                "on" => Some(true),
+                "off" => Some(false),
+                _ => {
+                    return Err(error(
+                        format!("/mouse takes on or off, or nothing, and not {rest}."),
+                        rest_span,
+                    ));
+                }
+            },
+        },
         _ => Command::Report {
             path: optional(rest),
         },
@@ -371,6 +396,19 @@ mod tests {
 
     fn fails(line: &str) -> ParseError {
         parse(line, &APIS).unwrap_err()
+    }
+
+    #[test]
+    fn mouse_takes_on_or_off_or_nothing() {
+        assert_eq!(ok("/mouse"), Command::Mouse { on: None });
+        assert_eq!(ok("/mouse on"), Command::Mouse { on: Some(true) });
+        assert_eq!(ok("/mouse  off "), Command::Mouse { on: Some(false) });
+        let failure = fails("/mouse maybe");
+        assert_eq!(
+            failure.message,
+            "/mouse takes on or off, or nothing, and not maybe."
+        );
+        assert_eq!(failure.span, Some(7..12));
     }
 
     #[test]
@@ -517,6 +555,7 @@ mod tests {
             ("/ping", Command::Ping { message: None }),
             ("/theme", Command::Theme { name: None }),
             ("/help", Command::Help { command: None }),
+            ("/mouse", Command::Mouse { on: None }),
             (
                 "/raw {}",
                 Command::Raw {

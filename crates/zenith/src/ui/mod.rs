@@ -17,7 +17,7 @@ pub mod session;
 pub mod text;
 
 use ratatui::Frame;
-use ratatui::layout::{Alignment, Constraint, Layout, Rect};
+use ratatui::layout::{Alignment, Constraint, Layout, Position, Rect};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Paragraph};
 
@@ -42,12 +42,7 @@ pub fn draw(frame: &mut Frame<'_>, app: &App) {
         opening::draw(frame, area, app);
         return;
     }
-    let [header, content, status] = Layout::vertical([
-        Constraint::Length(1),
-        Constraint::Min(1),
-        Constraint::Length(1),
-    ])
-    .areas(area);
+    let [header, content, status] = frame_areas(area);
     chrome::header(frame, header, app);
     chrome::status(frame, status, app);
     match app.tab {
@@ -62,6 +57,67 @@ pub fn draw(frame: &mut Frame<'_>, app: &App) {
             overlays::viewer(frame, content, app, record, scroll);
         }
         None => {}
+    }
+}
+
+/// The header, the tab and the status bar of a screen.
+fn frame_areas(area: Rect) -> [Rect; 3] {
+    Layout::vertical([
+        Constraint::Length(1),
+        Constraint::Min(1),
+        Constraint::Length(1),
+    ])
+    .areas(area)
+}
+
+/// The area of the tab, at the size the terminal last said it was.
+fn content_area(app: &App) -> Rect {
+    let [_, content, _] = frame_areas(Rect::new(0, 0, app.size.0, app.size.1));
+    content
+}
+
+/// What a notch of the wheel scrolls, by where the pointer is.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Scrolls {
+    /// Nothing: the header, the status bar, the opening, the form, a terminal too small.
+    Nothing,
+    /// The help or the viewer, wherever the pointer is, since it covers the tab and has
+    /// the keys.
+    Overlay,
+    /// The Session tab's transcript, from anywhere on the tab but the menu: it is the
+    /// tab's one view that scrolls.
+    Transcript,
+    /// The completion menu, under the pointer.
+    Menu,
+    /// The list of APIs.
+    ApiList,
+    /// The entry of the API selected.
+    ApiEntry,
+    /// The Log's lines.
+    Log,
+    /// The History's calls.
+    History,
+}
+
+/// What the wheel scrolls with the pointer on `position`, laid out by the code that draws
+/// the screen, at the size the terminal last said it was.
+#[must_use]
+pub fn scrolls_at(app: &App, position: Position) -> Scrolls {
+    if app.size.0 < MIN_WIDTH || app.size.1 < MIN_HEIGHT || app.opening.is_some() {
+        return Scrolls::Nothing;
+    }
+    if app.overlay.is_some() {
+        return Scrolls::Overlay;
+    }
+    let content = content_area(app);
+    if !content.contains(position) {
+        return Scrolls::Nothing;
+    }
+    match app.tab {
+        Tab::Session => session::scrolls_at(app, content, position),
+        Tab::Apis => apis::scrolls_at(app, content, position),
+        Tab::Log => Scrolls::Log,
+        Tab::History => Scrolls::History,
     }
 }
 

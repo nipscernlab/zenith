@@ -18,7 +18,8 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 use std::time::{Duration, Instant, SystemTime};
 
-use ratatui::crossterm::event::{KeyCode, KeyEvent};
+use ratatui::crossterm::event::{KeyCode, KeyEvent, MouseEvent, MouseEventKind};
+use ratatui::layout::Position;
 use serde_json::{Map, Value, json};
 use zenith_client::calls::{Answer, Refused};
 use zenith_client::connection::{Event as ConnectionEvent, Settings};
@@ -36,6 +37,7 @@ use crate::completion;
 use crate::glyphs::{Charset, Glyphs};
 use crate::keys::{self, Action, LevelKey, Place};
 use crate::theme::{Depth, Theme, ThemeName};
+use crate::ui::{self, Scrolls};
 
 use apis::{ApisTab, ExampleResult, Form};
 use history::{CallRecord, History, Origin, Outcome, RECORDING_FORMAT, Recorded, Summary};
@@ -120,6 +122,19 @@ pub const OPENING_FRAME: Duration = Duration::from_millis(83);
 /// The time between two redraws of the timer of a call in flight.
 pub const WAITING_TICK: Duration = Duration::from_millis(250);
 
+/// The lines a notch of the wheel scrolls text by, as most programs scroll it. A list
+/// moves its selection one row a notch instead, as its arrow keys do.
+pub const WHEEL_LINES: usize = 3;
+
+/// Who has the mouse.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Mouse {
+    /// ZENITH, for the wheel; the terminal selects text with a modifier held.
+    Zenith,
+    /// The terminal, which selects text as usual and does what it likes with the wheel.
+    Terminal,
+}
+
 /// How ZENITH was started.
 #[derive(Debug, Clone)]
 pub struct Options {
@@ -139,6 +154,9 @@ pub struct Options {
     pub environment: Vec<(String, String)>,
     /// The command line history of earlier sessions, and where this one keeps it.
     pub history: KeptHistory,
+    /// Who has the mouse at the start: ZENITH, unless `--no-mouse` or `ZENITH_NO_MOUSE`
+    /// leave it to the terminal.
+    pub mouse: Mouse,
 }
 
 /// The command line history of earlier sessions, as it was read at the start, and the file
@@ -165,6 +183,7 @@ impl Default for Options {
             opening: true,
             environment: Vec::new(),
             history: KeptHistory::default(),
+            mouse: Mouse::Zenith,
         }
     }
 }
@@ -207,6 +226,8 @@ pub enum Written {
 pub enum Incoming {
     /// A key.
     Key(KeyEvent),
+    /// The mouse. Only a notch of the wheel does anything.
+    Mouse(MouseEvent),
     /// Text pasted into the terminal.
     Paste(String),
     /// The terminal changed size.
@@ -348,6 +369,8 @@ pub struct App {
     pub flash: Option<(Tone, String)>,
     /// Whether the next `Ctrl+C` quits.
     pub interrupt_armed: bool,
+    /// Who has the mouse. `/mouse` changes it, and the runtime makes the terminal agree.
+    pub mouse: Mouse,
     /// The moment of the event being handled.
     pub now: Instant,
     /// The size of the terminal.
@@ -387,6 +410,7 @@ impl App {
             history: History::default(),
             flash: None,
             interrupt_armed: false,
+            mouse: options.mouse,
             now,
             size: (80, 24),
             quitting: false,
@@ -428,6 +452,7 @@ impl App {
         self.now = now.max(self.now);
         match incoming {
             Incoming::Key(key) => self.on_key(&key),
+            Incoming::Mouse(mouse) => self.on_mouse(mouse),
             Incoming::Paste(text) => self.on_paste(&text),
             Incoming::Resize { width, height } => self.size = (width, height),
             Incoming::Started { generation, result } => self.on_started(generation, result),
@@ -1224,6 +1249,120 @@ impl App {
         }
     }
 
+    /// A notch of the wheel scrolls what is under the pointer: text by [`WHEEL_LINES`], a
+    /// list by one row, as its arrow keys do. The command line history is never walked by
+    /// it, and nothing else of the mouse does anything.
+    fn on_mouse(&mut self, mouse: MouseEvent) {
+        let up = match mouse.kind {
+            MouseEventKind::ScrollUp => true,
+            MouseEventKind::ScrollDown => false,
+            _ => return,
+        };
+        if self.mouse == Mouse::Terminal {
+            return;
+        }
+        let step = if up { Action::Up } else { Action::Down };
+        match ui::scrolls_at(self, Position::new(mouse.column, mouse.row)) {
+            Scrolls::Nothing => {}
+            Scrolls::Overlay => self.scroll_overlay(up, WHEEL_LINES),
+            Scrolls::Transcript => self.scroll_transcript(up, WHEEL_LINES),
+            Scrolls::Menu => self.move_highlight(!up),
+            Scrolls::ApiList => self.act_on_apis(step),
+            Scrolls::ApiEntry => self.scroll_entry(up, WHEEL_LINES),
+            Scrolls::Log => self.act_on_log(step),
+            Scrolls::History => self.act_on_history(step),
+        }
+    }
+
+    /// Scrolls the transcript up or down by `lines`, never past its top, and follows it
+    /// again at the bottom.
+    fn scroll_transcript(&mut self, up: bool, lines: usize) {
+        let wanted = if up {
+            self.session.scroll.saturating_add(lines)
+        } else {
+            self.session.scroll.saturating_sub(lines)
+        };
+        self.session.scroll = ui::session::transcript_scroll(self, wanted);
+        if self.session.scroll == 0 {
+            self.session.unseen = 0;
+        }
+    }
+
+    /// Scrolls the entry of the API selected by `lines`, never past its last line.
+    fn scroll_entry(&mut self, up: bool, lines: usize) {
+        let lines = u16::try_from(lines).unwrap_or(u16::MAX);
+        let wanted = if up {
+            self.apis.scroll.saturating_sub(lines)
+        } else {
+            self.apis.scroll.saturating_add(lines)
+        };
+        self.apis.scroll = ui::apis::scroll_of_entry(self, wanted);
+    }
+
+    /// Scrolls the help or the viewer by `lines`, never past its last page.
+    fn scroll_overlay(&mut self, up: bool, lines: usize) {
+        let by = |scroll: usize| {
+            if up {
+                scroll.saturating_sub(lines)
+            } else {
+                scroll.saturating_add(lines)
+            }
+        };
+        if let Some(overlay) = self.overlay {
+            let scroll = match overlay {
+                Overlay::Help { scroll } | Overlay::Viewer { scroll, .. } => by(scroll),
+            };
+            self.set_overlay_scroll(overlay, scroll);
+        }
+    }
+
+    /// The help or the viewer at `scroll`, or at its last page when that is past it.
+    fn set_overlay_scroll(&mut self, overlay: Overlay, scroll: usize) {
+        self.overlay = Some(match overlay {
+            Overlay::Help { .. } => Overlay::Help {
+                scroll: ui::overlays::help_scroll(self, scroll),
+            },
+            Overlay::Viewer { record, .. } => Overlay::Viewer {
+                record,
+                scroll: ui::overlays::viewer_scroll(self, record, scroll),
+            },
+        });
+    }
+
+    /// `/theme`: the theme named, or the next one.
+    fn set_theme(&mut self, echo: Entry, name: Option<ThemeName>) {
+        let name = name.unwrap_or_else(|| self.theme.name.next());
+        self.theme = Theme::new(name, self.theme.depth);
+        self.session.push(echo);
+        self.push_notice(
+            Tone::Info,
+            vec![format!("The theme is now {}.", name.name())],
+        );
+    }
+
+    /// `/mouse`: the mouse to ZENITH with `on`, to the terminal with `off`, and to whoever
+    /// does not have it without either, with a notice of who has it now.
+    fn give_mouse(&mut self, echo: Entry, on: Option<bool>) {
+        self.session.push(echo);
+        let to_zenith = on.unwrap_or(self.mouse == Mouse::Terminal);
+        let (mouse, said) = if to_zenith {
+            (
+                Mouse::Zenith,
+                "ZENITH has the mouse: the wheel scrolls what is under the pointer. To select \
+                 text, hold Shift, or Option in iTerm2; /mouse off gives the mouse to the \
+                 terminal.",
+            )
+        } else {
+            (
+                Mouse::Terminal,
+                "The terminal has the mouse: dragging selects text, and the wheel does what \
+                 the terminal makes of it, the arrow keys in most. /mouse on takes it back.",
+            )
+        };
+        self.mouse = mouse;
+        self.push_notice(Tone::Info, vec![said.to_owned()]);
+    }
+
     fn action_for(&self, key: &KeyEvent) -> Option<Action> {
         let places = self.places();
         let line_empty = self.session.editor.is_empty();
@@ -1341,7 +1480,7 @@ impl App {
         match overlay {
             Overlay::Help { scroll } => {
                 if let Some(scroll) = scroll_by(scroll, action) {
-                    self.overlay = Some(Overlay::Help { scroll });
+                    self.set_overlay_scroll(overlay, scroll);
                     return true;
                 }
                 if action == Action::Help {
@@ -1351,7 +1490,7 @@ impl App {
             }
             Overlay::Viewer { record, scroll } => {
                 if let Some(scroll) = scroll_by(scroll, action) {
-                    self.overlay = Some(Overlay::Viewer { record, scroll });
+                    self.set_overlay_scroll(overlay, scroll);
                     return true;
                 }
                 let first = self.history.calls.first_number();
@@ -1525,14 +1664,11 @@ impl App {
             Action::DeleteToStart => editor.delete_to_start(),
             Action::DeleteToEnd => editor.delete_to_end(),
             Action::PageUp => {
-                self.session.scroll += page;
+                self.scroll_transcript(true, page);
                 edited = false;
             }
             Action::PageDown => {
-                self.session.scroll = self.session.scroll.saturating_sub(page);
-                if self.session.scroll == 0 {
-                    self.session.unseen = 0;
-                }
+                self.scroll_transcript(false, page);
                 edited = false;
             }
             _ => edited = false,
@@ -1669,13 +1805,11 @@ impl App {
                 self.command_call(echo, "solar.version", &json!({}), Layout::Version)
             }
             Command::Theme { name } => {
-                let name = name.unwrap_or_else(|| self.theme.name.next());
-                self.theme = Theme::new(name, self.theme.depth);
-                self.session.push(echo);
-                self.push_notice(
-                    Tone::Info,
-                    vec![format!("The theme is now {}.", name.name())],
-                );
+                self.set_theme(echo, name);
+                Ok(())
+            }
+            Command::Mouse { on } => {
+                self.give_mouse(echo, on);
                 Ok(())
             }
             Command::Help { command } => {
@@ -1900,18 +2034,8 @@ impl App {
                 self.apis.selected = count.saturating_sub(1);
                 self.apis.scroll = 0;
             }
-            Action::PageDown => {
-                self.apis.scroll = self
-                    .apis
-                    .scroll
-                    .saturating_add(u16::try_from(page).unwrap_or(u16::MAX));
-            }
-            Action::PageUp => {
-                self.apis.scroll = self
-                    .apis
-                    .scroll
-                    .saturating_sub(u16::try_from(page).unwrap_or(u16::MAX));
-            }
+            Action::PageDown => self.scroll_entry(false, page),
+            Action::PageUp => self.scroll_entry(true, page),
             Action::RunExample(number) => self.run_example(usize::from(number).saturating_sub(1)),
             Action::RunAllExamples => {
                 let count = self.selected_api().map_or(0, |api| api.examples.len());
