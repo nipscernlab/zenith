@@ -468,4 +468,54 @@ mod tests {
         assert_eq!(tracker.close_all().len(), 2);
         assert!(tracker.call("a.b", &json!({}), now).is_ok());
     }
+
+    #[test]
+    fn a_line_sent_by_hand_with_a_string_id_is_answered_by_that_id_and_no_other() {
+        let mut tracker = Tracker::new(8);
+        let now = Instant::now();
+        let (ping, _) = tracker.call("solar.ping", &json!({}), now).unwrap();
+        let by_hand = tracker
+            .raw(
+                r#"{"jsonrpc":"2.0","id":"by hand","method":"solar.version"}"#,
+                now,
+            )
+            .unwrap();
+        assert_eq!(
+            tracker
+                .find(by_hand)
+                .and_then(|waiting| waiting.method.as_deref()),
+            Some("solar.version")
+        );
+        assert_eq!(tracker.find(ping).map(|waiting| waiting.call), Some(ping));
+        assert!(tracker.find(by_hand + ping + 10).is_none());
+        // An id of other text is not this one.
+        assert!(matches!(
+            tracker.answer(&response(&json!("by han"))),
+            Answer::Unexpected
+        ));
+        // The answer to the string id is the line's, though the ping was sent first.
+        match tracker.answer(&response(&json!("by hand"))) {
+            Answer::Call { waiting, by_order } => {
+                assert_eq!(waiting.call, by_hand);
+                assert!(!by_order);
+            }
+            other @ Answer::Unexpected => panic!("{other:?}"),
+        }
+        assert!(tracker.find(by_hand).is_none());
+    }
+
+    #[test]
+    fn a_refusal_says_why_in_a_sentence() {
+        assert_eq!(
+            Refused::Full { limit: 256 }.to_string(),
+            "256 calls are already waiting for SOLAR, which is as many as ZENITH keeps."
+        );
+        assert!(
+            Refused::IdInUse {
+                id: "\"a\"".to_owned()
+            }
+            .to_string()
+            .starts_with("A call with the id \"a\" is already waiting")
+        );
+    }
 }

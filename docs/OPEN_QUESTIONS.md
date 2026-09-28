@@ -309,13 +309,23 @@ same tests. The code they had reached by chance now has tests of its own.
 ### Mutation testing reports, and does not gate
 
 `cargo mutants` runs weekly in CI, and never on a laptop, for the reason `AGENTS.md`
-gives. Its survivors go to the job's artefact and the job succeeds either way: the first
-run has no baseline to compare with, and a gate that fails on survivors nobody has
-looked at yet would be switched off rather than read.
+gives. Its survivors go to the job's artefact and the job succeeds either way.
 
-**What would change it.** A first run looked at survivor by survivor: once each one is
-killed by a test or recorded as a mutation that changes nothing, the job can fail on a
-new one.
+The ceiling is open for stage three, as the architect decided on 27 September 2026, and
+0.2.0 ships with the job reporting and not gating. No run has finished all twenty shards.
+Of the five started in stage two, two were cancelled while the job was being split into
+shards; one lost three shards when a mutant that took away a limit on memory took their
+runners down, which the limit on address space now prevents; one ran a single shard
+again to check that limit, and its summary failed as a part of a run must; and the fifth,
+on the tests written for the survivors, lost a shard to a test that failed now and then,
+since fixed, and waited in the queue for more than an hour until it was cancelled so
+that 0.2.0 could ship. The one measurement is of 17 of the 20 shards on version 0.1.0:
+2 237 mutants, 1 608 caught, 463 survived, 6 timed out and 160 could not be built, 77.70 %
+of the viable ones caught. The survivors outside the drawing code have tests since, and
+stay killed; those in it wait for the complete run.
+
+**What would change it.** The first run whose twenty shards all finish: the survivors it
+counts become `CEILING` in `xtask/src/mutants.rs`, and the job fails on one more.
 
 ### Development builds keep line tables only
 

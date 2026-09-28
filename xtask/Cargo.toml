@@ -11,10 +11,10 @@ homepage.workspace = true
 publish = false
 
 [dependencies]
-portable-pty = "0.9"
+portable-pty.workspace = true
 serde_json.workspace = true
 sysinfo = { version = "0.39", default-features = false, features = ["system"] }
-vt100 = "0.16"
+vt100.workspace = true
 zenith-client.workspace = true
 
 [lints]

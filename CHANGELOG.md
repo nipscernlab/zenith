@@ -39,6 +39,14 @@ either is stated here in its own line.
   by hand can name the shards to run again, and every process of the job may take six GiB
   of address space, so that a mutant that takes away a limit on memory fails its test
   rather than bringing the runner down.
+- Tests for what the first mutation run found unchecked. On version 0.1.0, 17 of its 20
+  shards finished: of 2 237 mutants, 1 608 were caught, 463 survived, 6 timed out and 160
+  could not be built, 77.70 % of the viable ones caught. The survivors outside the drawing
+  code are killed by tests of what the code does, and where a mutant changed nothing, the
+  part it changed was redundant and is gone. The `zenith` binary itself is tested in a
+  pseudo-terminal on Unix: it runs until it is told to quit, gives the terminal back and
+  writes its timings. `portable-pty` and `vt100`, which `xtask` already used, are
+  development dependencies of `zenith` for it.
 
 ### Changed
 
@@ -76,11 +84,23 @@ either is stated here in its own line.
   older than the recording format, such as 0.2.0, whose replay refuses the header ZENITH
   writes: a SOLAR whose own recordings have no header is not asked to replay, and the
   note says so.
-
 - No mark was ever seen on a fast machine: the opening lasts as long as the connection,
   32 ms on the architect's, as the design requires. Every connection now starts the
   Session tab with SOLAR's mark and the version that answered, above the notice that it
   connected, and the opening stays as short as the connection.
+- When the status bar is too narrow for everything while connected, `in orbit` stays and
+  the stretches before it drop, since `docs/DESIGN.md` says the state is never the first
+  thing to go; `in orbit` used to go first. A bar that has to cut its text keeps the
+  colours of its orbit and of SOLAR's body, and one stretch that fills the bar exactly no
+  longer pushes the last cell of the orbit off the edge.
+- The validator's sentences agree with their subject: at the root they say `The
+  parameters have` and `match`, where they said `has` and `matches`, and an element where
+  none is allowed is named by its own pointer, `/list/0 is an element where none is
+  allowed.`
+- A `multipleOf` of zero, which JSON Schema does not allow, refused every whole number and
+  let every other number through; it now holds no number to anything.
+- A test of the connection read SOLAR's standard error before it had closed, and failed
+  now and then; it waits for standard error to end.
 
 ## [0.1.0] - 2026-09-27
 

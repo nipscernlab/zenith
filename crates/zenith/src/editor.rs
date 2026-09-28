@@ -407,4 +407,23 @@ mod tests {
         let line = editor("日本");
         assert_eq!(line.window(10), (0, 4));
     }
+
+    fn with(text: &str) -> LineEditor {
+        let mut editor = LineEditor::default();
+        editor.set(text);
+        editor
+    }
+
+    #[test]
+    fn a_line_exactly_as_wide_as_the_window_scrolls_so_the_cursor_stays_inside() {
+        // Five cells before the cursor in a window of five: the cursor would be on the
+        // sixth column, so the line scrolls by one.
+        assert_eq!(with("abcde").window(5), (1, 4));
+        assert_eq!(with("abcd").window(5), (0, 4));
+        // In a window one cell wide, only the cursor fits, after the whole line.
+        assert_eq!(with("ab").window(1), (2, 0));
+        // Wide characters are counted by their cells and cut at their bytes.
+        assert_eq!(with("日本").window(2), (6, 0));
+        assert_eq!(with("日本").window(3), (3, 2));
+    }
 }

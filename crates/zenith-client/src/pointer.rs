@@ -16,7 +16,7 @@ pub enum Segment {
 }
 
 /// A JSON pointer. The empty pointer is the whole document.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Pointer(Vec<Segment>);
 
 impl Pointer {
@@ -143,5 +143,17 @@ mod tests {
     fn text_that_does_not_start_with_a_slash_is_not_a_pointer() {
         assert_eq!(Pointer::parse("tools"), None);
         assert_eq!(Pointer::parse(""), Some(Pointer::root()));
+    }
+
+    #[test]
+    fn the_last_segment_and_a_position_in_an_array_are_found() {
+        let pointer = Pointer::parse("/a/b").unwrap();
+        assert_eq!(pointer.last(), Some(&Segment::Key("b".to_owned())));
+        assert_eq!(Pointer::root().last(), None);
+        let document = json!({"list": ["zero", "one"]});
+        let by_position = Pointer::root().key("list").index(1);
+        assert_eq!(by_position.find(&document), Some(&json!("one")));
+        assert_eq!(Pointer::root().index(0).find(&document), None);
+        assert_eq!(Pointer::root().key("list").index(2).find(&document), None);
     }
 }

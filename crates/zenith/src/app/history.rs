@@ -577,4 +577,49 @@ mod tests {
         history.selected = Some(0);
         assert_eq!(history.current(), Some(0));
     }
+
+    #[test]
+    fn a_call_is_counted_by_its_lines_its_method_why_it_closed_and_an_overhead() {
+        let mut answered = record(1, Some(r#"{"id":1}"#));
+        answered.closed = Some("gone".to_owned());
+        assert_eq!(
+            answered.bytes(),
+            answered.request.len() + 8 + "solar.ping".len() + 4 + limits::ENTRY_OVERHEAD
+        );
+        let mut waiting = record(2, None);
+        waiting.method = None;
+        assert_eq!(
+            waiting.bytes(),
+            waiting.request.len() + limits::ENTRY_OVERHEAD
+        );
+    }
+
+    #[test]
+    fn every_origin_has_the_word_a_report_writes_for_it() {
+        for (origin, word) in [
+            (Origin::Handshake, "handshake"),
+            (Origin::Command, "command"),
+            (
+                Origin::Example {
+                    api: "a".to_owned(),
+                    index: 0,
+                },
+                "example",
+            ),
+            (Origin::Form, "form"),
+            (Origin::Raw, "raw"),
+            (Origin::Cancel, "cancel"),
+            (Origin::Again, "again"),
+            (
+                Origin::Report {
+                    path: std::path::PathBuf::new(),
+                },
+                "report",
+            ),
+            (Origin::Reload, "reload"),
+            (Origin::LogLevel, "log_level"),
+        ] {
+            assert_eq!(origin.word(), word);
+        }
+    }
 }

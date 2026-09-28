@@ -333,10 +333,11 @@ impl Failure {
     /// One sentence saying what was wrong.
     #[must_use]
     pub fn sentence(&self) -> String {
-        let place = if self.at.is_root() {
-            "The parameters".to_owned()
+        // At the root the sentence is about the parameters, which are plural.
+        let (place, has, matches) = if self.at.is_root() {
+            ("The parameters".to_owned(), "have", "match")
         } else {
-            self.at.to_string()
+            (self.at.to_string(), "has", "matches")
         };
         match &self.kind {
             FailureKind::Type { received, .. } => format!(
@@ -358,20 +359,21 @@ impl Failure {
                 format!("There is no parameter {property}.")
             }
             FailureKind::DependentMissing { property, requires } => {
-                format!("{place} has {property}, which needs {requires} as well.")
+                format!("{place} {has} {property}, which needs {requires} as well.")
             }
             FailureKind::NotUnique { first, second } => {
-                format!("{place} has the same value at {first} and at {second}.")
+                format!("{place} {has} the same value at {first} and at {second}.")
             }
-            FailureKind::ItemNotAllowed { index } => {
-                format!("{place} has an element at {index}, where none is allowed.")
+            // The failure is at the element itself, which is what the line underlines.
+            FailureKind::ItemNotAllowed { .. } => {
+                format!("{place} is an element where none is allowed.")
             }
             FailureKind::SeveralBranches { matched } => format!(
-                "{place} matches {} alternatives, and must match exactly one.",
+                "{place} {matches} {} alternatives, and must match exactly one.",
                 matched.len()
             ),
             FailureKind::BadPropertyName { name } => {
-                format!("{place} has a member named {name}, which the schema does not allow.")
+                format!("{place} {has} a member named {name}, which the schema does not allow.")
             }
             _ => format!("{place} should be {}.", self.expected()),
         }
@@ -1289,12 +1291,10 @@ fn check_number(
     }
 }
 
-/// Compares two numbers by value, exactly when both are integers.
+/// Compares two numbers by value, exactly as decimals, and as floats only when the two
+/// are too far apart to align in 128 bits.
 #[must_use]
 pub fn compare_numbers(left: &Number, right: &Number) -> Ordering {
-    if let (Some(a), Some(b)) = (as_i128(left), as_i128(right)) {
-        return a.cmp(&b);
-    }
     if let (Some(a), Some(b)) = (Decimal::of(left), Decimal::of(right)) {
         a.compare(&b)
     } else {
@@ -1302,13 +1302,6 @@ pub fn compare_numbers(left: &Number, right: &Number) -> Ordering {
         let b = right.as_f64().unwrap_or(f64::NAN);
         a.partial_cmp(&b).unwrap_or(Ordering::Equal)
     }
-}
-
-fn as_i128(number: &Number) -> Option<i128> {
-    number
-        .as_i64()
-        .map(i128::from)
-        .or_else(|| number.as_u64().map(i128::from))
 }
 
 /// Equality in the sense of JSON Schema: numbers are equal by value, so `1` equals `1.0`,
@@ -1381,11 +1374,14 @@ impl Decimal {
     }
 }
 
+/// Whether `number` is a multiple of `divisor`. A divisor of zero, which the specification
+/// does not allow, holds nobody to anything, so that a schema SOLAR would never publish
+/// cannot make ZENITH refuse a call.
 fn is_multiple_of(number: &Number, divisor: &Number) -> bool {
     if let (Some(value), Some(by)) = (Decimal::of(number), Decimal::of(divisor))
         && let Some((value, by)) = value.aligned(by)
     {
-        return by != 0 && value % by == 0;
+        return by == 0 || value % by == 0;
     }
     match (number.as_f64(), divisor.as_f64()) {
         (Some(value), Some(by)) if by != 0.0 => {
@@ -1721,5 +1717,140 @@ mod tests {
             report.failures[0].sentence(),
             "/message should be a string or null, and an integer arrived."
         );
+    }
+
+    /// The sentences of what failed, in the order the validator found them.
+    fn sentences(schema: &Value, instance: &Value) -> Vec<String> {
+        check(schema, instance)
+            .failures
+            .iter()
+            .map(|failure| {
+                assert_eq!(failure.to_string(), failure.sentence());
+                failure.sentence()
+            })
+            .collect()
+    }
+
+    #[test]
+    fn every_kind_of_failure_is_said_in_its_own_sentence() {
+        let cases = [
+            (
+                json!({"properties": {"a": true}, "unevaluatedProperties": false}),
+                json!({"a": 1, "b": 2}),
+                "There is no parameter b.",
+            ),
+            (
+                json!({"dependentRequired": {"a": ["b"]}}),
+                json!({"a": 1}),
+                "The parameters have a, which needs b as well.",
+            ),
+            (
+                json!({"properties": {"x": {"dependentRequired": {"a": ["b"]}}}}),
+                json!({"x": {"a": 1}}),
+                "/x has a, which needs b as well.",
+            ),
+            (
+                json!({"properties": {"tags": {"uniqueItems": true}}}),
+                json!({"tags": [1, 2, 1]}),
+                "/tags has the same value at 0 and at 2.",
+            ),
+            (
+                json!({"properties": {"list": {"items": false}}}),
+                json!({"list": [1]}),
+                "/list/0 is an element where none is allowed.",
+            ),
+            (
+                json!({"oneOf": [{"type": "object"}, {"required": []}]}),
+                json!({}),
+                "The parameters match 2 alternatives, and must match exactly one.",
+            ),
+            (
+                json!({"properties": {"x": {"oneOf": [true, true, true]}}}),
+                json!({"x": 1}),
+                "/x matches 3 alternatives, and must match exactly one.",
+            ),
+            (
+                json!({"propertyNames": {"maxLength": 1}}),
+                json!({"ab": 1}),
+                "The parameters have a member named ab, which the schema does not allow.",
+            ),
+            (
+                json!({"properties": {"n": {"type": "string"}}}),
+                json!({"n": 1.5}),
+                "/n should be a string, and a number arrived.",
+            ),
+            (
+                json!({"properties": {"n": {"type": "string"}}}),
+                json!({"n": 2}),
+                "/n should be a string, and an integer arrived.",
+            ),
+        ];
+        for (schema, instance, expected) in cases {
+            let said = sentences(&schema, &instance);
+            assert!(
+                said.iter().any(|sentence| sentence == expected),
+                "{schema} with {instance}: {said:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn a_count_of_one_is_singular_and_any_other_plural() {
+        let said = sentences(&json!({"minLength": 1}), &json!(""));
+        assert_eq!(said, ["The parameters should be at least 1 character."]);
+        let said = sentences(&json!({"minItems": 2}), &json!([1]));
+        assert_eq!(said, ["The parameters should be at least 2 elements."]);
+        let said = sentences(&json!({"maxProperties": 0}), &json!({"a": 1}));
+        assert_eq!(said, ["The parameters should be at most 0 members."]);
+    }
+
+    #[test]
+    fn a_multiple_of_a_decimal_is_found_exactly_whatever_its_exponent() {
+        // 3e-8 is three times 1e-8, and 7e-9 seven times 1e-9, which the nearest binary
+        // fractions are not: as floats the quotients are 2.9999999999999996 and
+        // 6.999999999999999.
+        assert!(valid(&json!({"multipleOf": 1e-8}), &json!(3e-8)));
+        assert!(valid(&json!({"multipleOf": 1e-9}), &json!(7e-9)));
+        assert!(valid(&json!({"multipleOf": 0.1}), &json!(0.3)));
+        assert!(!valid(&json!({"multipleOf": 0.1}), &json!(0.35)));
+        assert!(valid(&json!({"multipleOf": 2.5e3}), &json!(7.5e3)));
+        // A divisor of zero is not allowed, and holds nobody to anything, however large
+        // the number and whichever way it is compared.
+        assert!(valid(&json!({"multipleOf": 0}), &json!(3)));
+        assert!(valid(&json!({"multipleOf": 0}), &json!(1e300)));
+        assert!(valid(&json!({"multipleOf": 0.0}), &json!(2.5)));
+        // Numbers too far apart to align in 128 bits are judged as floats.
+        assert!(valid(&json!({"multipleOf": 1e150}), &json!(3e200)));
+        assert!(!valid(&json!({"multipleOf": 2e-160}), &json!(3e-200)));
+        assert!(!valid(&json!({"multipleOf": 1e-10}), &json!(1e300)));
+    }
+
+    #[test]
+    fn numbers_too_far_apart_to_align_are_still_compared_by_value() {
+        // 5e-260 and 1e-220 are forty orders of magnitude apart: no 128-bit integer holds
+        // both at one exponent, and the comparison falls back to floats, by value and not
+        // by mantissa.
+        assert!(valid(&json!({"maximum": 1e-220}), &json!(5e-260)));
+        assert!(!valid(&json!({"minimum": 1e-220}), &json!(5e-260)));
+        assert!(!valid(&json!({"maximum": 4e-300}), &json!(5e300)));
+    }
+
+    #[test]
+    fn the_edit_distance_is_levenshtein_s() {
+        for (left, right, distance) in [
+            ("", "", 0),
+            ("", "abc", 3),
+            ("abc", "", 3),
+            ("a", "b", 1),
+            ("no", "on", 2),
+            ("kitten", "sitting", 3),
+            ("mesage", "message", 1),
+            ("solar.pnig", "solar.ping", 2),
+            ("flaw", "lawn", 2),
+            ("é", "e", 1),
+        ] {
+            assert_eq!(edit_distance(left, right), distance, "{left} to {right}");
+            assert_eq!(edit_distance(right, left), distance, "{right} to {left}");
+        }
     }
 }

@@ -359,4 +359,75 @@ mod tests {
         tab.filter.set("info");
         assert_eq!(tab.current(&catalogue).unwrap().name, "system.info");
     }
+
+    fn field(kind: FieldKind) -> Field {
+        Field {
+            name: "f".to_owned(),
+            required: false,
+            kind,
+            summary: String::new(),
+            description: None,
+            default: None,
+            editor: LineEditor::new(),
+            boolean: None,
+            choice: None,
+        }
+    }
+
+    fn typed(kind: FieldKind, text: &str) -> Result<Option<Value>, String> {
+        let mut field = field(kind);
+        field.editor.set(text);
+        field.value()
+    }
+
+    #[test]
+    fn a_whole_number_may_be_negative_or_larger_than_a_signed_one() {
+        assert_eq!(typed(FieldKind::Integer, "-5"), Ok(Some(json!(-5))));
+        assert_eq!(
+            typed(FieldKind::Integer, "18446744073709551615"),
+            Ok(Some(json!(18_446_744_073_709_551_615_u64)))
+        );
+        assert!(typed(FieldKind::Integer, "2.5").is_err());
+        assert_eq!(typed(FieldKind::Number, "2.5"), Ok(Some(json!(2.5))));
+        assert_eq!(typed(FieldKind::Number, "-7"), Ok(Some(json!(-7))));
+        assert!(typed(FieldKind::Number, "seven").is_err());
+    }
+
+    #[test]
+    fn a_choice_cycles_round_both_ways_from_nothing_chosen() {
+        let mut choice = field(FieldKind::Choice(vec![json!("a"), json!("b"), json!("c")]));
+        choice.cycle(true);
+        assert_eq!(choice.choice, Some(0));
+        choice.cycle(true);
+        choice.cycle(true);
+        assert_eq!(choice.choice, Some(2));
+        choice.cycle(true);
+        assert_eq!(choice.choice, Some(0), "forward from the last is the first");
+        choice.cycle(false);
+        assert_eq!(choice.choice, Some(2), "back from the first is the last");
+        choice.cycle(false);
+        assert_eq!(choice.choice, Some(1));
+        let mut backwards = field(FieldKind::Choice(vec![json!(1), json!(2)]));
+        backwards.cycle(false);
+        assert_eq!(backwards.choice, Some(1), "back from nothing is the last");
+        // A choice of nothing stays unchosen.
+        let mut empty = field(FieldKind::Choice(Vec::new()));
+        empty.cycle(false);
+        empty.cycle(true);
+        assert_eq!(empty.choice, None);
+    }
+
+    #[test]
+    fn only_a_field_without_fixed_values_takes_the_keys_as_text() {
+        for kind in [
+            FieldKind::Text,
+            FieldKind::Integer,
+            FieldKind::Number,
+            FieldKind::Json,
+        ] {
+            assert!(field(kind.clone()).takes_text(), "{kind:?}");
+        }
+        assert!(!field(FieldKind::Boolean).takes_text());
+        assert!(!field(FieldKind::Choice(vec![json!(1)])).takes_text());
+    }
 }

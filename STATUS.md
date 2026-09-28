@@ -157,8 +157,11 @@ what it did before for a SOLAR that has none of them.
 
 - **The Mac.** Arthur's run of `docs/TESTING_BY_HAND.md` on the laboratory Mac, in macOS
   Terminal and in iTerm2 if it is there.
-- **The first mutation run**, on the first Monday: each survivor killed by a test or
-  recorded as a mutation that changes nothing, after which the job can fail on new ones.
+- **The mutation ceiling**, for stage three, set from the first run whose twenty shards
+  all finish, as the architect decided on 27 September 2026; `docs/OPEN_QUESTIONS.md` has
+  why. The one measurement, of 17 of the 20 shards on version 0.1.0, found 463 survivors
+  among 2 237 mutants, 77.70 % of the viable ones caught. The survivors outside the
+  drawing code have tests now; those in it wait for that run.
 - **The slow first start**, with the steps it now records.
 
 ## How changes reach `main`

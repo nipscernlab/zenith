@@ -2817,11 +2817,13 @@ dependencies = [
  "criterion",
  "ctrlc",
  "insta",
+ "portable-pty",
  "proptest",
  "ratatui",
  "serde",
  "serde_json",
  "unicode-width",
+ "vt100",
  "zenith-client",
 ]
 

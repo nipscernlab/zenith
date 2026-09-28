@@ -206,4 +206,25 @@ mod tests {
             Duration::from_secs(30)
         );
     }
+
+    #[test]
+    fn each_form_of_a_duration_begins_exactly_at_its_boundary() {
+        assert_eq!(latency(Duration::from_micros(9_999)), "9.99 ms");
+        assert_eq!(latency(Duration::from_millis(10)), "10.0 ms");
+        assert_eq!(latency(Duration::from_micros(999_999)), "999.9 ms");
+        assert_eq!(latency(Duration::from_secs(1)), "1.00 s");
+        assert_eq!(lasted(Duration::from_secs(59)), "59s");
+        assert_eq!(lasted(Duration::from_mins(1)), "1m");
+        assert_eq!(lasted(Duration::from_secs(3_599)), "59m");
+        assert_eq!(lasted(Duration::from_hours(1)), "1h 00m");
+        // At a minute, the next change is a minute later, not a second.
+        assert_eq!(
+            until_lasted_changes(Duration::from_secs(59)),
+            Duration::from_secs(1)
+        );
+        assert_eq!(
+            until_lasted_changes(Duration::from_mins(1)),
+            Duration::from_mins(1)
+        );
+    }
 }

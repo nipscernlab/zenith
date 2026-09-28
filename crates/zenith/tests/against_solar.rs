@@ -671,3 +671,27 @@ fn the_log_tab_sets_the_level_of_the_installed_solar() {
     });
     assert!(!mentions(driven.app(), "quiet please"));
 }
+
+/// `Ctrl+R` stops the SOLAR it replaces: its input is closed, it ends, and nothing of it
+/// is left running. On Linux, `/proc` says whether a process is still there.
+#[cfg(target_os = "linux")]
+#[test]
+fn ctrl_r_ends_the_solar_it_replaces() {
+    let mut driven = Driven::start(double(), &[]);
+    driven.until("the handshake", |app| app.link.connected());
+    let first = driven.app().link.pid.unwrap();
+    driven.key(KeyCode::Char('r'), KeyModifiers::CONTROL);
+    driven.until("the second handshake", |app| {
+        app.link.generation == 2 && app.link.connected()
+    });
+    assert_ne!(driven.app().link.pid, Some(first));
+    let running = || std::path::Path::new(&format!("/proc/{first}")).exists();
+    let deadline = Instant::now() + PATIENCE;
+    while running() {
+        assert!(
+            Instant::now() < deadline,
+            "the first SOLAR, {first}, is still running"
+        );
+        driven.runtime.step(Duration::from_millis(20)).unwrap();
+    }
+}

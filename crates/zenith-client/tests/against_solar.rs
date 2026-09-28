@@ -33,6 +33,7 @@ struct Session {
     events: Receiver<(u64, Event)>,
     tracker: Tracker,
     stderr: Vec<String>,
+    stderr_closed: bool,
 }
 
 impl Session {
@@ -57,6 +58,7 @@ impl Session {
             events,
             tracker: Tracker::new(256),
             stderr: Vec::new(),
+            stderr_closed: false,
         }
     }
 
@@ -73,6 +75,24 @@ impl Session {
     }
 
     /// The next event that is not a line of standard error, which is kept.
+    /// Reads what is left of standard error, until it closes. Standard error has a thread of
+    /// its own, so its last lines may come after standard output has closed.
+    fn until_stderr_closed(&mut self) {
+        let deadline = Instant::now() + WAIT;
+        while !self.stderr_closed {
+            let left = deadline.saturating_duration_since(Instant::now());
+            let (_, event) = self
+                .events
+                .recv_timeout(left)
+                .expect("standard error did not close in time");
+            match event {
+                Event::Stderr { text, .. } => self.stderr.push(text),
+                Event::StderrClosed => self.stderr_closed = true,
+                _ => {}
+            }
+        }
+    }
+
     fn next(&mut self) -> Event {
         let deadline = Instant::now() + WAIT;
         loop {
@@ -87,7 +107,7 @@ impl Session {
             );
             match event {
                 Event::Stderr { text, .. } => self.stderr.push(text),
-                Event::StderrClosed => {}
+                Event::StderrClosed => self.stderr_closed = true,
                 other => return other,
             }
         }
@@ -224,6 +244,7 @@ fn solar_writes_its_trace_to_standard_error_as_json() {
     session.data("solar.ping", &json!({"message": "log me"}));
     session.connection.close_input();
     while !matches!(session.next(), Event::OutputClosed { .. }) {}
+    session.until_stderr_closed();
     let traced = session.stderr.iter().any(|line| {
         serde_json::from_str::<Value>(line).is_ok_and(|entry| {
             entry["level"] == json!("trace")

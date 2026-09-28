@@ -660,4 +660,57 @@ mod tests {
         assert_eq!(text, "a\u{fffd}b");
         assert!(invalid);
     }
+
+    #[test]
+    fn a_program_that_cannot_start_is_said_with_its_path_and_the_system_s_reason() {
+        let error = StartError {
+            path: std::path::PathBuf::from("no/such/solar"),
+            error: io::Error::new(io::ErrorKind::NotFound, "it is not there"),
+        };
+        assert_eq!(
+            error.to_string(),
+            "ZENITH could not start no/such/solar: it is not there."
+        );
+        assert_eq!(
+            std::error::Error::source(&error)
+                .map(ToString::to_string)
+                .as_deref(),
+            Some("it is not there")
+        );
+    }
+
+    #[test]
+    fn a_line_that_cannot_be_sent_says_why() {
+        assert_eq!(
+            SendError::Full.to_string(),
+            "SOLAR is not reading its input: 256 lines are already waiting."
+        );
+        assert_eq!(SendError::Closed.to_string(), "SOLAR's input is closed.");
+    }
+
+    fn read_one(line: &[u8], limit: usize) -> Read {
+        let mut reader = io::BufReader::new(line);
+        let mut buffer = Vec::new();
+        read_capped_line(&mut reader, limit, 16, &mut buffer).unwrap()
+    }
+
+    #[test]
+    fn a_response_of_a_megabyte_and_a_line_of_error_at_its_limit_are_kept_whole() {
+        let mut response = vec![b'x'; 1024 * 1024];
+        response.push(b'\n');
+        assert!(
+            matches!(read_one(&response, RESPONSE_LINE_LIMIT), Read::Line(kept) if kept.len() == 1024 * 1024)
+        );
+        let mut error = vec![b'e'; STDERR_LINE_LIMIT];
+        error.push(b'\n');
+        assert!(
+            matches!(read_one(&error, STDERR_LINE_LIMIT), Read::Line(kept) if kept.len() == 64 * 1024)
+        );
+        let mut longer = vec![b'e'; STDERR_LINE_LIMIT + 1];
+        longer.push(b'\n');
+        assert!(matches!(
+            read_one(&longer, STDERR_LINE_LIMIT),
+            Read::TooLong { bytes, .. } if bytes == 64 * 1024 + 1
+        ));
+    }
 }

@@ -355,8 +355,8 @@ impl Theme {
     fn color(&self, rgb: Rgb, sixteen: Color) -> Color {
         match self.depth {
             Depth::TrueColor => Color::Rgb(rgb.0, rgb.1, rgb.2),
-            // The brand gives 215 for gold at this depth, and it is also the nearest.
-            Depth::Indexed if rgb == GOLD => Color::Indexed(215),
+            // For gold the nearest is 215, which is what the brand gives at this depth, as
+            // a test checks.
             Depth::Indexed => Color::Indexed(rgb.nearest_256()),
             Depth::Sixteen => sixteen,
             Depth::None => Color::Reset,
@@ -460,7 +460,8 @@ impl Theme {
     #[must_use]
     pub fn badge_ok(&self) -> Style {
         self.accent()
-            .add_modifier(Modifier::REVERSED | Modifier::BOLD)
+            .add_modifier(Modifier::REVERSED)
+            .add_modifier(Modifier::BOLD)
     }
 
     /// The `error` badge.
@@ -493,7 +494,8 @@ impl Theme {
     #[must_use]
     pub fn tab_active(&self) -> Style {
         self.accent()
-            .add_modifier(Modifier::BOLD | Modifier::UNDERLINED)
+            .add_modifier(Modifier::BOLD)
+            .add_modifier(Modifier::UNDERLINED)
     }
 
     /// A tab not being shown.
@@ -706,5 +708,57 @@ mod tests {
                 Depth::Sixteen
             }
         );
+    }
+
+    #[test]
+    fn a_dark_colour_is_lit_by_the_linear_part_of_the_formula() {
+        // 10 of 255 is below 0.04045, where WCAG divides by 12.92.
+        let luminance = Rgb(10, 10, 10).luminance();
+        assert!(
+            (luminance - 10.0 / 255.0 / 12.92).abs() < 1e-9,
+            "{luminance}"
+        );
+    }
+
+    #[test]
+    fn a_colour_halfway_between_two_entries_takes_the_first() {
+        // 13 is 5 from the grey 8, entry 232, and 5 from the grey 18, entry 233.
+        assert_eq!(Rgb(13, 13, 13).nearest_256(), 232);
+        assert_eq!(GOLD.nearest_256(), 215);
+    }
+
+    #[test]
+    fn wezterm_draws_true_colour() {
+        let only = |pairs: &'static [(&'static str, &'static str)]| {
+            move |name: &str| {
+                pairs
+                    .iter()
+                    .find(|(key, _)| *key == name)
+                    .map(|(_, value)| (*value).to_owned())
+            }
+        };
+        assert_eq!(
+            Depth::guess(only(&[("TERM_PROGRAM", "WezTerm")])),
+            Depth::TrueColor
+        );
+        assert_eq!(
+            Depth::guess(only(&[("TERM_PROGRAM", "vscode")])),
+            Depth::TrueColor
+        );
+    }
+
+    #[test]
+    fn the_badges_and_the_tab_shown_are_bold_and_reversed_as_they_say() {
+        let theme = Theme::new(ThemeName::Night, Depth::None);
+        let ok = theme.badge_ok();
+        assert!(ok.add_modifier.contains(Modifier::REVERSED));
+        assert!(ok.add_modifier.contains(Modifier::BOLD));
+        let tab = theme.tab_active();
+        assert!(tab.add_modifier.contains(Modifier::BOLD));
+        assert!(tab.add_modifier.contains(Modifier::UNDERLINED));
+        // A JSON string has a colour of its own, wherever there is colour.
+        let coloured = Theme::new(ThemeName::Night, Depth::TrueColor);
+        assert_ne!(coloured.json_string(), Style::default());
+        assert!(coloured.json_string().fg.is_some());
     }
 }
