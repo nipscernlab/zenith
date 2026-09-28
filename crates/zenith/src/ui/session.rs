@@ -2,12 +2,13 @@
 
 use ratatui::Frame;
 use ratatui::layout::{Constraint, Layout, Position, Rect};
+
 use ratatui::style::Modifier;
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Clear, Paragraph};
 
 use super::text::{self, pad, truncate, wrap};
-use super::{cards, chrome};
+use super::{Scrolls, cards, chrome};
 use crate::app::App;
 use crate::app::session::Tone;
 
@@ -16,23 +17,45 @@ const MENU_ROWS: usize = 8;
 
 /// Draws the tab.
 pub fn draw(frame: &mut Frame<'_>, area: Rect, app: &App) {
-    let width = usize::from(area.width);
-    let band = band_lines(app, width);
-    let band_height = u16::try_from(band.len()).unwrap_or(0);
-    let [transcript, band_area, command] = Layout::vertical([
+    let band = band_lines(app, usize::from(area.width));
+    let [transcript, band_area, command] = split(area, &band);
+    draw_transcript(frame, transcript, app);
+    frame.render_widget(Paragraph::new(band).style(app.theme.base()), band_area);
+    draw_command_line(frame, command, app);
+    if let Some(menu) = menu_area(app, transcript, command) {
+        draw_menu(frame, menu, app);
+    }
+}
+
+/// The transcript, the band and the command line, top to bottom.
+fn split(area: Rect, band: &[Line<'_>]) -> [Rect; 3] {
+    Layout::vertical([
         Constraint::Min(1),
-        Constraint::Length(band_height),
+        Constraint::Length(u16::try_from(band.len()).unwrap_or(0)),
         Constraint::Length(3),
     ])
-    .areas(area);
-    draw_transcript(frame, transcript, app);
-    if band_height > 0 {
-        frame.render_widget(Paragraph::new(band).style(app.theme.base()), band_area);
+    .areas(area)
+}
+
+/// What the wheel scrolls at `position` of the tab: the menu under the pointer, and the
+/// transcript anywhere else.
+#[must_use]
+pub fn scrolls_at(app: &App, area: Rect, position: Position) -> Scrolls {
+    let [transcript, _, command] = split(area, &band_lines(app, usize::from(area.width)));
+    if menu_area(app, transcript, command).is_some_and(|menu| menu.contains(position)) {
+        Scrolls::Menu
+    } else {
+        Scrolls::Transcript
     }
-    draw_command_line(frame, command, app);
-    if app.session.menu_open() {
-        draw_menu(frame, transcript, command, app);
-    }
+}
+
+/// How far up the transcript can be, at the terminal's size, of the `scroll` lines asked
+/// for: all of them, unless that is past its top.
+#[must_use]
+pub fn transcript_scroll(app: &App, scroll: usize) -> usize {
+    let area = super::content_area(app);
+    let [transcript, _, _] = split(area, &band_lines(app, usize::from(area.width)));
+    transcript_lines(app, transcript, scroll).1
 }
 
 fn band_lines(app: &App, width: usize) -> Vec<Line<'static>> {
@@ -62,11 +85,14 @@ fn band_lines(app: &App, width: usize) -> Vec<Line<'static>> {
     lines
 }
 
-fn draw_transcript(frame: &mut Frame<'_>, area: Rect, app: &App) {
-    let theme = &app.theme;
+/// The transcript laid out in `area`, from the newest entry up and only as far as a view
+/// scrolled up by `scroll` lines needs, with the line that says what was dropped once the
+/// top is reached; and the scroll the view can have, which is `scroll` unless that is past
+/// the top.
+fn transcript_lines(app: &App, area: Rect, scroll: usize) -> (Vec<Line<'static>>, usize) {
     let width = usize::from(area.width).saturating_sub(1);
     let height = usize::from(area.height);
-    let wanted = height + app.session.scroll;
+    let wanted = height.saturating_add(scroll);
     // Lay out from the newest entry up, only as far as the view needs.
     let mut lines: Vec<Line<'static>> = Vec::new();
     let mut reached_top = true;
@@ -88,11 +114,18 @@ fn draw_transcript(frame: &mut Frame<'_>, area: Rect, app: &App) {
                     app.session.transcript.dropped(),
                     app.session.transcript.max_entries()
                 ),
-                theme.muted(),
+                app.theme.muted(),
             )),
         );
     }
-    let scroll = app.session.scroll.min(lines.len().saturating_sub(height));
+    let scroll = scroll.min(lines.len().saturating_sub(height));
+    (lines, scroll)
+}
+
+fn draw_transcript(frame: &mut Frame<'_>, area: Rect, app: &App) {
+    let theme = &app.theme;
+    let height = usize::from(area.height);
+    let (lines, scroll) = transcript_lines(app, area, app.session.scroll);
     let end = lines.len() - scroll;
     let start = end.saturating_sub(height);
     let visible: Vec<Line<'static>> = lines[start..end].to_vec();
@@ -207,21 +240,33 @@ fn boundary(text: &str, mut at: usize) -> usize {
     at
 }
 
-fn draw_menu(frame: &mut Frame<'_>, transcript: Rect, command: Rect, app: &App) {
+/// Where the completion menu is, when it is open: over the transcript, just above the
+/// command line.
+fn menu_area(app: &App, transcript: Rect, command: Rect) -> Option<Rect> {
+    let completion = app
+        .session
+        .completion
+        .as_ref()
+        .filter(|_| app.session.menu_open())?;
+    let rows = completion.candidates.len().min(MENU_ROWS);
+    let height = u16::try_from(rows + 2).unwrap_or(3).min(transcript.height);
+    let width = transcript.width.saturating_sub(2).min(78);
+    Some(Rect::new(
+        command.x + 1,
+        command.y.saturating_sub(height),
+        width,
+        height,
+    ))
+}
+
+fn draw_menu(frame: &mut Frame<'_>, area: Rect, app: &App) {
     let Some(completion) = &app.session.completion else {
         return;
     };
     let theme = &app.theme;
     let count = completion.candidates.len();
     let rows = count.min(MENU_ROWS);
-    let height = u16::try_from(rows + 2).unwrap_or(3).min(transcript.height);
-    let width = transcript.width.saturating_sub(2).min(78);
-    let area = Rect::new(
-        command.x + 1,
-        command.y.saturating_sub(height),
-        width,
-        height,
-    );
+    let width = area.width;
     let first = app
         .session
         .highlighted

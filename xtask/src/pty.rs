@@ -229,10 +229,19 @@ impl Session {
     }
 
     /// Whether the terminal is as a shell would have it: the main screen, with its cursor
-    /// shown.
+    /// shown and its mouse its own.
     pub(crate) fn restored(&self) -> bool {
         self.parser.lock().is_ok_and(|parser| {
-            !parser.screen().alternate_screen() && !parser.screen().hide_cursor()
+            !parser.screen().alternate_screen()
+                && !parser.screen().hide_cursor()
+                && parser.screen().mouse_protocol_mode() == vt100::MouseProtocolMode::None
+        })
+    }
+
+    /// Whether the program has asked the terminal for the mouse and not given it back.
+    pub(crate) fn mouse_taken(&self) -> bool {
+        self.parser.lock().is_ok_and(|parser| {
+            parser.screen().mouse_protocol_mode() != vt100::MouseProtocolMode::None
         })
     }
 

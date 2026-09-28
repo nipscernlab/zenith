@@ -76,6 +76,10 @@ A card in the transcript, a section of an API's entry, an overlay.
 - **An overlay**: a variant of `Overlay` in `app/mod.rs`, the places its keys work in
   `places`, its keys in `act_on_overlay`, and its drawing in `ui/overlays.rs`, dispatched
   from `ui/mod.rs`.
+- **A view that scrolls**: what the wheel does over it, a variant of `Scrolls` returned by
+  `ui::scrolls_at` from the same layout the drawing uses, handled in `App::on_mouse`, and
+  a limit that keeps its scroll from passing its end, from the lines the drawing lays out;
+  the table of section 11.1 of `docs/DESIGN.md` says what a notch does there.
 - **Colours**: roles of `theme.rs`, never colours. A new role gets its colour in every
   theme, from the palette or a mix of two of its colours, and its contrast is added to the
   tests of `theme.rs`. Meaning is never carried by colour alone: every state has a word or

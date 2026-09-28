@@ -233,7 +233,7 @@ completion.
 | In the argument of `/describe` or the first argument of `/call` | The API names, with their summaries |
 | At a key position inside the JSON of `/call` | The parameters the schema declares at that position and that are not there yet, with their types and descriptions |
 | At a value position inside the JSON of `/call` | The values the schema allows there: `true` and `false`, the members of an `enum`, the `const` of each `oneOf` branch, `null` when the type admits it |
-| In the argument of `/theme` or `/help` | The themes, the commands |
+| In the argument of `/theme`, `/help` or `/mouse` | The themes, the commands, `on` and `off` |
 
 The candidates appear in a menu above the line as soon as there are any. `Tab` inserts the
 highlighted one and `Shift+Tab` moves back; `↑` and `↓` move through the menu while it is
@@ -268,7 +268,8 @@ so an unknown keyword is never treated as a failure. Why the validator is not th
 [ADR 0007](adr/0007-zenith-has-its-own-schema-validator.md).
 
 **The history** of the command line holds the lines that were run, without consecutive
-repeats, and `↑` and `↓` walk it when the completion menu is closed. It survives between
+repeats, and `↑` and `↓` walk it when the completion menu is closed; the mouse wheel never
+does (section 11). It survives between
 sessions ([ADR 0014](adr/0014-the-command-line-history-survives-between-sessions.md)): a
 session starts with the lines of the last one, and after every line it runs, the whole
 history is written to its file, section 12, on a thread of its own so that the line never
@@ -531,10 +532,15 @@ says a session ends, and waits up to half a second for SOLAR to exit before kill
 | `/forget` | Empties the command line history, here and in its file | none |
 | `/export [path]` | Writes the recording of the current connection, in SOLAR's recording format (sections 8 and 12) | none |
 | `/report [path]` | Writes a bug report to a file (section 12) | `system.info` |
+| `/mouse [on\|off]` | Gives the mouse to the terminal, to select text, or takes it for the wheel; alone, switches (section 11) | none |
 
-The first eight are the ones the brief names. The other five exist because testing SOLAR
-by hand needs them: `/raw` is the only way to see how SOLAR answers something malformed,
-`/reconnect` picks up a new build, and `/report` is what a tester sends back.
+The first eight are the ones the brief names. `/raw`, `/reconnect`, `/clear`, `/export`
+and `/report` exist because testing SOLAR by hand needs them
+([ADR 0009](adr/0009-five-commands-beyond-the-brief.md)): `/raw` is the only way to see how
+SOLAR answers something malformed, `/reconnect` picks up a new build, and `/report` is
+what a tester sends back. `/forget` came with the history that survives between sessions
+([ADR 0014](adr/0014-the-command-line-history-survives-between-sessions.md)), and `/mouse`
+with the wheel ([ADR 0015](adr/0015-the-wheel-scrolls-and-the-terminal-keeps-selection.md)).
 
 `/raw` is the one command whose line is not validated, because its purpose is to send what
 validation would refuse. Its response is matched like any other.
@@ -607,6 +613,57 @@ and `Alt` held, and on a Brazilian ABNT2 keyboard that is how `/` and `?` are ty
 German and French keyboards, `{`, `}`, `[`, `]` and `@`. ZENITH therefore has no binding
 with `Ctrl` and `Alt` together, and treats such a key as the character it types. This was
 found by typing into ZENITH in Windows Terminal on the machine it was written on.
+
+### 11.1 The mouse
+
+ZENITH takes the mouse from the terminal, unless `--no-mouse` or `ZENITH_NO_MOUSE` says
+not to, so that the wheel scrolls
+([ADR 0015](adr/0015-the-wheel-scrolls-and-the-terminal-keeps-selection.md)). Left to the
+terminal, the wheel turns into arrow keys on the alternate screen and walks the command
+history. A notch of the wheel scrolls what is under the pointer:
+
+| Under the pointer | A notch |
+| ----------------- | ------- |
+| The transcript, the band or the command line | Three lines of the transcript; at the bottom it follows the transcript again |
+| The completion menu | The highlighted candidate, by one |
+| The list of APIs | The selection, by one API, as `↑` and `↓` move it |
+| The entry of an API | Three lines of the entry |
+| The Log, the History | The selection, by one row, as `↑` and `↓` move it; at the bottom it follows again |
+| Anywhere, while the help or the viewer is open | Three lines of it |
+| The header, the status bar, the opening, the form | Nothing |
+
+Text moves three lines a notch, as most programs scroll it, and a list one row, as its
+arrow keys move it. The wheel never walks the command history, which `↑` and `↓` walk, and
+`PgUp` and `PgDn` scroll as they did. Nothing scrolls past its end, so the first notch
+back always moves the view. Clicks do nothing in this version.
+
+ZENITH asks the terminal for its buttons only, the wheel's notches among them, in SGR's
+encoding, which has no limit on the column: `CSI ? 1000 h` and `CSI ? 1006 h`. It does
+not ask for movement, which it has no use for; Windows' console is asked through its own
+interface, and reports movement whatever it is asked. Whatever the mouse reports besides
+a notch stops in the thread that reads the terminal, so moving the mouse wakes nothing
+else and costs no frame. The mouse is given back with the rest of the terminal when ZENITH
+exits, on a signal and after a panic; `/mouse off` gives it back at once, `/mouse on` takes
+it again, and `/mouse` alone switches.
+
+**Selecting text** while ZENITH has the mouse is the terminal's, with a key held:
+
+| Terminal | To select text | Where it is documented |
+| -------- | -------------- | ---------------------- |
+| Windows Terminal, and WSL in it | `Shift` and drag | Microsoft's *Selection* page of the Windows Terminal documentation |
+| GNOME Terminal, and the terminals built on VTE | `Shift` and drag | GNOME Terminal's help, *Text selection* |
+| xterm | `Shift` and drag | xterm's control sequences, `XTSHIFTESCAPE`: by default the Shift key overrides the mouse protocol |
+| Alacritty | `Shift` and drag | Alacritty's `docs/features.md` |
+| WezTerm | `Shift` and drag | WezTerm's `bypass_mouse_reporting_modifiers`, `SHIFT` by default |
+| iTerm2 | `Option` and drag | iTerm2's *General Usage*: pressing Option turns mouse reporting off for the selection |
+| macOS Terminal | `Cmd+R` turns View › Allow Mouse Reporting off, and on again | Apple's Terminal User Guide, which documents no key to hold |
+
+These are each terminal's own documentation, read on 27 September 2026; none was measured
+by a machine, since a selection is made by a hand on the mouse. The walkthrough checks what
+ZENITH does, that it asks for the mouse and gives it back, and the row `Shift and drag` of
+`docs/TESTING_BY_HAND.md` is the person's check. In the classic Windows console, taking
+the mouse also turns off its Quick Edit selection while ZENITH has it. `/mouse off` works
+in every terminal.
 
 ## 12. The files ZENITH writes
 
@@ -840,6 +897,7 @@ it, and in CI a skip is a failure.
 ## 17. What this version does not do
 
 No AI features, no program other than `solar` started, no file written unless asked but
-the command line history, no configuration file, and no mouse, for now, which is
-[ADR 0013](adr/0013-no-mouse-for-now.md). The others are either out of scope by
-instruction or an open question, and `docs/OPEN_QUESTIONS.md` says which.
+the command line history, no configuration file, and no clicks: the mouse only scrolls,
+[ADR 0015](adr/0015-the-wheel-scrolls-and-the-terminal-keeps-selection.md). The others are
+either out of scope by instruction or an open question, and `docs/OPEN_QUESTIONS.md` says
+which.

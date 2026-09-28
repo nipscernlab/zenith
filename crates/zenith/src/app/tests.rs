@@ -3,7 +3,9 @@
 use std::path::PathBuf;
 use std::time::{Duration, Instant, SystemTime};
 
-use ratatui::crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyEventState, KeyModifiers};
+use ratatui::crossterm::event::{
+    KeyCode, KeyEvent, KeyEventKind, KeyEventState, KeyModifiers, MouseEvent, MouseEventKind,
+};
 use serde_json::{Value, json};
 use zenith_client::connection::Event as ConnectionEvent;
 use zenith_client::locate::{Found, Origin as FoundBy, Prepared};
@@ -2184,4 +2186,310 @@ fn the_history_counts_each_call_once_and_keeps_every_call_its_bytes_allow() {
         sizes.len()
     );
     assert!(calls.dropped() > 0, "the limit was reached");
+}
+
+fn wheel(harness: &mut Harness, up: bool, column: u16, row: u16) {
+    harness.feed(Incoming::Mouse(MouseEvent {
+        kind: if up {
+            MouseEventKind::ScrollUp
+        } else {
+            MouseEventKind::ScrollDown
+        },
+        column,
+        row,
+        modifiers: KeyModifiers::NONE,
+    }));
+}
+
+#[test]
+fn the_wheel_scrolls_the_transcript_three_lines_a_notch_and_never_walks_the_history() {
+    let mut harness = Harness::connected();
+    pings_answered(&mut harness, 12);
+    assert!(harness.line().is_empty());
+    // At 80 × 24: over the transcript, and over the command line, which does not scroll.
+    for row in [3, 12, 21] {
+        wheel(&mut harness, true, 40, row);
+    }
+    assert_eq!(harness.app.session.scroll, 3 * WHEEL_LINES);
+    assert!(harness.line().is_empty(), "the wheel walked the history");
+    wheel(&mut harness, false, 40, 5);
+    assert_eq!(harness.app.session.scroll, 2 * WHEEL_LINES);
+    // Up and Down still walk it.
+    harness.key(KeyCode::Up, KeyModifiers::NONE);
+    assert_eq!(harness.line(), "/ping");
+    harness.key(KeyCode::Down, KeyModifiers::NONE);
+    assert!(harness.line().is_empty());
+    // Past the top the view stops, and the first notch back down moves it.
+    for _ in 0..500 {
+        wheel(&mut harness, true, 40, 5);
+    }
+    let top = harness.app.session.scroll;
+    assert_eq!(
+        top,
+        ui::session::transcript_scroll(&harness.app, usize::MAX)
+    );
+    assert!(top > 3 * WHEEL_LINES, "{top}");
+    wheel(&mut harness, false, 40, 5);
+    assert_eq!(harness.app.session.scroll, top - WHEEL_LINES);
+    // PageUp stops at the top as well, and the bottom follows the transcript again.
+    for _ in 0..50 {
+        harness.key(KeyCode::PageUp, KeyModifiers::NONE);
+    }
+    assert_eq!(harness.app.session.scroll, top);
+    harness.app.session.unseen = 2;
+    for _ in 0..500 {
+        wheel(&mut harness, false, 40, 5);
+    }
+    assert_eq!(harness.app.session.scroll, 0);
+    assert_eq!(harness.app.session.unseen, 0);
+}
+
+#[test]
+fn the_wheel_over_the_menu_moves_its_highlight_and_elsewhere_scrolls_the_transcript() {
+    let mut harness = Harness::connected();
+    pings_answered(&mut harness, 12);
+    harness.type_text("/");
+    assert!(harness.app.session.menu_open());
+    // At 80 × 24 the menu's eight rows and its borders stand on rows 10 to 19.
+    wheel(&mut harness, false, 20, 15);
+    wheel(&mut harness, false, 20, 19);
+    assert_eq!(harness.app.session.highlighted, 2);
+    wheel(&mut harness, true, 20, 10);
+    assert_eq!(harness.app.session.highlighted, 1);
+    assert_eq!(harness.app.session.scroll, 0);
+    wheel(&mut harness, true, 20, 9);
+    assert_eq!(harness.app.session.scroll, WHEEL_LINES);
+    assert_eq!(harness.app.session.highlighted, 1);
+    assert_eq!(harness.line(), "/");
+}
+
+#[test]
+fn the_wheel_moves_the_list_of_apis_one_api_a_notch_and_scrolls_the_entry_three_lines() {
+    let mut harness = Harness::connected();
+    go_to_tab(&mut harness, Tab::Apis);
+    // At 80 columns the list is 28 cells wide, and the rule after it goes with the entry.
+    wheel(&mut harness, false, 5, 6);
+    wheel(&mut harness, false, 27, 6);
+    assert_eq!(harness.app.apis.selected, 2);
+    wheel(&mut harness, true, 5, 6);
+    assert_eq!(harness.app.apis.selected, 1);
+    assert_eq!(harness.app.apis.scroll, 0);
+    wheel(&mut harness, false, 28, 6);
+    wheel(&mut harness, false, 60, 6);
+    assert_eq!(usize::from(harness.app.apis.scroll), 2 * WHEEL_LINES);
+    assert_eq!(harness.app.apis.selected, 1);
+    // The entry stops at its last line, and the first notch back up moves it.
+    for _ in 0..500 {
+        wheel(&mut harness, false, 60, 6);
+    }
+    let last = harness.app.apis.scroll;
+    assert_eq!(last, ui::apis::scroll_of_entry(&harness.app, u16::MAX));
+    assert!(usize::from(last) > WHEEL_LINES, "{last}");
+    wheel(&mut harness, true, 60, 6);
+    assert_eq!(
+        usize::from(harness.app.apis.scroll),
+        usize::from(last) - WHEEL_LINES
+    );
+    // PageDown stops there too.
+    for _ in 0..50 {
+        harness.key(KeyCode::PageDown, KeyModifiers::NONE);
+    }
+    assert_eq!(harness.app.apis.scroll, last);
+    // With the form open, the wheel does nothing, over the list or over the form.
+    harness.key(KeyCode::Enter, KeyModifiers::NONE);
+    assert!(harness.app.apis.form.is_some());
+    let (selected, scroll) = (harness.app.apis.selected, harness.app.apis.scroll);
+    wheel(&mut harness, false, 5, 6);
+    wheel(&mut harness, false, 60, 6);
+    assert_eq!(
+        (harness.app.apis.selected, harness.app.apis.scroll),
+        (selected, scroll)
+    );
+}
+
+#[test]
+fn the_wheel_scrolls_the_help_and_the_viewer_from_anywhere_and_stops_at_their_ends() {
+    let mut harness = Harness::connected();
+    pings_answered(&mut harness, 1);
+    harness.key(KeyCode::Char('?'), KeyModifiers::NONE);
+    assert_eq!(harness.app.overlay, Some(Overlay::Help { scroll: 0 }));
+    wheel(&mut harness, false, 40, 10);
+    wheel(&mut harness, false, 0, 0);
+    assert_eq!(
+        harness.app.overlay,
+        Some(Overlay::Help {
+            scroll: 2 * WHEEL_LINES
+        })
+    );
+    for _ in 0..500 {
+        wheel(&mut harness, false, 40, 10);
+    }
+    let last = ui::overlays::help_scroll(&harness.app, usize::MAX);
+    assert!(last > WHEEL_LINES, "{last}");
+    assert_eq!(harness.app.overlay, Some(Overlay::Help { scroll: last }));
+    wheel(&mut harness, true, 40, 10);
+    assert_eq!(
+        harness.app.overlay,
+        Some(Overlay::Help {
+            scroll: last - WHEEL_LINES
+        })
+    );
+    // End goes to the last page and not past it, so the first Up leaves it.
+    harness.key(KeyCode::End, KeyModifiers::NONE);
+    assert_eq!(harness.app.overlay, Some(Overlay::Help { scroll: last }));
+    harness.key(KeyCode::Up, KeyModifiers::NONE);
+    assert_eq!(
+        harness.app.overlay,
+        Some(Overlay::Help { scroll: last - 1 })
+    );
+    harness.key(KeyCode::Esc, KeyModifiers::NONE);
+    harness.key(KeyCode::Char('o'), KeyModifiers::CONTROL);
+    let Some(Overlay::Viewer { record, scroll: 0 }) = harness.app.overlay else {
+        panic!("{:?}", harness.app.overlay);
+    };
+    for _ in 0..500 {
+        wheel(&mut harness, false, 40, 10);
+    }
+    let end = ui::overlays::viewer_scroll(&harness.app, record, usize::MAX);
+    assert_eq!(
+        harness.app.overlay,
+        Some(Overlay::Viewer {
+            record,
+            scroll: end
+        })
+    );
+    wheel(&mut harness, true, 40, 10);
+    assert_eq!(
+        harness.app.overlay,
+        Some(Overlay::Viewer {
+            record,
+            scroll: end.saturating_sub(WHEEL_LINES)
+        })
+    );
+}
+
+#[test]
+fn the_wheel_moves_the_log_and_the_history_one_row_a_notch() {
+    let mut harness = Harness::connected();
+    pings_answered(&mut harness, 5);
+    for index in 0..5 {
+        harness.feed(Incoming::Connection {
+            generation: 1,
+            event: ConnectionEvent::Stderr {
+                text: format!(r#"{{"level":"info","message":"line {index}","time":"t"}}"#),
+                cut: 0,
+                at: harness.now,
+            },
+        });
+    }
+    go_to_tab(&mut harness, Tab::Log);
+    assert_eq!(harness.app.log.selected, None);
+    wheel(&mut harness, true, 40, 10);
+    let visible = harness.app.log.visible();
+    assert_eq!(
+        harness.app.log.selected,
+        visible.get(visible.len() - 2).copied()
+    );
+    wheel(&mut harness, false, 40, 10);
+    assert_eq!(harness.app.log.selected, None, "the bottom follows the Log");
+    go_to_tab(&mut harness, Tab::History);
+    let last = harness.app.history.calls.next_number() - 1;
+    wheel(&mut harness, true, 40, 10);
+    wheel(&mut harness, true, 40, 10);
+    assert_eq!(harness.app.history.selected, Some(last - 2));
+    wheel(&mut harness, false, 40, 10);
+    assert_eq!(harness.app.history.selected, Some(last - 1));
+}
+
+#[test]
+fn only_a_notch_of_the_wheel_does_anything_and_only_while_zenith_has_the_mouse() {
+    use ratatui::crossterm::event::MouseButton;
+    let mut harness = Harness::connected();
+    pings_answered(&mut harness, 12);
+    for kind in [
+        MouseEventKind::Down(MouseButton::Left),
+        MouseEventKind::Up(MouseButton::Left),
+        MouseEventKind::Drag(MouseButton::Left),
+        MouseEventKind::Moved,
+        MouseEventKind::ScrollLeft,
+        MouseEventKind::ScrollRight,
+    ] {
+        harness.feed(Incoming::Mouse(MouseEvent {
+            kind,
+            column: 40,
+            row: 5,
+            modifiers: KeyModifiers::NONE,
+        }));
+    }
+    assert_eq!(harness.app.session.scroll, 0);
+    assert_eq!(harness.app.tab, Tab::Session);
+    // The header and the status bar scroll nothing, and neither does a terminal too small.
+    wheel(&mut harness, true, 40, 0);
+    wheel(&mut harness, true, 40, 23);
+    harness.feed(Incoming::Resize {
+        width: 79,
+        height: 24,
+    });
+    wheel(&mut harness, true, 40, 5);
+    harness.feed(Incoming::Resize {
+        width: 80,
+        height: 23,
+    });
+    wheel(&mut harness, true, 40, 5);
+    assert_eq!(harness.app.session.scroll, 0);
+    harness.feed(Incoming::Resize {
+        width: 80,
+        height: 24,
+    });
+    // With the mouse given to the terminal, a notch that still arrives does nothing.
+    harness.run("/mouse off");
+    wheel(&mut harness, true, 40, 5);
+    assert_eq!(harness.app.session.scroll, 0);
+    harness.run("/mouse on");
+    wheel(&mut harness, true, 40, 5);
+    assert_eq!(harness.app.session.scroll, WHEEL_LINES);
+    // Nor does it scroll anything while the opening shows.
+    let mut opening = Harness::started(Options::default());
+    wheel(&mut opening, true, 40, 5);
+    assert!(opening.app.opening.is_some());
+    assert_eq!(opening.app.session.scroll, 0);
+}
+
+#[test]
+fn mouse_gives_the_mouse_to_the_terminal_and_takes_it_back() {
+    let mut harness = Harness::connected();
+    assert_eq!(harness.app.mouse, Mouse::Zenith);
+    harness.run("/mouse");
+    assert_eq!(harness.app.mouse, Mouse::Terminal);
+    let last = harness.notices().last().cloned().unwrap_or_default();
+    assert!(
+        last.starts_with("The terminal has the mouse: dragging selects text"),
+        "{last}"
+    );
+    harness.run("/mouse");
+    assert_eq!(harness.app.mouse, Mouse::Zenith);
+    let last = harness.notices().last().cloned().unwrap_or_default();
+    assert!(
+        last.starts_with("ZENITH has the mouse: the wheel scrolls"),
+        "{last}"
+    );
+    harness.run("/mouse on");
+    assert_eq!(harness.app.mouse, Mouse::Zenith);
+    harness.run("/mouse off");
+    harness.run("/mouse off");
+    assert_eq!(harness.app.mouse, Mouse::Terminal);
+    harness.run("/mouse maybe");
+    assert_eq!(
+        harness.band().map(|band| band.lines.clone()),
+        Some(vec![
+            "/mouse takes on or off, or nothing, and not maybe.".to_owned()
+        ])
+    );
+    assert_eq!(harness.app.mouse, Mouse::Terminal);
+    let told = Harness::started(Options {
+        opening: false,
+        mouse: Mouse::Terminal,
+        ..Options::default()
+    });
+    assert_eq!(told.app.mouse, Mouse::Terminal);
 }

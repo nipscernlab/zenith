@@ -7,8 +7,8 @@ use std::thread;
 use std::time::Instant;
 
 use clap::Parser;
-use ratatui::crossterm::event::{self, Event, KeyEventKind};
-use zenith::app::{Incoming, Options};
+use ratatui::crossterm::event::{self, Event, KeyEventKind, MouseEventKind};
+use zenith::app::{Incoming, Mouse, Options};
 use zenith::command_history::{self, System};
 use zenith::glyphs::Charset;
 use zenith::keys::LevelKey;
@@ -18,14 +18,18 @@ use zenith::theme::{Depth, ThemeName};
 
 /// The command line of `zenith`.
 #[derive(Debug, Parser)]
+#[allow(
+    clippy::struct_excessive_bools,
+    reason = "each is a flag of the command line, which clap reads as a bool"
+)]
 #[command(
     name = "zenith",
     about = zenith::ABOUT,
     long_about = None,
     disable_version_flag = true,
     after_help = "Environment: ZENITH_SOLAR, ZENITH_THEME, ZENITH_COLOR, ZENITH_ASCII, NO_COLOR, \
-                  ZENITH_NO_HISTORY, ZENITH_DATA_DIR. docs/DESIGN.md in nipscernlab/zenith says \
-                  what each does."
+                  ZENITH_NO_HISTORY, ZENITH_NO_MOUSE, ZENITH_DATA_DIR. docs/DESIGN.md in \
+                  nipscernlab/zenith says what each does."
 )]
 struct Args {
     /// The solar program to start. Without it, `ZENITH_SOLAR`, then the PATH.
@@ -54,6 +58,12 @@ struct Args {
     /// written to it. Also `ZENITH_NO_HISTORY`.
     #[arg(long)]
     no_history: bool,
+
+    /// Leave the mouse to the terminal: dragging selects text as usual, and the wheel does
+    /// what the terminal makes of it. `/mouse` takes it while ZENITH runs. Also
+    /// `ZENITH_NO_MOUSE`.
+    #[arg(long)]
+    no_mouse: bool,
 
     /// Print the version and what this program is, and exit.
     #[arg(short = 'V', long)]
@@ -125,6 +135,11 @@ fn options(args: &Args) -> Options {
         opening: true,
         environment: Vec::new(),
         history: command_history::kept(off, file),
+        mouse: if args.no_mouse || variable("ZENITH_NO_MOUSE").is_some() {
+            Mouse::Terminal
+        } else {
+            Mouse::Zenith
+        },
     }
 }
 
@@ -162,9 +177,11 @@ fn main() -> ExitCode {
     let timings = Timings::from_environment(process_start);
     let mut runtime = Runtime::new(backend_terminal, options, timings);
     runtime.paint_margin_with(terminal::paint_background);
+    runtime.mouse_with(terminal::set_mouse);
     let sender = runtime.sender();
 
-    // Keys, pastes and resizes, from a thread of their own that blocks on the terminal.
+    // Keys, pastes, resizes and the wheel, from a thread of their own that blocks on the
+    // terminal. The rest of the mouse stops here, so that moving it wakes nothing else.
     let input = sender.clone();
     let _ = thread::Builder::new()
         .name("zenith-input".to_owned())
@@ -174,6 +191,14 @@ fn main() -> ExitCode {
                     Event::Key(key) if key.kind != KeyEventKind::Release => Incoming::Key(key),
                     Event::Paste(text) => Incoming::Paste(text),
                     Event::Resize(width, height) => Incoming::Resize { width, height },
+                    Event::Mouse(mouse)
+                        if matches!(
+                            mouse.kind,
+                            MouseEventKind::ScrollUp | MouseEventKind::ScrollDown
+                        ) =>
+                    {
+                        Incoming::Mouse(mouse)
+                    }
                     _ => continue,
                 };
                 if input.send(incoming).is_err() {

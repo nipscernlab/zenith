@@ -135,6 +135,21 @@ fn arguments(
                 })
                 .collect(),
         }),
+        "mouse" if in_first_word => Some(Completion {
+            replace: word_start..word_end(line, cursor),
+            candidates: [
+                ("on", "ZENITH has the mouse: the wheel scrolls"),
+                ("off", "the terminal has the mouse: dragging selects text"),
+            ]
+            .into_iter()
+            .filter(|(word, _)| word.starts_with(first_word))
+            .map(|(word, detail)| Candidate {
+                insert: word.to_owned(),
+                label: word.to_owned(),
+                detail: detail.to_owned(),
+            })
+            .collect(),
+        }),
         "help" if in_first_word => {
             let prefix = first_word.trim_start_matches('/');
             Some(Completion {
@@ -290,6 +305,16 @@ mod tests {
         assert_eq!(inserts("/").len(), COMMANDS.len());
         assert_eq!(inserts("/re"), vec!["/reconnect", "/report "]);
         assert_eq!(inserts("/desc"), vec!["/describe "]);
+    }
+
+    #[test]
+    fn mouse_completes_on_and_off_in_its_first_word() {
+        assert_eq!(inserts("/mouse "), vec!["on", "off"]);
+        assert_eq!(inserts("/mouse o"), vec!["on", "off"]);
+        assert_eq!(inserts("/mouse of"), vec!["off"]);
+        assert!(inserts("/mouse off x").is_empty());
+        let completion = complete("/mouse of", 9, None).unwrap();
+        assert_eq!(completion.replace, 7..9);
     }
 
     #[test]

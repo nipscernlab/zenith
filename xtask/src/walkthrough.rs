@@ -272,6 +272,85 @@ const STEPS: &[Step] = &[
         },
     },
     Step {
+        row: "The mouse wheel, over the transcript, the APIs and the help",
+        run: |walk| {
+            walk.fresh()?;
+            for line in ["/list", "/describe solar.ping", "/help"] {
+                walk.line(line)?;
+            }
+            walk.see("the commands, or one of them")?;
+            // Up over the transcript: it scrolls, and the command line stays empty.
+            for _ in 0..4 {
+                walk.wheel(false, 60, 10)?;
+            }
+            walk.see("more below")?;
+            walk.see("Type / for the commands")?;
+            for _ in 0..40 {
+                walk.wheel(true, 60, 10)?;
+            }
+            walk.gone("more below")?;
+            // The list of APIs moves one API a notch, and the entry scrolls beside it.
+            walk.press(TAB)?;
+            walk.press(b"g")?;
+            let first = walk.selected_row()?;
+            walk.wheel(true, 6, 6)?;
+            let second = walk.selected_row()?;
+            if second != first + 1 {
+                return Err(format!(
+                    "a notch over the list moved the selection from row {first} to {second}"
+                ));
+            }
+            let top = walk.row(1);
+            walk.wheel(true, 80, 10)?;
+            if walk.row(1) == top {
+                return Err("a notch over the entry did not scroll it".to_owned());
+            }
+            // The help, from anywhere.
+            walk.press(b"?")?;
+            walk.see("Everywhere")?;
+            for _ in 0..4 {
+                walk.wheel(true, 60, 10)?;
+            }
+            walk.gone("Everywhere")?;
+            for _ in 0..4 {
+                walk.wheel(false, 60, 10)?;
+            }
+            walk.see("Everywhere")?;
+            walk.press(ESC)?;
+            walk.gone("Everywhere")?;
+            walk.press(b"/")?;
+            walk.press(CTRL_U)
+        },
+    },
+    Step {
+        row: "`Shift` and drag, or `Option` and drag in iTerm2",
+        run: |walk| {
+            // The selection is the terminal's own, which a machine cannot drag; what ZENITH
+            // does about it is ask the terminal for the mouse, which it did.
+            if !walk.session.mouse_taken() {
+                return Err("ZENITH has not asked the terminal for the mouse".to_owned());
+            }
+            walk.said("ZENITH has the mouse; the selection itself is the terminal's to check");
+            Ok(())
+        },
+    },
+    Step {
+        row: "`/mouse off`, then `/mouse on`",
+        run: |walk| {
+            walk.fresh()?;
+            walk.line("/mouse off")?;
+            walk.see("The terminal has the mouse")?;
+            walk.until("the terminal to have the mouse", |walk| {
+                !walk.session.mouse_taken()
+            })?;
+            walk.line("/mouse on")?;
+            walk.see("ZENITH has the mouse")?;
+            walk.until("ZENITH to have the mouse", |walk| {
+                walk.session.mouse_taken()
+            })
+        },
+    },
+    Step {
         row: "Make the window smaller than 80 × 24",
         run: |walk| {
             walk.session.resize(70, 20)?;
@@ -446,6 +525,52 @@ impl Walk {
             }
             thread::sleep(Duration::from_millis(5));
         }
+    }
+
+    /// A notch of the wheel at a cell, counted from 1, as a terminal reports it in SGR, and a
+    /// moment for the screen to follow.
+    fn wheel(&mut self, down: bool, column: u16, row: u16) -> Result<(), String> {
+        let button = if down { 65 } else { 64 };
+        self.session
+            .write(format!("\x1b[<{button};{column};{row}M").as_bytes())?;
+        thread::sleep(Duration::from_millis(40));
+        Ok(())
+    }
+
+    /// The row of the screen, from 0, whose list has its selection on it.
+    fn selected_row(&self) -> Result<usize, String> {
+        self.session
+            .rows()
+            .iter()
+            .position(|line| {
+                line.chars()
+                    .take(usize::from(COLUMNS / 3))
+                    .collect::<String>()
+                    .contains("\u{203a} ")
+            })
+            .ok_or_else(|| {
+                format!(
+                    "no row is selected; the screen was:\n{}",
+                    self.session.dump()
+                )
+            })
+    }
+
+    /// One row of the screen, from 0.
+    fn row(&self, row: usize) -> String {
+        self.session.rows().get(row).cloned().unwrap_or_default()
+    }
+
+    /// Waits for `condition`, which `what` names.
+    fn until(&self, what: &str, condition: impl Fn(&Self) -> bool) -> Result<(), String> {
+        let from = std::time::Instant::now();
+        while !condition(self) {
+            if from.elapsed() > PATIENCE {
+                return Err(format!("gave up waiting for {what}"));
+            }
+            thread::sleep(Duration::from_millis(5));
+        }
+        Ok(())
     }
 
     /// Moves the selection of a list to the entry that shows `name`.

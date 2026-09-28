@@ -239,6 +239,13 @@ fn help_overlay(options: Options) -> Script {
     script
 }
 
+/// The help at its last page, which says what the mouse does.
+fn help_overlay_end(options: Options) -> Script {
+    let mut script = help_overlay(options);
+    script.key(KeyCode::End, KeyModifiers::NONE);
+    script
+}
+
 fn envelope_viewer(options: Options) -> Script {
     let mut script = session_just_connected(options);
     script.run("/ping hello");
@@ -251,7 +258,7 @@ fn envelope_viewer(options: Options) -> Script {
     script
 }
 
-const SCENES: [(&str, Scene); 16] = [
+const SCENES: [(&str, Scene); 17] = [
     ("opening_connecting", opening_connecting),
     ("opening_not_on_path", opening_not_on_path),
     ("session_just_connected", session_just_connected),
@@ -267,6 +274,7 @@ const SCENES: [(&str, Scene); 16] = [
     ("log_at_trace", log_at_trace),
     ("history", history),
     ("help_overlay", help_overlay),
+    ("help_overlay_end", help_overlay_end),
     ("envelope_viewer", envelope_viewer),
 ];
 

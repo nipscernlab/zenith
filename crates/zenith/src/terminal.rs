@@ -8,6 +8,9 @@
 //! While ZENITH runs, the terminal's own background is the theme's, with OSC 11, so that
 //! the margin a terminal keeps around its cells, where no program can draw, is the colour
 //! of the screen; giving the terminal back puts its own background back, with OSC 111.
+//!
+//! ZENITH takes the mouse for the wheel unless it was told not to, and gives it back with
+//! the rest, and whenever `/mouse` says so (ADR 0015).
 
 use std::io::{self, Stdout, Write};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -15,6 +18,8 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use ratatui::Terminal;
 use ratatui::backend::CrosstermBackend;
 use ratatui::crossterm::event::{DisableBracketedPaste, EnableBracketedPaste};
+#[cfg(windows)]
+use ratatui::crossterm::event::{DisableMouseCapture, EnableMouseCapture};
 use ratatui::crossterm::execute;
 use ratatui::crossterm::terminal::{
     EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode,
@@ -27,6 +32,37 @@ static PAINTED: AtomicBool = AtomicBool::new(false);
 
 /// OSC 111: the terminal's own background again.
 pub const OWN_BACKGROUND: &str = "\x1b]111\x1b\\";
+
+/// Whether ZENITH has the mouse, and so has to give it back.
+static CAPTURED: AtomicBool = AtomicBool::new(false);
+
+/// The mouse, asked of the terminal: a press and a release of each button, the wheel's
+/// notches among them, and no movement, which ZENITH has no use for and would only wake it;
+/// in SGR's encoding, which has no limit on the column. Windows' console is asked through
+/// its own interface instead, and reports movement whatever it is asked.
+pub const MOUSE_ON: &str = "\x1b[?1000h\x1b[?1006h";
+
+/// The mouse, given back to the terminal.
+pub const MOUSE_OFF: &str = "\x1b[?1006l\x1b[?1000l";
+
+/// Takes the mouse from the terminal, for the wheel, or gives it back, for selecting text.
+pub fn set_mouse(on: bool) {
+    let mut stdout = io::stdout();
+    #[cfg(windows)]
+    {
+        let _ = if on {
+            execute!(stdout, EnableMouseCapture)
+        } else {
+            execute!(stdout, DisableMouseCapture)
+        };
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = stdout.write_all(if on { MOUSE_ON } else { MOUSE_OFF }.as_bytes());
+        let _ = stdout.flush();
+    }
+    CAPTURED.store(on, Ordering::SeqCst);
+}
 
 /// OSC 11, which sets the terminal's background, and with it the colour of its margin.
 #[must_use]
@@ -69,9 +105,13 @@ pub fn enter() -> io::Result<(Terminal<CrosstermBackend<Stdout>>, Guard)> {
     Ok((terminal, guard))
 }
 
-/// Gives the terminal back: its own background, the main screen, a visible cursor, no raw
-/// mode.
+/// Gives the terminal back: its mouse, its own background, the main screen, a visible
+/// cursor, no raw mode. The mouse goes back first: on Windows, giving it back restores the
+/// console's mode of before, which leaving raw mode then builds on.
 pub fn restore() {
+    if CAPTURED.load(Ordering::SeqCst) {
+        set_mouse(false);
+    }
     let mut stdout = io::stdout();
     if PAINTED.swap(false, Ordering::SeqCst) {
         let _ = stdout.write_all(OWN_BACKGROUND.as_bytes());
@@ -117,5 +157,11 @@ mod tests {
             "\u{1b}]11;rgb:ff/00/10\u{1b}\\"
         );
         assert_eq!(OWN_BACKGROUND, "\u{1b}]111\u{1b}\\");
+    }
+
+    #[test]
+    fn the_mouse_is_asked_for_its_buttons_in_sgr_and_given_back_in_the_reverse_order() {
+        assert_eq!(MOUSE_ON, "\u{1b}[?1000h\u{1b}[?1006h");
+        assert_eq!(MOUSE_OFF, "\u{1b}[?1006l\u{1b}[?1000l");
     }
 }

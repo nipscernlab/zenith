@@ -169,3 +169,156 @@ fn the_program_runs_until_it_quits_gives_the_terminal_back_and_writes_its_timing
     assert_eq!(frames, wakeups + 1 + 2, "{events:?}");
     let _ = std::fs::remove_dir_all(&scratch);
 }
+
+/// The binary in a pseudo-terminal of 80 × 24, against the double, and what it wrote.
+struct Running {
+    child: Box<dyn portable_pty::Child + Send + Sync>,
+    writer: Box<dyn Write + Send>,
+    parser: Arc<Mutex<vt100::Parser>>,
+    scratch: PathBuf,
+}
+
+impl Running {
+    fn start(name: &str) -> Self {
+        let scratch = std::env::temp_dir().join(format!("zenith-{name}-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&scratch);
+        std::fs::create_dir_all(&scratch).unwrap();
+        let pair = native_pty_system()
+            .openpty(PtySize {
+                rows: 24,
+                cols: 80,
+                pixel_width: 0,
+                pixel_height: 0,
+            })
+            .unwrap();
+        let mut command = CommandBuilder::new(env!("CARGO_BIN_EXE_zenith"));
+        command.args(["--solar", double().to_str().unwrap()]);
+        command.env("ZENITH_DATA_DIR", &scratch);
+        command.env("TERM", "xterm-256color");
+        let child = pair.slave.spawn_command(command).unwrap();
+        drop(pair.slave);
+        let mut reader = pair.master.try_clone_reader().unwrap();
+        let writer = pair.master.take_writer().unwrap();
+        let parser = Arc::new(Mutex::new(vt100::Parser::new(24, 80, 0)));
+        let feeding = Arc::clone(&parser);
+        thread::spawn(move || {
+            let _master = pair.master;
+            let mut buffer = vec![0_u8; 64 * 1024];
+            while let Ok(read) = reader.read(&mut buffer) {
+                if read == 0 {
+                    break;
+                }
+                feeding.lock().unwrap().process(&buffer[..read]);
+            }
+        });
+        Self {
+            child,
+            writer,
+            parser,
+            scratch,
+        }
+    }
+
+    fn screen(&self) -> String {
+        self.parser.lock().unwrap().screen().contents()
+    }
+
+    fn mouse(&self) -> (vt100::MouseProtocolMode, vt100::MouseProtocolEncoding) {
+        let parser = self.parser.lock().unwrap();
+        let screen = parser.screen();
+        (
+            screen.mouse_protocol_mode(),
+            screen.mouse_protocol_encoding(),
+        )
+    }
+
+    fn wait_until(&self, what: &str, condition: impl Fn(&Self) -> bool) {
+        let deadline = Instant::now() + PATIENCE;
+        while !condition(self) {
+            assert!(
+                Instant::now() < deadline,
+                "gave up waiting for {what}; the screen was:\n{}",
+                self.screen()
+            );
+            thread::sleep(Duration::from_millis(20));
+        }
+    }
+
+    fn write(&mut self, bytes: &[u8]) {
+        self.writer.write_all(bytes).unwrap();
+        self.writer.flush().unwrap();
+    }
+
+    /// A notch of the wheel at a cell, counted from 1, as a terminal reports it in SGR.
+    fn wheel(&mut self, down: bool, column: u16, row: u16) {
+        let button = if down { 65 } else { 64 };
+        self.write(format!("\x1b[<{button};{column};{row}M").as_bytes());
+        thread::sleep(Duration::from_millis(30));
+    }
+}
+
+impl Drop for Running {
+    fn drop(&mut self) {
+        let _ = self.child.kill();
+        let _ = std::fs::remove_dir_all(&self.scratch);
+    }
+}
+
+#[test]
+fn the_wheel_scrolls_the_real_program_and_the_mouse_is_given_back_when_asked_and_at_the_end() {
+    use vt100::{MouseProtocolEncoding, MouseProtocolMode};
+    let mut zenith = Running::start("wheel");
+    zenith.wait_until("the connection", |zenith| {
+        zenith.screen().contains("in orbit")
+    });
+    // ZENITH asked for the buttons, the wheel's among them, in SGR, and no movement.
+    zenith.wait_until("the mouse", |zenith| {
+        zenith.mouse() == (MouseProtocolMode::PressRelease, MouseProtocolEncoding::Sgr)
+    });
+    // The help, scrolled down past its first heading by the wheel and back up.
+    zenith.write(b"?");
+    zenith.wait_until("the help", |zenith| zenith.screen().contains("Everywhere"));
+    for _ in 0..4 {
+        zenith.wheel(true, 40, 10);
+    }
+    zenith.wait_until("the help to scroll", |zenith| {
+        !zenith.screen().contains("Everywhere")
+    });
+    for _ in 0..4 {
+        zenith.wheel(false, 40, 10);
+    }
+    zenith.wait_until("the help to scroll back", |zenith| {
+        zenith.screen().contains("Everywhere")
+    });
+    zenith.write(b"\x1b");
+    zenith.wait_until("the help to close", |zenith| {
+        !zenith.screen().contains("Everywhere")
+    });
+    // /mouse gives it to the terminal and takes it back.
+    zenith.write(b"/mouse off\r");
+    zenith.wait_until("the mouse to be given back", |zenith| {
+        zenith.mouse().0 == MouseProtocolMode::None
+    });
+    zenith.write(b"/mouse on\r");
+    zenith.wait_until("the mouse to be taken again", |zenith| {
+        zenith.mouse().0 == MouseProtocolMode::PressRelease
+    });
+    // Quitting gives it back with the rest of the terminal.
+    zenith.write(b"\x03");
+    zenith.wait_until("the offer to quit", |zenith| {
+        zenith.screen().contains("Press Ctrl+C again to quit")
+    });
+    zenith.write(b"\x03");
+    let deadline = Instant::now() + PATIENCE;
+    let status = loop {
+        if let Some(status) = zenith.child.try_wait().unwrap() {
+            break status;
+        }
+        assert!(Instant::now() < deadline, "ZENITH did not quit");
+        thread::sleep(Duration::from_millis(20));
+    };
+    assert!(status.success(), "{status:?}");
+    zenith.wait_until("the mouse to be given back at the end", |zenith| {
+        zenith.mouse().0 == MouseProtocolMode::None
+    });
+}

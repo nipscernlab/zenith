@@ -39,6 +39,19 @@ either is stated here in its own line.
   by hand can name the shards to run again, and every process of the job may take six GiB
   of address space, so that a mutant that takes away a limit on memory fails its test
   rather than bringing the runner down.
+- The mouse wheel scrolls what is under the pointer: the transcript, the completion menu,
+  the list of APIs and the entry beside it, the Log, the History, and the help or the
+  viewer while one is open, as the architect decided in ADR 0015, which supersedes 0013.
+  Text moves three lines a notch and a list one row; the wheel never walks the command
+  history, which `↑` and `↓` walk. ZENITH asks the terminal for its buttons only, in SGR,
+  so that moving the mouse wakes nothing, and clicks do nothing. Text is selected with the
+  terminal's own key held, `Shift` in Windows Terminal, WSL and most Linux terminals and
+  `Option` in iTerm2, and `docs/DESIGN.md`, section 11.1, lists each terminal's with where
+  it is documented. `/mouse off`, `/mouse on` and `/mouse` give the mouse to the terminal
+  and take it back, `--no-mouse` and `ZENITH_NO_MOUSE` leave it to the terminal from the
+  start, and the help has a section on the mouse. The guide has three rows for it, which
+  the walkthrough types into the real binary, and a test drives the binary's wheel in a
+  pseudo-terminal on Unix.
 - Tests for what the first mutation run found unchecked. On version 0.1.0, 17 of its 20
   shards finished: of 2 237 mutants, 1 608 were caught, 463 survived, 6 timed out and 160
   could not be built, 77.70 % of the viable ones caught. The survivors outside the drawing
@@ -101,6 +114,10 @@ either is stated here in its own line.
   let every other number through; it now holds no number to anything.
 - A test of the connection read SOLAR's standard error before it had closed, and failed
   now and then; it waits for standard error to end.
+- Scrolling past the end of the transcript, the help, the envelope viewer or an API's entry
+  kept going where nothing was drawn, so the view did not move back until as many steps
+  had been taken the other way; `End` on the help did the same. Each now stops at its end,
+  and the first step back moves it.
 
 ## [0.1.0] - 2026-09-27
 
