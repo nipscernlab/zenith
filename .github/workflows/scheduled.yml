@@ -91,7 +91,7 @@ jobs:
       - name: Point the tests at SOLAR
         run: echo "ZENITH_SOLAR=$PWD/solar-checkout/target/release/solar" >> "$GITHUB_ENV"
       - name: Install the mutation tool and the test runner
-        uses: taiki-e/install-action@4cef1412cce204788f482e778a0b9187f9626a29 # v2.87.21
+        uses: taiki-e/install-action@8cca0918f8471c33515202b73f56ab27f2bed283 # v2.87.29
         with:
           tool: cargo-mutants,cargo-nextest
 
